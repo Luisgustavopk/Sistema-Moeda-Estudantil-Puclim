@@ -11,6 +11,7 @@ Os arquivos desta pasta documentam a estrutura conceitual da aplicação, permit
 - `diagrama_componetes.pdf` — diagrama de componentes da solução, com a representação da interação entre os principais blocos do sistema.
 - `diagrama_de_classe.pdf` — diagrama de classes, apresentando as entidades, atributos e relações principais da aplicação.
 - `MER.pdf` — Modelo Entidade-Relacionamento, detalhando as entidades do banco de dados e suas interconexões.
+- `DER.pdf` — Diagrama Entidade-Relacionamento, representando graficamente as entidades e os relacionamentos do banco de dados.
 
 ## Observação
 
