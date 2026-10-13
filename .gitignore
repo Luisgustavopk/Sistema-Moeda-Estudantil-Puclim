@@ -1,0 +1,23 @@
+# Dependências, builds e caches locais
+**/node_modules/
+**/dist/
+**/target/
+.cache/
+*.log
+
+# Configurações locais e credenciais
+.env
+.env.*
+!.env.example
+**/.env
+**/.env.*
+!**/.env.example
+**/application-local.yml
+**/application-local.properties
+
+# IDEs e sistema operacional
+.idea/
+.vscode/
+*.iml
+.DS_Store
+Thumbs.db
