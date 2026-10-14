@@ -127,6 +127,8 @@ export interface Notification {
   body: string
   date: string
   recipient: string
+  deliveryStatus?: 'PENDENTE' | 'ENVIADO'
+  attempts?: number
 }
 
 export interface PuclimApi {
@@ -147,12 +149,13 @@ export interface PuclimApi {
     studentId: string,
     amount: number,
     reason: string,
+    requestKey?: string,
   ): Promise<Transaction>
   advantages(own?: boolean): Promise<Advantage[]>
   uploadPhoto(file: File): Promise<string>
   saveAdvantage(input: AdvantageInput, id?: string): Promise<Advantage>
   deleteAdvantage(id: string): Promise<void>
-  redeem(id: string): Promise<Coupon>
+  redeem(id: string, requestKey?: string): Promise<Coupon>
   coupons(): Promise<Coupon[]>
   checkCoupon(code: string): Promise<Coupon>
   useCoupon(code: string): Promise<Coupon>

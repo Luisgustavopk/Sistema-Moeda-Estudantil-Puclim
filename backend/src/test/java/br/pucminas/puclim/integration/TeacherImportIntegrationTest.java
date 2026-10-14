@@ -32,7 +32,7 @@ class TeacherImportIntegrationTest extends AbstractDatabaseTest {
         var result = institution.client().ok("POST", "/instituicao/professores/importar", Map.of("rows", preview));
         assertEquals(1, result.path("created").asInt());
         assertEquals(2, result.path("errors").size());
-        assertTrue(result.path("access").get(0).path("temporaryPassword").asText().length() >= 24);
+        assertTrue(result.path("access").get(0).path("temporaryPassword").asString().length() >= 24);
         var repeated = institution.client().ok("POST", "/instituicao/professores/importar", Map.of("rows", preview));
         assertEquals(0, repeated.path("created").asInt());
         assertEquals(1, institution.client().ok("GET", "/instituicao/professores", null).size());

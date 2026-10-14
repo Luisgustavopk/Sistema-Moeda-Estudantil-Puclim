@@ -35,7 +35,7 @@ class RegistrationIntegrationTest extends AbstractDatabaseTest {
     void partnerRegistrationSupportsEveryKindAndRejectsDuplicateCnpjAndEmail() throws Exception {
         for (String kind : new String[] { "EMPRESA", "ENSINO", "BENEFICIARIA" }) {
             var partner = data.partner(kind);
-            assertEquals(kind, partner.client().ok("GET", "/auth/session", null).path("partnerKind").asText());
+            assertEquals(kind, partner.client().ok("GET", "/auth/session", null).path("partnerKind").asString());
             var duplicateCnpj = new HashMap<>(TestPayloads.partner(kind));
             duplicateCnpj.put("cnpj", partner.registration().get("cnpj"));
             data.anonymous().expect("POST", "/empresas", duplicateCnpj, 409);

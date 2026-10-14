@@ -31,7 +31,7 @@ class CouponPersistenceTest extends AbstractDatabaseTest {
         var company = data.partner("EMPRESA");
         var advantage = data.advantage(company, 60);
         var result = data.redeem(fixture.student(), advantage);
-        String code = result.path("code").asText();
+        String code = result.path("code").asString();
         var original = coupons.findByCode(code).orElseThrow();
         assertEquals(fixture.student().id(), original.student.id);
         assertEquals(company.id(), original.company.id);
@@ -53,13 +53,13 @@ class CouponPersistenceTest extends AbstractDatabaseTest {
         data.transfer(fixture, 100, "Reconhecimento");
         var company = data.partner("EMPRESA");
         var advantage = data.advantage(company, 10);
-        String code = data.redeem(fixture.student(), advantage).path("code").asText();
+        String code = data.redeem(fixture.student(), advantage).path("code").asString();
         company.client().expect("DELETE", "/vantagens/" + advantage.id(), null, 204);
         assertFalse(advantages.findById(advantage.id()).orElseThrow().active);
         assertEquals("VALIDO", coupons.findByCode(code).orElseThrow().status);
         company.client().expect("DELETE", "/conta", null, 204);
         assertTrue(coupons.findByCode(code).isPresent());
-        assertEquals(code, fixture.student().client().ok("GET", "/cupons", null).get(0).path("code").asText());
+        assertEquals(code, fixture.student().client().ok("GET", "/cupons", null).get(0).path("code").asString());
     }
 
 }

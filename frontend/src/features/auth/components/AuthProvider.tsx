@@ -44,6 +44,10 @@ export function AuthProvider({ children }: PropsWithChildren) {
         touchDemoSession()
         lastTouch = now
       }
+      if (DATA_MODE === 'api' && now - lastTouch > 60000) {
+        lastTouch = now
+        void client.invalidateQueries({ queryKey: ['session'] })
+      }
     }
     const events = ['pointerdown', 'keydown', 'scroll'] as const
     events.forEach((event) =>

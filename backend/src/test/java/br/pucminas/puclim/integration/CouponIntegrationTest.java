@@ -57,7 +57,7 @@ class CouponIntegrationTest extends AbstractDatabaseTest {
         var company = data.partner("EMPRESA");
         var other = data.partner("EMPRESA");
         var coupon = data.redeem(fixture.student(), data.advantage(company, 10));
-        String code = coupon.path("code").asText();
+        String code = coupon.path("code").asString();
         other.client().expect("GET", "/cupons/" + code, null, 403);
         other.client().expect("POST", "/cupons/" + code + "/utilizar", Map.of(), 403);
         company.client().expect("GET", "/cupons/" + UUID.randomUUID(), null, 404);
@@ -66,8 +66,8 @@ class CouponIntegrationTest extends AbstractDatabaseTest {
                 () -> company.client().call("POST", "/cupons/" + code + "/utilizar", Map.of(), null).statusCode(),
                 () -> second.call("POST", "/cupons/" + code + "/utilizar", Map.of(), null).statusCode());
         assertEquals(List.of(200, 409), responses.stream().sorted().toList());
-        assertEquals("UTILIZADO", company.client().ok("GET", "/cupons/" + code, null).path("status").asText());
-        assertEquals("UTILIZADO", fixture.student().client().ok("GET", "/cupons", null).get(0).path("status").asText());
+        assertEquals("UTILIZADO", company.client().ok("GET", "/cupons/" + code, null).path("status").asString());
+        assertEquals("UTILIZADO", fixture.student().client().ok("GET", "/cupons", null).get(0).path("status").asString());
     }
 
 }

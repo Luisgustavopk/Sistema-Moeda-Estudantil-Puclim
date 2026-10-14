@@ -27,8 +27,8 @@ class AuthenticationIntegrationTest extends AbstractDatabaseTest {
         var wrongPassword = anonymous.expect("POST", "/auth/login",
                 Map.of("login", account.login(), "password", "invalida"), 401);
         assertEquals(missing.path("message"), wrongPassword.path("message"));
-        assertEquals("Login ou senha inválidos.", missing.path("message").asText());
-        assertEquals(account.id(), anonymous.login(account.email(), account.password()).path("id").asText());
+        assertEquals("Login ou senha inválidos.", missing.path("message").asString());
+        assertEquals(account.id(), anonymous.login(account.email(), account.password()).path("id").asString());
     }
 
     @Test
@@ -57,7 +57,7 @@ class AuthenticationIntegrationTest extends AbstractDatabaseTest {
         sessions.expireAfter(account.client().sessionId(), 1);
         Thread.sleep(1300);
         account.client().expect("GET", "/auth/session", null, 401);
-        assertEquals(account.id(), other.ok("GET", "/auth/session", null).path("id").asText());
+        assertEquals(account.id(), other.ok("GET", "/auth/session", null).path("id").asString());
     }
 
     @Test
@@ -68,7 +68,7 @@ class AuthenticationIntegrationTest extends AbstractDatabaseTest {
         account.client().ok("PATCH", "/conta/senha",
                 Map.of("currentPassword", account.password(), "password", password));
         previous.expect("GET", "/auth/session", null, 401);
-        assertEquals(account.id(), data.anonymous().login(account.login(), password).path("id").asText());
+        assertEquals(account.id(), data.anonymous().login(account.login(), password).path("id").asString());
     }
 
 }

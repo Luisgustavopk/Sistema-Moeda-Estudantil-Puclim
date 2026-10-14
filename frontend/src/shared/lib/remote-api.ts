@@ -28,8 +28,11 @@ export const remoteApi: PuclimApi = {
   importTeachers: (rows) =>
     http('/instituicao/professores/importar', body({ rows })),
   transactions: () => http('/conta/extrato'),
-  transfer: (studentId, amount, reason) =>
-    http('/transferencias', body({ studentId, amount, reason })),
+  transfer: (studentId, amount, reason, requestKey = crypto.randomUUID()) =>
+    http('/transferencias', {
+      ...body({ studentId, amount, reason }),
+      headers: { 'Idempotency-Key': requestKey },
+    }),
   advantages: (own) => http(`/vantagens${own ? '?minhas=true' : ''}`),
   uploadPhoto: async (file) => {
     const form = new FormData()
@@ -47,8 +50,11 @@ export const remoteApi: PuclimApi = {
     ),
   deleteAdvantage: (id) =>
     http(`/vantagens/${encodeURIComponent(id)}`, { method: 'DELETE' }),
-  redeem: (id) =>
-    http(`/vantagens/${encodeURIComponent(id)}/resgates`, body({})),
+  redeem: (id, requestKey = crypto.randomUUID()) =>
+    http(`/vantagens/${encodeURIComponent(id)}/resgates`, {
+      ...body({}),
+      headers: { 'Idempotency-Key': requestKey },
+    }),
   coupons: () => http('/cupons'),
   checkCoupon: (code) => http(`/cupons/${encodeURIComponent(code)}`),
   useCoupon: (code) =>

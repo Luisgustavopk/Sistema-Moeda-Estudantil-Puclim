@@ -24,7 +24,10 @@ export function RedeemDialog({
   const [step, setStep] = useState<'detail' | 'confirm' | 'success'>('detail')
   const [coupon, setCoupon] = useState<Coupon | null>(null)
   const submitting = useRef(false)
-  const action = useAction(() => vantagensApi.redeem(advantage.id))
+  const requestKey = useRef(crypto.randomUUID())
+  const action = useAction(() =>
+    vantagensApi.redeem(advantage.id, requestKey.current),
+  )
   const balance = user?.balance || 0
   const submit = async () => {
     if (submitting.current) return

@@ -1,6 +1,6 @@
 import { ApiError } from './errors'
 export const DATA_MODE =
-  import.meta.env.VITE_DATA_MODE === 'api' ? 'api' : 'demo'
+  import.meta.env.VITE_DATA_MODE === 'demo' ? 'demo' : 'api'
 const baseUrl = (import.meta.env.VITE_API_URL || '/api').replace(/\/$/, '')
 export async function http<T>(
   path: string,
@@ -12,6 +12,18 @@ export async function http<T>(
     const headers = new Headers(options.headers)
     if (!(options.body instanceof FormData))
       headers.set('Content-Type', 'application/json')
+    if (
+      options.method &&
+      !['GET', 'HEAD', 'OPTIONS'].includes(options.method.toUpperCase())
+    ) {
+      // Fetch a fresh token when login/logout/password change cleared the cookie.
+      if (
+        !document.cookie
+          .split('; ')
+          .some((value) => value.startsWith('XSRF-TOKEN='))
+      )
+        await http('/auth/csrf')
+    }
     const csrf = document.cookie
       .split('; ')
       .find((value) => value.startsWith('XSRF-TOKEN='))

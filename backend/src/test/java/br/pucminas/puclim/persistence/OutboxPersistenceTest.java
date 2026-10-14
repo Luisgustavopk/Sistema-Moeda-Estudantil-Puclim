@@ -37,7 +37,7 @@ class OutboxPersistenceTest extends AbstractDatabaseTest {
         String email = TestPayloads.unique("contato") + "@example.test";
         company.client().ok("PATCH", "/conta/perfil", Map.of("name", company.name(), "email", email,
                 "phone", "31988888888", "description", "Novo contato"));
-        String code = data.redeem(fixture.student(), data.advantage(company, 10)).path("code").asText();
+        String code = data.redeem(fixture.student(), data.advantage(company, 10)).path("code").asString();
         var partnerMail = notifications.findByAccountIdOrderByDateDesc(company.id()).get(0);
         assertEquals(email, partnerMail.recipient);
         assertTrue(partnerMail.body.contains(code));

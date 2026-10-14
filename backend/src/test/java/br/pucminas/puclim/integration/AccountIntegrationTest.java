@@ -19,9 +19,9 @@ class AccountIntegrationTest extends AbstractDatabaseTest {
         student.client().ok("PATCH", "/conta/perfil", Map.of("name", "Aluno Atualizado", "email", email,
                 "address", "Rua atualizada, 456", "course", "Computacao"));
         var profile = student.client().ok("GET", "/conta/perfil", null);
-        assertEquals(student.id(), profile.path("id").asText());
-        assertEquals("Computacao", profile.path("course").asText());
-        assertEquals(email, profile.path("email").asText());
+        assertEquals(student.id(), profile.path("id").asString());
+        assertEquals("Computacao", profile.path("course").asString());
+        assertEquals(email, profile.path("email").asString());
         student.client().expect("DELETE", "/conta", null, 204);
         student.client().expect("GET", "/auth/session", null, 401);
     }
@@ -33,8 +33,8 @@ class AccountIntegrationTest extends AbstractDatabaseTest {
         String email = TestPayloads.unique("contato") + "@example.test";
         own.client().ok("PATCH", "/conta/perfil", Map.of("name", "Empresa Atualizada", "email", email,
                 "phone", "31988888888", "description", "Novo contato"));
-        assertEquals(email, own.client().ok("GET", "/conta/perfil", null).path("email").asText());
-        assertEquals(other.id(), other.client().ok("GET", "/conta/perfil", null).path("id").asText());
+        assertEquals(email, own.client().ok("GET", "/conta/perfil", null).path("email").asString());
+        assertEquals(other.id(), other.client().ok("GET", "/conta/perfil", null).path("id").asString());
         own.client().expect("DELETE", "/conta", null, 204);
         data.anonymous().expect("POST", "/auth/login", Map.of("login", own.login(), "password", own.password()), 401);
     }

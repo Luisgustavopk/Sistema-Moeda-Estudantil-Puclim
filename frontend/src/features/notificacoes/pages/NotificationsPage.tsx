@@ -49,6 +49,15 @@ export function NotificationsPage() {
             </span>
             <div className="row-text">
               <strong>{item.subject}</strong>
+              {item.deliveryStatus && (
+                <span
+                  className={`badge ${item.deliveryStatus === 'ENVIADO' ? 'badge-success' : ''}`}
+                >
+                  {item.deliveryStatus === 'ENVIADO'
+                    ? 'E-mail enviado'
+                    : 'E-mail aguardando envio'}
+                </span>
+              )}
               <p className="notification-body">{item.body}</p>
               <p style={{ marginTop: 10 }}>
                 {dateTime(item.date)} · {item.recipient}

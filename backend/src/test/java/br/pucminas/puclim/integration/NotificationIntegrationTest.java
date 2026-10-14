@@ -74,7 +74,7 @@ class NotificationIntegrationTest extends AbstractDatabaseTest {
         data.transfer(fixture, 100, "Reconhecimento");
         var company = data.partner("EMPRESA");
         var coupon = data.redeem(fixture.student(), data.advantage(company, 10));
-        String code = coupon.path("code").asText();
+        String code = coupon.path("code").asString();
         var studentMail = notifications.findByAccountIdOrderByDateDesc(fixture.student().id()).stream()
                 .filter(notification -> notification.body.contains(code)).findFirst().orElseThrow();
         var partnerMail = notifications.findByAccountIdOrderByDateDesc(company.id()).get(0);

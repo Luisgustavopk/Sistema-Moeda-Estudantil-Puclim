@@ -38,6 +38,7 @@ export function TransferPage() {
   const [search, setSearch] = useState('')
   const [completed, setCompleted] = useState(false)
   const lock = useRef(false)
+  const request = useRef({ fingerprint: '', key: crypto.randomUUID() })
   const students = useQuery({
     queryKey: ['students', user?.id],
     queryFn: alunosApi.list,
@@ -50,9 +51,17 @@ export function TransferPage() {
   const selected = students.data?.find(
     (student) => student.id === values.studentId,
   )
-  const action = useAction((data: Values) =>
-    moedasApi.transfer(data.studentId, data.amount, data.reason),
-  )
+  const action = useAction((data: Values) => {
+    const fingerprint = JSON.stringify(data)
+    if (request.current.fingerprint !== fingerprint)
+      request.current = { fingerprint, key: crypto.randomUUID() }
+    return moedasApi.transfer(
+      data.studentId,
+      data.amount,
+      data.reason,
+      request.current.key,
+    )
+  })
   const filtered =
     students.data?.filter((student) =>
       `${student.name} ${student.course}`
@@ -123,6 +132,10 @@ export function TransferPage() {
                     setCompleted(false)
                     setStep(1)
                     form.reset()
+                    request.current = {
+                      fingerprint: '',
+                      key: crypto.randomUUID(),
+                    }
                     action.reset()
                   }}
                 >

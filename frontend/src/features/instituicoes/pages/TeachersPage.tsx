@@ -101,7 +101,11 @@ export function TeachersPage() {
                 return
               }
               try {
-                setRows(parseTeachersCsv(await file.text()))
+                setRows(
+                  DATA_MODE === 'api'
+                    ? await instituicoesApi.preview(file)
+                    : parseTeachersCsv(await file.text()),
+                )
                 setFileName(file.name)
               } catch (error) {
                 setFileError(
@@ -189,9 +193,9 @@ export function TeachersPage() {
               <>
                 <h3 style={{ marginTop: 23 }}>Primeiros acessos</h3>
                 <p className="small muted" style={{ margin: '7px 0 13px' }}>
-                  {DATA_MODE === 'demo'
-                    ? 'Entregue a credencial temporária ao professor. A troca de senha será exigida no primeiro acesso. As senhas abaixo não voltam a aparecer após sair desta página.'
-                    : 'As instruções de primeiro acesso serão processadas pelo sistema para os professores.'}
+                  Entregue a credencial temporária ao professor por um canal
+                  seguro. A troca de senha será exigida no primeiro acesso. As
+                  senhas abaixo não voltam a aparecer após sair desta página.
                 </p>
                 <div className="table-scroll">
                   <table>
