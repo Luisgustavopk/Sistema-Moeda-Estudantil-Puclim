@@ -1,1 +1,54 @@
-/* Os tokens visuais do protótipo serão definidos na implementação das telas. */
+/* Clay, petróleo e ouro: valores do protótipo de referência. */
+:root {
+  color-scheme: light;
+  --petroleum: #0f4c5c;
+  --gold: #d1a21c;
+  --secondary: #1b2631;
+  --canvas: #f6f0e2;
+  --surface: #fffbf2;
+  --surface-raised: #fffbf2;
+  --ink: #1b2631;
+  --muted: #5b6b76;
+  --primary: var(--petroleum);
+  --on-primary: #fff;
+  --success: #2e8b57;
+  --danger: #b3392f;
+  --gold-soft: color-mix(in srgb, var(--gold) 25%, transparent);
+  --border: color-mix(in srgb, var(--muted) 25%, transparent);
+  --radius: 22px;
+  /* Escala fluida: dimensões da referência em notebooks, maiores em monitores largos. */
+  --text-base: clamp(1rem, 0.3vw + 0.73rem, 1.125rem);
+  --text-small: clamp(0.8125rem, 0.15vw + 0.6775rem, 0.875rem);
+  --text-muted: clamp(0.875rem, 0.2vw + 0.695rem, 1rem);
+  --text-heading: clamp(1.875rem, 1.25vw + 0.75rem, 2.5rem);
+  --text-section: clamp(1.125rem, 0.5vw + 0.675rem, 1.375rem);
+  --text-stat: clamp(2rem, 2.2vw, 2.75rem);
+  --text-balance: clamp(3.25rem, 3.65vw, 4.75rem);
+  --space-grid: clamp(1.125rem, 1.25vw, 1.75rem);
+  --space-card: clamp(1.25rem, 1.4vw, 1.75rem);
+  --content-max: 108rem;
+  --page-gutter: clamp(1.5rem, 4vw, 6rem);
+  --shadow:
+    0 10px 22px color-mix(in srgb, var(--petroleum) 22%, transparent),
+    inset 0 3px 0 rgba(255, 255, 255, 0.8),
+    inset 0 -4px 0 color-mix(in srgb, var(--petroleum) 10%, transparent);
+  --button-shadow:
+    0 6px 0 color-mix(in srgb, var(--primary) 55%, #000),
+    0 12px 18px rgba(0, 0, 0, 0.25);
+  --inset: inset 0 2px 6px color-mix(in srgb, var(--petroleum) 20%, transparent);
+}
+[data-theme='dark'] {
+  color-scheme: dark;
+  --canvas: #121b24;
+  --surface: #1b2631;
+  --surface-raised: #1b2631;
+  --ink: #f6f0e2;
+  --muted: #a4b8c4;
+  --gold: #6cc3d5;
+  --primary: var(--gold);
+  --on-primary: #1b1b1b;
+  --shadow:
+    0 10px 22px rgba(0, 0, 0, 0.4), inset 0 3px 0 rgba(255, 255, 255, 0.06),
+    inset 0 -4px 0 rgba(0, 0, 0, 0.2);
+  --inset: inset 0 2px 6px rgba(0, 0, 0, 0.4);
+}

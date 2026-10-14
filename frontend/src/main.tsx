@@ -1,4 +1,7 @@
 import { StrictMode } from 'react'
+import '@fontsource/bricolage-grotesque/400.css'
+import '@fontsource/bricolage-grotesque/600.css'
+import '@fontsource/bricolage-grotesque/800.css'
 import { createRoot } from 'react-dom/client'
 import App from './app/App'
 import { AppProviders } from './app/providers'
