@@ -1,0 +1,43 @@
+import { defineConfig } from '@playwright/test'
+
+export default defineConfig({
+  testDir: './tests',
+  timeout: 45000,
+  expect: { timeout: 10000 },
+  fullyParallel: false,
+  workers: 1,
+  reporter: [['list']],
+  use: {
+    channel: process.env.PLAYWRIGHT_CHANNEL || 'chrome',
+    headless: true,
+    viewport: { width: 1440, height: 1000 },
+    trace: 'retain-on-failure',
+    screenshot: 'only-on-failure',
+  },
+  projects: [
+    {
+      name: 'demo',
+      testMatch: 'sprint3.spec.ts',
+      use: { baseURL: 'http://127.0.0.1:5173' },
+    },
+    {
+      name: 'api',
+      testMatch: 'api.spec.ts',
+      use: { baseURL: 'http://127.0.0.1:5174' },
+    },
+  ],
+  webServer: [
+    {
+      command: 'npm run dev -- --host 127.0.0.1 --port 5173',
+      url: 'http://127.0.0.1:5173',
+      env: { VITE_DATA_MODE: 'demo' },
+      reuseExistingServer: false,
+    },
+    {
+      command: 'npm run dev -- --host 127.0.0.1 --port 5174',
+      url: 'http://127.0.0.1:5174',
+      env: { VITE_DATA_MODE: 'api' },
+      reuseExistingServer: false,
+    },
+  ],
+})

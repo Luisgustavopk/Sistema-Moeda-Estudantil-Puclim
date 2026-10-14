@@ -4,9 +4,11 @@ Projeto desenvolvido para o Laboratório de Desenvolvimento de Software da PUC M
 
 ## Estado atual
 
-Esta etapa inicializa a estrutura técnica do frontend e do backend. Estão preparados os diretórios, as dependências, as configurações de build e a conexão futura com MySQL.
+O frontend da sprint 3 está implementado: acesso e cadastros, perfis, painéis por papel, envio de moedas, extratos, catálogo, gestão de vantagens, resgates, cupons, importação de professores e notificações. O visual segue o protótipo em estilo **clay, petróleo e ouro**, com barra lateral e opção de modo escuro. O perfil é definido pelo login; não há seletor de papel, estilo ou paleta.
 
-Ainda não foram implementados CRUDs, telas, endpoints, autenticação própria, entidades, tabelas de negócio ou migrations. O frontend abre uma página vazia intencionalmente. As pastas vazias possuem `.gitkeep` para serem preservadas pelo Git.
+O backend permanece com a estrutura inicial. Seus endpoints, entidades, tabelas de negócio, migrations e regras ainda não foram implementados. Por isso, o frontend inicia em **modo de demonstração**, com dados fictícios persistidos no navegador, sem conexão com MySQL ou envio de e-mails reais. Há um adaptador separado para a futura API, que pode ser selecionado por configuração; erros da API nunca acionam automaticamente a demonstração.
+
+As interfaces da sprint 3 cobrem as histórias obrigatórias US01–US20. O contrato HTTP está preparado no frontend e ainda precisa ser implementado e validado no backend. Pastas reservadas para evolução possuem `.gitkeep` para serem preservadas pelo Git.
 
 ## Tecnologias
 
@@ -39,10 +41,14 @@ As versões das dependências do backend são coordenadas pelo parent do Spring 
 | shadcn/ui | Configuração para adicionar componentes adaptáveis ao projeto |
 | Lucide React | Ícones da interface |
 | Oxlint | Análise estática do código |
+| Prettier | Formatação consistente do código |
+| Playwright | Testes dos fluxos no navegador, em desktop e celular |
 
 As dependências e suas faixas de versão ficam em `frontend/package.json`; o `package-lock.json` registra as versões efetivamente resolvidas. Use `npm ci` para reproduzir a instalação.
 
-O shadcn/ui foi preparado por meio de `components.json`, aliases e utilitários de classes. Nenhum componente visual foi adicionado. A identidade visual do protótipo será traduzida em tokens em `src/styles/tokens.css` durante a implementação das telas.
+O shadcn/ui continua preparado por meio de `components.json`, aliases e utilitários de classes. Os componentes utilizados nesta entrega são próprios e ficam em `shared/components/ui`, preservando o visual clay. Os tokens de cor, sombra e modo escuro ficam em `src/styles/tokens.css`; os estilos compartilhados ficam em `globals.css`. A fonte Bricolage Grotesque e as imagens de exemplo são servidas localmente.
+
+A base visual usa os valores do wireframe fornecido: petróleo `#0f4c5c`, ouro `#d1a21c`, cartões com raio de 22 px e sombras clay externas e internas. O conteúdo é fluido e centralizado ao lado do menu, com largura máxima de 108 rem (1.728 px na configuração padrão) e padding lateral de 24–96 px no desktop; isso oferece mais respiro em monitores grandes. Tipografia e espaçamentos usam `clamp()`: texto-base de 16–18 px e títulos de 30–40 px no desktop, com títulos de 24 px e padding lateral de 16 px no celular. A barra lateral ocupa 250 px no desktop, passa a 78 px com ícones em telas intermediárias e abre por botão no celular. Painéis e catálogo reorganizam suas colunas; formulários e notificações preservam limites de leitura, e cupons isolados mantêm tamanho de cartão. Fotografias, busca, atalhos e a mensagem “O mérito começa com você” foram mantidos. O header reúne navegação, indicação de demonstração e modo escuro. Notificações têm acesso apenas pela barra lateral. Foto, nome, tipo de usuário, acesso ao perfil e saída ficam juntos na barra lateral, também acessível pelo menu no celular.
 
 Vite é uma ferramenta de desenvolvimento e build, e React Router cuida da navegação. O backend permanece no Spring Boot; não há servidor Express nem outro backend em Node.js.
 
@@ -141,7 +147,9 @@ frontend/
     │   ├── instituicoes/
     │   ├── moedas/
     │   ├── vantagens/
-    │   └── cupons/
+    │   ├── cupons/
+    │   ├── conta/
+    │   └── notificacoes/
     ├── shared/
     │   ├── components/ui/
     │   ├── hooks/
@@ -153,7 +161,7 @@ frontend/
         └── tokens.css
 ```
 
-Cada funcionalidade possui os diretórios `api`, `components`, `hooks`, `pages`, `schemas` e `types`. Eles acomodarão, respectivamente, chamadas HTTP, componentes específicos, hooks, páginas, validações e tipos.
+As funcionalidades usam os diretórios `api`, `components`, `hooks`, `pages`, `schemas` e `types` conforme necessário. Eles acomodam, respectivamente, chamadas HTTP, componentes específicos, hooks, páginas, validações e tipos. Contratos compartilhados entre funcionalidades ficam em `shared/types/domain.ts`.
 
 - `app` reúne a composição da aplicação, providers, roteamento e layouts.
 - `features` mantém juntos os arquivos relacionados a uma funcionalidade.
@@ -253,7 +261,18 @@ npm run dev
 
 No PowerShell, se a política de execução bloquear `npm.ps1`, utilize `npm.cmd` nos mesmos comandos.
 
-Acesse `http://localhost:5173`. A página vazia é esperada. O servidor Vite está preparado para encaminhar chamadas a `/api` ao backend em `http://localhost:8080`, durante o desenvolvimento. Nenhuma chamada foi implementada. Se alterar a porta do backend, ajuste o destino em `vite.config.ts`.
+Acesse `http://localhost:5173`. Para testar o frontend isoladamente, não é necessário iniciar o backend ou o MySQL. As contas de demonstração são:
+
+| Perfil | Login/e-mail | Senha inicial |
+| --- | --- | --- |
+| Aluno | `aluno@puclim.demo` | `Puclim@2026` |
+| Professor | `professor@puclim.demo` | `Puclim@2026` |
+| Empresa | `empresa@puclim.demo` | `Puclim@2026` |
+| Instituição de ensino | `instituicao@puclim.demo` | `Puclim@2026` |
+
+Alterações da demonstração são preservadas neste navegador. Para recomeçar, remova as chaves `puclim.demo.v1` do armazenamento local e `puclim.demo.session` do armazenamento da sessão, pelas ferramentas do navegador. Professores importados recebem uma senha temporária na demonstração e devem substituí-la no primeiro acesso.
+
+Para integrar ao backend quando os endpoints estiverem prontos, copie `frontend/.env.example` para `frontend/.env.local`, configure `VITE_DATA_MODE=api` e reinicie o Vite. `VITE_API_URL` define a base da API, por padrão `/api`. O proxy encaminha esse caminho ao backend em `http://localhost:8080` durante o desenvolvimento. Se alterar a porta do backend, ajuste o destino em `vite.config.ts`.
 
 O proxy do Vite não faz parte do build de produção. O encaminhamento da API no ambiente publicado será definido durante a preparação da implantação.
 
@@ -274,7 +293,17 @@ Backend, dentro de `backend/`:
 .\mvnw.cmd verify
 ```
 
-Esses comandos verificam lint, tipos e empacotamento. Ainda não há testes de negócio ou de integração com MySQL; o build do backend não exige um banco em execução nesta etapa.
+Para testar os fluxos do frontend, dentro de `frontend/`:
+
+```powershell
+npm run test:e2e
+```
+
+Os testes usam Chrome em modo invisível, criam contextos isolados e iniciam/encerram os servidores de teste nas portas `5173` e `5174`. Essas portas precisam estar livres. A suíte cobre demonstração e integração HTTP com respostas controladas, incluindo erros da API. Por padrão é necessário ter Google Chrome instalado; também é possível instalar Chromium com `npx playwright install chromium` e definir `PLAYWRIGHT_CHANNEL=chromium`.
+
+Use `npm run format` para formatar o frontend. Resultados, screenshots e traces dos testes ficam em `frontend/test-results/` e são ignorados pelo Git.
+
+Esses comandos verificam o frontend e o empacotamento do backend. Ainda não há testes de integração com MySQL nem validação dos endpoints reais do Spring Boot; o build do backend não exige um banco em execução nesta etapa.
 
 ## Artefatos e referências
 
