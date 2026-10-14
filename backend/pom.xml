@@ -15,8 +15,11 @@
 	<description>Sistema de Moeda Estudantil Puclim</description>
 	<properties>
 		<java.version>17</java.version>
+        <puclim.build.directory>${project.basedir}/target</puclim.build.directory>
 	</properties>
 	<dependencies>
+        <dependency><groupId>org.springframework.boot</groupId><artifactId>spring-boot-starter-mail</artifactId></dependency>
+        <dependency><groupId>org.apache.commons</groupId><artifactId>commons-csv</artifactId><version>1.14.1</version></dependency>
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-data-jpa</artifactId>
@@ -42,6 +45,11 @@
 			<artifactId>flyway-mysql</artifactId>
 		</dependency>
 
+        <dependency>
+            <groupId>org.mariadb.jdbc</groupId>
+            <artifactId>mariadb-java-client</artifactId>
+            <scope>runtime</scope>
+        </dependency>
 		<dependency>
 			<groupId>com.mysql</groupId>
 			<artifactId>mysql-connector-j</artifactId>
@@ -55,6 +63,7 @@
 	</dependencies>
 
 	<build>
+        <directory>${puclim.build.directory}</directory>
 		<plugins>
 			<plugin>
 				<groupId>org.springframework.boot</groupId>
