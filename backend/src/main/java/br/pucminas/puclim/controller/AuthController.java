@@ -1,5 +1,8 @@
 package br.pucminas.puclim.controller;
 
+import br.pucminas.puclim.dto.request.LoginRequest;
+import br.pucminas.puclim.dto.response.AccountResponse;
+
 import java.util.Map;
 
 import org.springframework.security.web.csrf.CsrfToken;
@@ -10,8 +13,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
-import br.pucminas.puclim.dto.request.Requests.Login;
-import br.pucminas.puclim.dto.response.Responses.AccountView;
 import br.pucminas.puclim.service.AccountService;
 import br.pucminas.puclim.service.AuthService;
 import jakarta.servlet.http.HttpServletRequest;
@@ -35,12 +36,12 @@ public class AuthController {
     }
 
     @GetMapping("/session")
-    AccountView session() {
+    AccountResponse session() {
         return accounts.view(accounts.current());
     }
 
     @PostMapping("/login")
-    AccountView login(@Valid @RequestBody Login input, HttpServletRequest request, HttpServletResponse response) {
+    AccountResponse login(@Valid @RequestBody LoginRequest input, HttpServletRequest request, HttpServletResponse response) {
         return auth.login(input, request, response);
     }
 

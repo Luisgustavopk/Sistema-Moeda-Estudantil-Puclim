@@ -1,12 +1,13 @@
 package br.pucminas.puclim.service;
 
+import br.pucminas.puclim.dto.request.AdvantageRequest;
+import br.pucminas.puclim.dto.response.AdvantageResponse;
+
 import java.util.List;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import br.pucminas.puclim.dto.request.Requests.AdvantageInput;
-import br.pucminas.puclim.dto.response.Responses.AdvantageView;
 import br.pucminas.puclim.entity.Account;
 import br.pucminas.puclim.entity.Advantage;
 import br.pucminas.puclim.entity.ImageAsset;
@@ -30,7 +31,7 @@ public class AdvantageService {
     }
 
     @Transactional(readOnly = true)
-    public List<AdvantageView> list(boolean own) {
+    public List<AdvantageResponse> list(boolean own) {
         if (own) {
             Partner p = identity.requirePartner("EMPRESA");
             return advantages.own(p.id).stream().map(DomainMapper::advantage).toList();
@@ -39,7 +40,7 @@ public class AdvantageService {
         return advantages.catalog().stream().map(DomainMapper::advantage).toList();
     }
 
-    public AdvantageView save(String id, AdvantageInput input) {
+    public AdvantageResponse save(String id, AdvantageRequest input) {
         Partner company = identity.requirePartner("EMPRESA");
         Account owner = identity.locked(company.id);
         if (!owner.active)

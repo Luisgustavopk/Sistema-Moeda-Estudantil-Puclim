@@ -1,9 +1,11 @@
 package br.pucminas.puclim.service;
 
+import br.pucminas.puclim.dto.request.TransferRequest;
+import br.pucminas.puclim.dto.response.CouponResponse;
+import br.pucminas.puclim.dto.response.TransactionResponse;
+
 import br.pucminas.puclim.entity.*;
 import br.pucminas.puclim.repository.*;
-import br.pucminas.puclim.dto.request.Requests.Transfer;
-import br.pucminas.puclim.dto.response.Responses.*;
 import br.pucminas.puclim.mapper.DomainMapper;
 import br.pucminas.puclim.exception.ApiException;
 import org.springframework.stereotype.Service;
@@ -109,7 +111,7 @@ public class FinancialService {
         operations.save(o);
     }
 
-    public Transaction transfer(Transfer input, String key) {
+    public TransactionResponse transfer(TransferRequest input, String key) {
         Account authenticated = identity.require("PROFESSOR");
         if (input.amount() == null || input.amount() <= 0 || input.reason() == null || input.reason().isBlank())
             throw ApiException.bad("Quantidade positiva e motivo são obrigatórios.");
@@ -133,7 +135,7 @@ public class FinancialService {
         return DomainMapper.transaction(sent);
     }
 
-    public CouponView redeem(String id, String key) {
+    public CouponResponse redeem(String id, String key) {
         Account authenticated = identity.require("ALUNO");
         Advantage initial = advantages.findById(id).orElseThrow(ApiException::missing);
         var locked = lockAccounts(authenticated.id, initial.company.id);
@@ -182,7 +184,7 @@ public class FinancialService {
     }
 
     @Transactional(readOnly = true)
-    public List<Transaction> transactions() {
+    public List<TransactionResponse> transactions() {
         Account a = identity.current();
         if (a.role.equals("EMPRESA"))
             throw ApiException.forbidden();
@@ -190,7 +192,7 @@ public class FinancialService {
     }
 
     @Transactional(readOnly = true)
-    public List<CouponView> coupons() {
+    public List<CouponResponse> coupons() {
         Account a = identity.current();
         if (a.role.equals("ALUNO"))
             return coupons.findByStudentIdOrderByDateDesc(a.id).stream().map(DomainMapper::coupon).toList();
@@ -199,7 +201,7 @@ public class FinancialService {
     }
 
     @Transactional(readOnly = true)
-    public CouponView checkCoupon(String code) {
+    public CouponResponse checkCoupon(String code) {
         Partner p = identity.requirePartner("EMPRESA");
         Coupon c = coupons.findByCode(code.toUpperCase(Locale.ROOT)).orElseThrow(ApiException::missing);
         if (!c.company.id.equals(p.id))
@@ -207,7 +209,7 @@ public class FinancialService {
         return DomainMapper.coupon(c);
     }
 
-    public CouponView useCoupon(String code) {
+    public CouponResponse useCoupon(String code) {
         Partner p = identity.requirePartner("EMPRESA");
         Coupon c = coupons.lockByCode(code.toUpperCase(Locale.ROOT)).orElseThrow(ApiException::missing);
         if (!c.company.id.equals(p.id))

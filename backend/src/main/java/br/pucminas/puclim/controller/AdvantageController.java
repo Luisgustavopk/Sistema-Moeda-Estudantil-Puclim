@@ -1,5 +1,8 @@
 package br.pucminas.puclim.controller;
 
+import br.pucminas.puclim.dto.request.AdvantageRequest;
+import br.pucminas.puclim.dto.response.AdvantageResponse;
+
 import java.util.List;
 
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -13,8 +16,6 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
-import br.pucminas.puclim.dto.request.Requests.AdvantageInput;
-import br.pucminas.puclim.dto.response.Responses.AdvantageView;
 import br.pucminas.puclim.service.AdvantageService;
 import jakarta.validation.Valid;
 
@@ -28,18 +29,18 @@ public class AdvantageController {
     }
 
     @GetMapping
-    List<AdvantageView> list(@RequestParam(defaultValue = "false") boolean minhas) {
+    List<AdvantageResponse> list(@RequestParam(defaultValue = "false") boolean minhas) {
         return advantages.list(minhas);
     }
 
     @PostMapping
     @ResponseStatus(org.springframework.http.HttpStatus.CREATED)
-    AdvantageView create(@Valid @RequestBody AdvantageInput input) {
+    AdvantageResponse create(@Valid @RequestBody AdvantageRequest input) {
         return advantages.save(null, input);
     }
 
     @PutMapping("/{id}")
-    AdvantageView update(@PathVariable String id, @Valid @RequestBody AdvantageInput input) {
+    AdvantageResponse update(@PathVariable String id, @Valid @RequestBody AdvantageRequest input) {
         return advantages.save(id, input);
     }
 

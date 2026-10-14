@@ -1,5 +1,11 @@
 package br.pucminas.puclim.service;
 
+import br.pucminas.puclim.dto.request.LoginRequest;
+import br.pucminas.puclim.dto.request.TeacherImportRowRequest;
+import br.pucminas.puclim.dto.response.TeacherImportErrorResponse;
+import br.pucminas.puclim.dto.response.TeacherImportResponse;
+import br.pucminas.puclim.dto.response.TeacherInitialAccessResponse;
+
 import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.nio.charset.StandardCharsets;
@@ -20,11 +26,6 @@ import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.support.TransactionTemplate;
 import org.springframework.web.multipart.MultipartFile;
 
-import br.pucminas.puclim.dto.request.Requests.ImportRow;
-import br.pucminas.puclim.dto.response.Responses.*;
-import br.pucminas.puclim.dto.response.Responses.ImportError;
-import br.pucminas.puclim.dto.response.Responses.ImportResult;
-import br.pucminas.puclim.dto.response.Responses.InitialAccess;
 import br.pucminas.puclim.entity.Account;
 import br.pucminas.puclim.entity.Teacher;
 import br.pucminas.puclim.exception.ApiException;
@@ -55,7 +56,7 @@ public class TeacherImportService {
         zone = ZoneId.of(z);
     }
 
-    public List<ImportRow> preview(MultipartFile file) throws IOException {
+    public List<TeacherImportRowRequest> preview(MultipartFile file) throws IOException {
         identity.requirePartner("ENSINO");
         if (file.isEmpty() || file.getSize() > 1024 * 1024)
             throw ApiException.bad("Envie um CSV de até 1 MB.");
@@ -64,7 +65,7 @@ public class TeacherImportService {
         char delimiter = header.contains(";") ? ';' : ',';
         var format = CSVFormat.DEFAULT.builder().setDelimiter(delimiter).setHeader().setSkipHeaderRecord(true)
                 .setIgnoreEmptyLines(true).setTrim(true).get();
-        List<ImportRow> rows = new ArrayList<>();
+        List<TeacherImportRowRequest> rows = new ArrayList<>();
         Set<String> cpfs = new HashSet<>(), emails = new HashSet<>(), logins = new HashSet<>();
         try (CSVParser parser = CSVParser.parse(content, format)) {
             if (!parser.getHeaderNames().containsAll(List.of("nome", "cpf", "departamento", "email", "login")))
@@ -74,10 +75,10 @@ public class TeacherImportService {
                     throw ApiException.bad("Importe até 500 professores por arquivo.");
                 int line = (int) r.getRecordNumber() + 1;
                 if (!r.isConsistent()) {
-                    rows.add(new ImportRow(line, "", "", "", "", "", "Número de colunas diferente do cabeçalho."));
+                    rows.add(new TeacherImportRowRequest(line, "", "", "", "", "", "Número de colunas diferente do cabeçalho."));
                     continue;
                 }
-                ImportRow row = new ImportRow(line, r.get("nome"), r.get("cpf"), r.get("departamento"), r.get("email"),
+                TeacherImportRowRequest row = new TeacherImportRowRequest(line, r.get("nome"), r.get("cpf"), r.get("departamento"), r.get("email"),
                         r.get("login"), null);
                 String error = validate(row);
                 if (error == null) {
@@ -91,7 +92,7 @@ public class TeacherImportService {
                         logins.add(login);
                     }
                 }
-                rows.add(new ImportRow(line, row.name(), row.cpf(), row.department(), row.email(), row.login(), error));
+                rows.add(new TeacherImportRowRequest(line, row.name(), row.cpf(), row.department(), row.email(), row.login(), error));
             }
         } catch (UncheckedIOException | IllegalArgumentException e) {
             throw ApiException.bad("CSV inválido. Confira as aspas e colunas.");
@@ -101,7 +102,7 @@ public class TeacherImportService {
         return rows;
     }
 
-    private String validate(ImportRow row) {
+    private String validate(TeacherImportRowRequest row) {
         try {
             IdentityValidation.cpf(row.cpf());
         } catch (ApiException e) {
@@ -114,7 +115,7 @@ public class TeacherImportService {
         if (row.email() == null || row.email().length() > 254 || !row.email().matches("[^\\s@]+@[^\\s@]+\\.[^\\s@]+"))
             return "E-mail inválido.";
         if (row.login() == null || !row.login().matches("[a-zA-Z0-9._-]{3,40}"))
-            return "Login inválido.";
+            return "LoginRequest inválido.";
         if (teachers.existsByCpf(IdentityValidation.cpf(row.cpf()))
                 || accounts.existsByEmail(IdentityValidation.normalize(row.email()))
                 || accounts.existsByLogin(IdentityValidation.normalize(row.login())))
@@ -122,18 +123,18 @@ public class TeacherImportService {
         return null;
     }
 
-    public ImportResult importRows(List<ImportRow> rows) {
+    public TeacherImportResponse importRows(List<TeacherImportRowRequest> rows) {
         String institution = identity.requirePartner("ENSINO").id;
-        List<ImportError> errors = new ArrayList<>();
-        List<InitialAccess> access = new ArrayList<>();
-        for (ImportRow row : rows) {
+        List<TeacherImportErrorResponse> errors = new ArrayList<>();
+        List<TeacherInitialAccessResponse> access = new ArrayList<>();
+        for (TeacherImportRowRequest row : rows) {
             String error = row.error() != null && !row.error().isBlank() ? row.error() : validate(row);
             if (error != null) {
-                errors.add(new ImportError(row.line(), error));
+                errors.add(new TeacherImportErrorResponse(row.line(), error));
                 continue;
             }
             try {
-                InitialAccess result = tx.execute(status -> {
+                TeacherInitialAccessResponse result = tx.execute(status -> {
                     Account institutionAccount = identity.locked(institution);
                     if (!institutionAccount.active)
                         throw ApiException.forbidden();
@@ -153,15 +154,15 @@ public class TeacherImportService {
                     teachers.saveAndFlush(t);
                     LocalDate date = LocalDate.now(zone);
                     finance.creditSemester(a.id, date.getYear() + "-" + (date.getMonthValue() <= 6 ? 1 : 2));
-                    return new InitialAccess(a.name, a.login, password);
+                    return new TeacherInitialAccessResponse(a.name, a.login, password);
                 });
                 access.add(result);
             } catch (ApiException e) {
-                errors.add(new ImportError(row.line(), e.getMessage()));
+                errors.add(new TeacherImportErrorResponse(row.line(), e.getMessage()));
             } catch (org.springframework.dao.DataIntegrityViolationException e) {
-                errors.add(new ImportError(row.line(), "CPF, e-mail ou login já cadastrado."));
+                errors.add(new TeacherImportErrorResponse(row.line(), "CPF, e-mail ou login já cadastrado."));
             }
         }
-        return new ImportResult(access.size(), errors, access);
+        return new TeacherImportResponse(access.size(), errors, access);
     }
 }

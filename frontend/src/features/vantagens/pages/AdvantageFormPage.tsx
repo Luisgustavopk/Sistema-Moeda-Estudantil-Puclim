@@ -171,7 +171,7 @@ export function AdvantageFormPage() {
             label="Foto da vantagem"
             className="full"
             error={fileError || errors.photo?.message}
-            hint="JPG, PNG ou WebP · até 2 MB."
+            hint="JPG ou PNG · até 2 MB."
           >
             <div className="upload-area">
               {previewPhoto ? (
@@ -190,19 +190,15 @@ export function AdvantageFormPage() {
               <input
                 id="photo"
                 type="file"
-                accept="image/jpeg,image/png,image/webp"
+                accept="image/jpeg,image/png"
                 onChange={(event) => {
                   const selected = event.target.files?.[0]
                   if (!selected) return
                   if (
-                    !['image/jpeg', 'image/png', 'image/webp'].includes(
-                      selected.type,
-                    ) ||
+                    !['image/jpeg', 'image/png'].includes(selected.type) ||
                     selected.size > 2 * 1024 * 1024
                   ) {
-                    setFileError(
-                      'Selecione uma imagem JPG, PNG ou WebP de até 2 MB.',
-                    )
+                    setFileError('Selecione uma imagem JPG ou PNG de até 2 MB.')
                     event.target.value = ''
                     return
                   }

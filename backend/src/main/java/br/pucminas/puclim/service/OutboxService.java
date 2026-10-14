@@ -1,5 +1,7 @@
 package br.pucminas.puclim.service;
 
+import br.pucminas.puclim.dto.response.NotificationResponse;
+
 import java.time.Instant;
 import java.util.List;
 
@@ -10,7 +12,6 @@ import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import br.pucminas.puclim.dto.response.Responses.NotificationView;
 import br.pucminas.puclim.entity.Account;
 import br.pucminas.puclim.entity.Notification;
 import br.pucminas.puclim.repository.NotificationRepository;
@@ -64,8 +65,8 @@ public class OutboxService {
     }
 
     @Transactional(readOnly = true)
-    public List<NotificationView> list(String accountId) {
-        return notifications.findByAccountIdOrderByDateDesc(accountId).stream().map(n -> new NotificationView(n.id,
+    public List<NotificationResponse> list(String accountId) {
+        return notifications.findByAccountIdOrderByDateDesc(accountId).stream().map(n -> new NotificationResponse(n.id,
                 n.subject, n.body, n.date, n.recipient, n.sentAt == null ? "PENDENTE" : "ENVIADO", n.attempts))
                 .toList();
     }

@@ -1,5 +1,9 @@
 package br.pucminas.puclim.service;
 
+import br.pucminas.puclim.dto.request.LoginRequest;
+import br.pucminas.puclim.dto.request.PasswordChangeRequest;
+import br.pucminas.puclim.dto.response.AccountResponse;
+
 import java.util.List;
 
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -10,10 +14,6 @@ import org.springframework.security.web.csrf.CsrfTokenRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import br.pucminas.puclim.dto.request.Requests.*;
-import br.pucminas.puclim.dto.request.Requests.Login;
-import br.pucminas.puclim.dto.request.Requests.Password;
-import br.pucminas.puclim.dto.response.Responses.AccountView;
 import br.pucminas.puclim.entity.Account;
 import br.pucminas.puclim.security.SessionPrincipal;
 import jakarta.servlet.http.Cookie;
@@ -33,7 +33,7 @@ public class AuthService {
         tokens = t;
     }
 
-    public AccountView login(Login input, HttpServletRequest request, HttpServletResponse response) {
+    public AccountResponse login(LoginRequest input, HttpServletRequest request, HttpServletResponse response) {
         Account a = accounts.authenticate(input);
         request.getSession();
         request.changeSessionId();
@@ -51,7 +51,7 @@ public class AuthService {
         contexts.saveContext(context, request, response);
     }
 
-    public AccountView password(Password input, HttpServletRequest request, HttpServletResponse response) {
+    public AccountResponse password(PasswordChangeRequest input, HttpServletRequest request, HttpServletResponse response) {
         Account a = accounts.changePassword(input);
         request.changeSessionId();
         authenticate(a, request, response);

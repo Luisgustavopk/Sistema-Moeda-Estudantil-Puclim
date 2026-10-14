@@ -1,5 +1,10 @@
 package br.pucminas.puclim.controller;
 
+import br.pucminas.puclim.dto.request.TeacherImportRequest;
+import br.pucminas.puclim.dto.request.TeacherImportRowRequest;
+import br.pucminas.puclim.dto.response.TeacherImportResponse;
+import br.pucminas.puclim.dto.response.TeacherSummaryResponse;
+
 import java.io.IOException;
 import java.util.List;
 
@@ -11,11 +16,6 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
-import br.pucminas.puclim.dto.request.Requests.*;
-import br.pucminas.puclim.dto.request.Requests.ImportRow;
-import br.pucminas.puclim.dto.response.Responses.*;
-import br.pucminas.puclim.dto.response.Responses.ImportResult;
-import br.pucminas.puclim.dto.response.Responses.TeacherSummary;
 import br.pucminas.puclim.service.AccountService;
 import br.pucminas.puclim.service.TeacherImportService;
 import jakarta.validation.Valid;
@@ -32,17 +32,17 @@ public class TeacherController {
     }
 
     @GetMapping
-    List<TeacherSummary> list() {
+    List<TeacherSummaryResponse> list() {
         return accounts.teachers();
     }
 
     @PostMapping(value = "/preview", consumes = "multipart/form-data")
-    List<ImportRow> preview(@RequestParam MultipartFile file) throws IOException {
+    List<TeacherImportRowRequest> preview(@RequestParam MultipartFile file) throws IOException {
         return imports.preview(file);
     }
 
     @PostMapping("/importar")
-    ImportResult importRows(@Valid @RequestBody br.pucminas.puclim.dto.request.Requests.Import input) {
+    TeacherImportResponse importRows(@Valid @RequestBody TeacherImportRequest input) {
         return imports.importRows(input.rows());
     }
 }

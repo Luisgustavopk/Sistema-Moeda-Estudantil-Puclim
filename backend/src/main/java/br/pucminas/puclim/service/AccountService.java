@@ -1,5 +1,15 @@
 package br.pucminas.puclim.service;
 
+import br.pucminas.puclim.dto.request.LoginRequest;
+import br.pucminas.puclim.dto.request.PartnerRegistrationRequest;
+import br.pucminas.puclim.dto.request.PasswordChangeRequest;
+import br.pucminas.puclim.dto.request.ProfileUpdateRequest;
+import br.pucminas.puclim.dto.request.StudentRegistrationRequest;
+import br.pucminas.puclim.dto.response.AccountResponse;
+import br.pucminas.puclim.dto.response.InstitutionResponse;
+import br.pucminas.puclim.dto.response.StudentSummaryResponse;
+import br.pucminas.puclim.dto.response.TeacherSummaryResponse;
+
 import java.util.List;
 import java.util.UUID;
 
@@ -8,17 +18,6 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import br.pucminas.puclim.dto.request.Requests.*;
-import br.pucminas.puclim.dto.request.Requests.Login;
-import br.pucminas.puclim.dto.request.Requests.PartnerRegistration;
-import br.pucminas.puclim.dto.request.Requests.Password;
-import br.pucminas.puclim.dto.request.Requests.Profile;
-import br.pucminas.puclim.dto.request.Requests.StudentRegistration;
-import br.pucminas.puclim.dto.response.Responses.*;
-import br.pucminas.puclim.dto.response.Responses.AccountView;
-import br.pucminas.puclim.dto.response.Responses.Institution;
-import br.pucminas.puclim.dto.response.Responses.StudentSummary;
-import br.pucminas.puclim.dto.response.Responses.TeacherSummary;
 import br.pucminas.puclim.entity.Account;
 import br.pucminas.puclim.entity.Partner;
 import br.pucminas.puclim.entity.Student;
@@ -84,7 +83,7 @@ public class AccountService {
   entityManager.refresh(account);
   return account;
  }
- public Account authenticate(Login input) {
+ public Account authenticate(LoginRequest input) {
     String login = IdentityValidation.normalize(input.login());
     Account a = accounts.findByLoginOrEmail(login, login).orElse(null);
     // Always perform a password verification to reduce account enumeration through
@@ -92,7 +91,7 @@ public class AccountService {
     String hash = a == null ? dummyHash : a.passwordHash;
     boolean valid = encoder.matches(input.password(), hash);
     if (a == null || !valid || !a.active)
-      throw new ApiException(401, "Login ou senha inválidos.");
+      throw new ApiException(401, "LoginRequest ou senha inválidos.");
     return a;
   }
 
@@ -109,13 +108,13 @@ public class AccountService {
     a.email = IdentityValidation.normalize(email);
     a.login = IdentityValidation.normalize(login);
     if (accounts.existsByEmail(a.email) || accounts.existsByLogin(a.login))
-      throw new ApiException(409, "Login ou e-mail já cadastrado.");
+      throw new ApiException(409, "LoginRequest ou e-mail já cadastrado.");
     a.passwordHash = encoder.encode(password);
     a.role = role;
     return accounts.save(a);
   }
 
-  public AccountView registerStudent(StudentRegistration input) {
+  public AccountResponse registerStudent(StudentRegistrationRequest input) {
     Partner institution = partners.findById(input.institutionId())
         .orElseThrow(() -> ApiException.bad("Instituição inválida."));
     // Serialize institutional membership with deactivation so no new student can
@@ -138,7 +137,7 @@ public class AccountService {
     return view(a);
   }
 
-  public AccountView registerPartner(PartnerRegistration input) {
+  public AccountResponse registerPartner(PartnerRegistrationRequest input) {
     String cnpj = IdentityValidation.cnpj(input.cnpj());
     if (partners.existsByCnpj(cnpj))
       throw new ApiException(409, "CNPJ já cadastrado.");
@@ -153,11 +152,11 @@ public class AccountService {
     return view(a);
   }
 
-  public AccountView view(Account a) {
+  public AccountResponse view(Account a) {
     Student s = a.role.equals("ALUNO") ? students.findById(a.id).orElseThrow(ApiException::missing) : null;
     Teacher t = a.role.equals("PROFESSOR") ? teachers.findById(a.id).orElseThrow(ApiException::missing) : null;
     Partner p = a.role.equals("EMPRESA") ? partners.findById(a.id).orElseThrow(ApiException::missing) : null;
-    return new AccountView(a.id, a.role, a.name, a.email, a.login, a.balance, a.active,
+    return new AccountResponse(a.id, a.role, a.name, a.email, a.login, a.balance, a.active,
         s != null ? s.cpf : t != null ? t.cpf : null,
         s == null ? null : s.rg, s == null ? null : s.address, s == null ? null : s.course,
         s != null ? s.institution.id : t != null ? t.institution.id : null,
@@ -165,7 +164,7 @@ public class AccountService {
         p == null ? null : p.description, p == null ? null : p.kind, a.mustChangePassword);
   }
 
-  public AccountView profile(Profile input) {
+  public AccountResponse profile(ProfileUpdateRequest input) {
     Account a = locked(current().id);
     String email = IdentityValidation.normalize(input.email());
     if (!email.equals(a.email) && accounts.existsByEmail(email))
@@ -189,7 +188,7 @@ public class AccountService {
     return view(a);
   }
 
-  public Account changePassword(Password input) {
+  public Account changePassword(PasswordChangeRequest input) {
     Account a = locked(current().id);
     if (!encoder.matches(input.currentPassword(), a.passwordHash))
       throw ApiException.bad("Senha atual inválida.");
@@ -212,21 +211,21 @@ public class AccountService {
   }
 
   @Transactional(readOnly = true)
-  public List<Institution> institutions() {
-    return partners.institutions().stream().map(p -> new Institution(p.id, p.account.name)).toList();
+  public List<InstitutionResponse> institutions() {
+    return partners.institutions().stream().map(p -> new InstitutionResponse(p.id, p.account.name)).toList();
   }
 
   @Transactional(readOnly = true)
-  public List<StudentSummary> students() {
+  public List<StudentSummaryResponse> students() {
     require("PROFESSOR");
     return students.selectable().stream()
-        .map(s -> new StudentSummary(s.id, s.account.name, s.course, s.institution.account.name)).toList();
+        .map(s -> new StudentSummaryResponse(s.id, s.account.name, s.course, s.institution.account.name)).toList();
   }
 
   @Transactional(readOnly = true)
-  public List<TeacherSummary> teachers() {
+  public List<TeacherSummaryResponse> teachers() {
     Partner p = requirePartner("ENSINO");
     return teachers.forInstitution(p.id).stream()
-        .map(t -> new TeacherSummary(t.id, t.account.name, t.account.login, t.department, t.account.email)).toList();
+        .map(t -> new TeacherSummaryResponse(t.id, t.account.name, t.account.login, t.department, t.account.email)).toList();
   }
 }
