@@ -91,7 +91,7 @@ public class AccountService {
     String hash = a == null ? dummyHash : a.passwordHash;
     boolean valid = encoder.matches(input.password(), hash);
     if (a == null || !valid || !a.active)
-      throw new ApiException(401, "LoginRequest ou senha inválidos.");
+      throw new ApiException(401, "Login ou senha inválidos.");
     return a;
   }
 
@@ -108,7 +108,7 @@ public class AccountService {
     a.email = IdentityValidation.normalize(email);
     a.login = IdentityValidation.normalize(login);
     if (accounts.existsByEmail(a.email) || accounts.existsByLogin(a.login))
-      throw new ApiException(409, "LoginRequest ou e-mail já cadastrado.");
+      throw new ApiException(409, "Login ou e-mail já cadastrado.");
     a.passwordHash = encoder.encode(password);
     a.role = role;
     return accounts.save(a);
