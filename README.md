@@ -6,9 +6,40 @@ Projeto desenvolvido para o Laboratório de Desenvolvimento de Software da PUC M
 
 O frontend da sprint 3 está implementado: acesso e cadastros, perfis, painéis por papel, envio de moedas, extratos, catálogo, gestão de vantagens, resgates, cupons, importação de professores e notificações. O visual segue o protótipo em estilo **clay, petróleo e ouro**, com barra lateral e opção de modo escuro. O perfil é definido pelo login; não há seletor de papel, estilo ou paleta.
 
-O backend permanece com a estrutura inicial. Seus endpoints, entidades, tabelas de negócio, migrations e regras ainda não foram implementados. Por isso, o frontend inicia em **modo de demonstração**, com dados fictícios persistidos no navegador, sem conexão com MySQL ou envio de e-mails reais. Há um adaptador separado para a futura API, que pode ser selecionado por configuração; erros da API nunca acionam automaticamente a demonstração.
+O backend Spring Boot agora contém a primeira implementação integrada dos fluxos de autenticação por sessão, contas, extratos, exportação CSV, transferências, vantagens, resgates, cupons, notificações e upload de imagens. O frontend continua iniciando em **modo de demonstração** por padrão; use `VITE_DATA_MODE=api` para consumir o backend.
 
-As interfaces da sprint 3 cobrem as histórias obrigatórias US01–US20. O contrato HTTP está preparado no frontend e ainda precisa ser implementado e validado no backend. Pastas reservadas para evolução possuem `.gitkeep` para serem preservadas pelo Git.
+As interfaces da sprint 3 cobrem as histórias obrigatórias US01–US20. A migration inicial fica em `backend/src/main/resources/db/migration/V1__schema.sql` e usa `ddl-auto: validate`.
+
+## Executar a integração
+
+Defina `DB_PASSWORD` e suba um MySQL 8.4 ou MariaDB compatível. O backend usa `DB_URL`, `DB_USER` e `DB_PASSWORD`; depois execute:
+
+```powershell
+cd backend
+./mvnw.cmd spring-boot:run
+```
+
+Em outro terminal:
+
+```powershell
+cd frontend
+$env:VITE_DATA_MODE = "api"
+npm ci
+npm run dev
+```
+
+Verificações disponíveis:
+
+```powershell
+cd backend; ./mvnw.cmd verify
+cd ../frontend; npm run lint; npm run build
+```
+
+## API
+
+As rotas usam sessão HTTP e retornam erros como `{ "message": "..." }`. `GET /api/conta/extrato` aceita `de`, `ate`, `tipo` (`entradas`, `saidas` ou `COTA`, `ENVIO`, `RECEBIMENTO`, `RESGATE`) e `busca`. `GET /api/conta/extrato/exportar` aceita os mesmos filtros e retorna CSV UTF-8 com BOM, separador `;` e nome `extrato-puclim.csv`.
+
+`GET/POST/PUT/DELETE /api/vantagens` gerenciam o catálogo; `POST /api/vantagens/{id}/resgates` exige `Idempotency-Key`; `GET /api/cupons`, `GET /api/cupons/{code}` e `POST /api/cupons/{code}/utilizar` cobrem a consulta e utilização; `GET /api/conta/notificacoes?limite=` lista notificações próprias, limitadas a 200.
 
 ## Tecnologias
 
