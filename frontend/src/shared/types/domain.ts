@@ -93,6 +93,12 @@ export interface Transaction {
   counterpart?: string
   reason?: string
 }
+export interface TransactionFilters {
+  from?: string
+  to?: string
+  type?: string
+  search?: string
+}
 export interface Coupon {
   id: string
   advantageId: string
@@ -142,7 +148,8 @@ export interface PuclimApi {
   students(): Promise<StudentSummary[]>
   teachers(): Promise<TeacherSummary[]>
   importTeachers(rows: ImportRow[]): Promise<ImportResult>
-  transactions(): Promise<Transaction[]>
+  transactions(filters?: TransactionFilters): Promise<Transaction[]>
+  exportTransactions(filters?: TransactionFilters): Promise<Blob>
   transfer(
     studentId: string,
     amount: number,

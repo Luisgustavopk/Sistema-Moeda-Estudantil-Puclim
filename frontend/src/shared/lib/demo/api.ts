@@ -3,6 +3,7 @@ import type {
   AdvantageInput,
   PuclimApi,
   Transaction,
+  TransactionFilters,
 } from '@/shared/types/domain'
 import { digits } from '@/shared/utils/format'
 import { ApiError } from '../errors'
@@ -85,6 +86,22 @@ function validateAdvantage(input: AdvantageInput) {
     throw new ApiError(
       'Preencha os dados da vantagem e informe um custo inteiro maior que zero.',
     )
+}
+function filterTransactions(values: Transaction[], filters?: TransactionFilters) {
+  const search = filters?.search?.toLocaleLowerCase('pt-BR') || ''
+  return values.filter((item) => {
+    const date = new Date(item.date)
+    const localDate = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`
+    const text = `${item.description} ${item.counterpart || ''} ${item.reason || ''}`.toLocaleLowerCase('pt-BR')
+    const type = filters?.type
+    return (
+      (!filters?.from || localDate >= filters.from) &&
+      (!filters?.to || localDate <= filters.to) &&
+      (!search || text.includes(search)) &&
+      (!type || type === 'all' ||
+        (type === 'entradas' ? item.amount > 0 : type === 'saidas' ? item.amount < 0 : item.kind === type))
+    )
+  })
 }
 
 export const demoApi: PuclimApi = {
@@ -285,13 +302,31 @@ export const demoApi: PuclimApi = {
       }
       return result
     }),
-  transactions: () =>
-    withStore((store) =>
-      (
-        store.transactions[currentAccount(store, ['ALUNO', 'PROFESSOR']).id] ||
-        []
-      ).toSorted((a, b) => b.date.localeCompare(a.date)),
-    ),
+  transactions: (filters) =>
+    withStore((store) => {
+      const values = (
+        store.transactions[currentAccount(store, ['ALUNO', 'PROFESSOR']).id] || []
+      ).toSorted((a, b) => b.date.localeCompare(a.date))
+      return filterTransactions(values, filters)
+    }),
+  exportTransactions: async (filters) => {
+    const values = await demoApi.transactions(filters)
+    const csvCell = (value: string) =>
+      `"${(/^[=+\-@]/.test(value) ? `'${value}` : value).replace(/"/g, '""')}"`
+    const rows = values.map((item) =>
+      [
+        csvCell(new Date(item.date).toLocaleString('pt-BR')),
+        csvCell(item.kind),
+        csvCell(item.description),
+        csvCell(item.counterpart || ''),
+        csvCell(item.reason || ''),
+        csvCell(String(item.amount)),
+      ].join(';'),
+    )
+    return new Blob(['\uFEFF', ['Data;Tipo;Descrição;Pessoa ou empresa;Motivo;Pucoins', ...rows].join('\r\n')], {
+      type: 'text/csv;charset=utf-8',
+    })
+  },
   transfer: (studentId, amount, reason) =>
     withStore((store) => {
       const teacher = currentAccount(store, ['PROFESSOR'])
