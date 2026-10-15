@@ -1,0 +1,11 @@
+package br.pucminas.puclim.controller;
+import br.pucminas.puclim.entity.*; import br.pucminas.puclim.service.PuclimService; import jakarta.servlet.http.HttpSession; import org.springframework.web.bind.annotation.*; import java.util.*;
+@RestController public class FinancialController {
+ private final PuclimService service; public FinancialController(PuclimService service){this.service=service;}
+ @GetMapping("/api/alunos/selecionaveis") public List<?> students(HttpSession s){service.current(s,Account.Role.PROFESSOR);return service.students().stream().map(a->Map.of("id",a.id,"name",a.name,"course",Objects.toString(a.course,""),"institution",Objects.toString(a.institutionId,""))).toList();}
+ @PostMapping("/api/transferencias") public Map<String,Object> transfer(@RequestBody Map<String,Object>b,HttpSession s){LedgerEntry l=service.transfer(s,Objects.toString(b.get("studentId"),""),Long.parseLong(Objects.toString(b.get("amount"),"0")),Objects.toString(b.get("reason"),""));return service.transaction(l);}
+ @PostMapping("/api/vantagens/{id}/resgates") public Map<String,Object> redeem(@PathVariable String id,@RequestHeader("Idempotency-Key") String idempotencyKey,@RequestBody(required=false)Map<String,Object>b,HttpSession s){if(idempotencyKey.isBlank())throw new br.pucminas.puclim.exception.ApiException("O cabeçalho Idempotency-Key é obrigatório.");Coupon c=service.redeem(s,id,b==null?null:Objects.toString(b.get("expectedCost"),null));return service.coupon(c);}
+ @GetMapping("/api/cupons") public List<Map<String,Object>> coupons(HttpSession s){Account a=service.current(s,Account.Role.ALUNO,Account.Role.EMPRESA);return service.coupons(a).stream().map(service::coupon).toList();}
+ @GetMapping("/api/cupons/{code}") public Map<String,Object> check(@PathVariable String code,HttpSession s){return service.coupon(service.check(s,code));}
+ @PostMapping("/api/cupons/{code}/utilizar") public Map<String,Object> use(@PathVariable String code,HttpSession s){return service.coupon(service.use(s,code));}
+}
