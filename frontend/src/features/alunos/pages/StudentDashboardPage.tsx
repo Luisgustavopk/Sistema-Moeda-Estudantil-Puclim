@@ -21,7 +21,7 @@ export function StudentDashboardPage() {
   const [selected, setSelected] = useState<Advantage | null>(null)
   const transactions = useQuery({
     queryKey: ['transactions', user?.id],
-    queryFn: moedasApi.transactions,
+    queryFn: () => moedasApi.transactions(),
   })
   const offers = useQuery({
     queryKey: ['advantages'],

@@ -13,7 +13,7 @@ export function TeacherDashboardPage() {
   const { user } = useAuth()
   const transactions = useQuery({
     queryKey: ['transactions', user?.id],
-    queryFn: moedasApi.transactions,
+    queryFn: () => moedasApi.transactions(),
   })
   const sent =
     transactions.data?.filter((value) => value.kind === 'ENVIO') || []

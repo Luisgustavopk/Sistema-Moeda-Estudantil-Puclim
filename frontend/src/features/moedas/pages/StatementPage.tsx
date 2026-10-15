@@ -8,20 +8,30 @@ import { PageHeading } from '@/shared/components/ui/PageHeading'
 import { Button } from '@/shared/components/ui/Button'
 import { QueryState, EmptyState } from '@/shared/components/ui/Feedback'
 import { number, downloadText, dateTime } from '@/shared/utils/format'
+import { useToast } from '@/shared/hooks/toast-context'
+import { DATA_MODE } from '@/shared/lib/http'
 const csv = (value: string) =>
   `"${(/^[=+\-@]/.test(value) ? `'${value}` : value).replace(/"/g, '""')}"`
 export function StatementPage() {
   const { user } = useAuth()
+  const toast = useToast()
   const teacher = user?.role === 'PROFESSOR'
-  const transactions = useQuery({
-    queryKey: ['transactions', user?.id],
-    queryFn: moedasApi.transactions,
-  })
   const [search, setSearch] = useState('')
   const [kind, setKind] = useState('all')
   const [from, setFrom] = useState('')
   const [to, setTo] = useState('')
   const invalidPeriod = !!from && !!to && from > to
+  const transactions = useQuery({
+    queryKey: ['transactions', user?.id, search, kind, from, to],
+    queryFn: () =>
+      moedasApi.transactions({
+        from,
+        to,
+        search,
+        type: kind === 'in' ? 'entradas' : kind === 'out' ? 'saidas' : kind,
+      }),
+    enabled: !invalidPeriod,
+  })
   const filtered = (transactions.data || []).filter((item) => {
     const text =
       `${item.description} ${item.counterpart || ''} ${item.reason || ''}`.toLocaleLowerCase(
@@ -48,23 +58,43 @@ export function StatementPage() {
   const outgoing = filtered
     .filter((item) => item.amount < 0)
     .reduce((sum, item) => sum - item.amount, 0)
-  const exportCsv = () =>
-    downloadText(
-      'extrato-puclim.csv',
-      [
-        'Data;Tipo;Descrição;Pessoa ou empresa;Motivo;Pucoins',
-        ...filtered.map((item) =>
+  const exportCsv = async () => {
+    try {
+      if (DATA_MODE === 'demo') {
+        downloadText(
+          'extrato-puclim.csv',
           [
-            csv(dateTime(item.date)),
-            csv(item.kind),
-            csv(item.description),
-            csv(item.counterpart || ''),
-            csv(item.reason || ''),
-            item.amount,
-          ].join(';'),
-        ),
-      ].join('\r\n'),
-    )
+            'Data;Tipo;Descrição;Pessoa ou empresa;Motivo;Pucoins',
+            ...filtered.map((item) =>
+              [
+                csv(dateTime(item.date)),
+                csv(item.kind),
+                csv(item.description),
+                csv(item.counterpart || ''),
+                csv(item.reason || ''),
+                item.amount,
+              ].join(';'),
+            ),
+          ].join('\r\n'),
+        )
+        return
+      }
+      const blob = await moedasApi.exportTransactions({
+        from,
+        to,
+        search,
+        type: kind === 'in' ? 'entradas' : kind === 'out' ? 'saidas' : kind,
+      })
+      const url = URL.createObjectURL(blob)
+      const anchor = document.createElement('a')
+      anchor.href = url
+      anchor.download = 'extrato-puclim.csv'
+      anchor.click()
+      URL.revokeObjectURL(url)
+    } catch (error) {
+      toast(error instanceof Error ? error.message : 'Não foi possível baixar o extrato.')
+    }
+  }
   return (
     <>
       <PageHeading
@@ -79,7 +109,7 @@ export function StatementPage() {
           <Button
             variant="secondary"
             disabled={!filtered.length}
-            onClick={exportCsv}
+            onClick={() => void exportCsv()}
           >
             <Download size={17} /> Baixar extrato
           </Button>
