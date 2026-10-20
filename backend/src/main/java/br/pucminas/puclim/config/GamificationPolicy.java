@@ -14,6 +14,13 @@ public class GamificationPolicy {
     private long weeklyReward = 20, maxAllocation = 1000000;
     private List<Long> prizes = new ArrayList<>(List.of(100L, 60L, 40L));
 
+    @jakarta.annotation.PostConstruct
+    public void validate() {
+        if (levels == null || levels.isEmpty() || levels.get(0) != 0L) throw new IllegalStateException("Níveis devem começar em zero.");
+        for (int i = 1; i < levels.size(); i++) if (levels.get(i) <= levels.get(i-1)) throw new IllegalStateException("Limites dos níveis devem ser crescentes.");
+        if (quizSize < 1 || quizSize > 30 || weeklyReward < 1 || maxAllocation < 1 || maxAllocation > 1000000000L || bonusCap < 0 || bonusCap > 25 || perfectPercent < 0 || donationPercent < 0 || streakPercent < 0 || perfectPercent > 100 || donationPercent > 100 || streakPercent > 100 || prizes == null || prizes.size() != 3 || prizes.stream().anyMatch(p -> p < 0 || p > maxAllocation)) throw new IllegalStateException("Política de gamificação inválida.");
+    }
+
     @Bean
     public Clock gamificationClock() {
         return Clock.system(ZoneId.of("America/Sao_Paulo"));

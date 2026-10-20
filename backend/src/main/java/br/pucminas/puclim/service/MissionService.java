@@ -91,16 +91,18 @@ public class MissionService {
     public List<GamificationResponses.Mission> list() {
         Account a = identity.current();
         List<Mission> rows;
-        if (a.role.equals("PROFESSOR"))
-            rows = db.list(Mission.class, "select m from Mission m where m.teacher.id=:t order by m.date desc", "t",
-                    a.id);
-        else if (a.role.equals("ALUNO")) {
-            Student s = db.get(Student.class, a.id);
-            rows = db.list(Mission.class,
-                    "select m from Mission m where m.teacher.institution.id=:i and ((m.status='DISPONIVEL' and m.deadline>:now and m.teacher.account.active=true) or exists (select p.id from MissionParticipation p where p.mission=m and p.student.id=:s)) order by m.date desc",
-                    "i", s.institution.id, "now", clock.instant(), "s", a.id);
-        } else
-            throw ApiException.forbidden();
+        switch (a.role) {
+            case "PROFESSOR" ->
+                rows = db.list(Mission.class, "select m from Mission m where m.teacher.id=:t order by m.date desc", "t",
+                        a.id);
+            case "ALUNO" -> {
+                Student s = db.get(Student.class, a.id);
+                rows = db.list(Mission.class,
+                        "select m from Mission m where m.teacher.institution.id=:i and ((m.status='DISPONIVEL' and m.deadline>:now and m.teacher.account.active=true) or exists (select p.id from MissionParticipation p where p.mission=m and p.student.id=:s)) order by m.date desc",
+                        "i", s.institution.id, "now", clock.instant(), "s", a.id);
+            }
+            default -> throw ApiException.forbidden();
+        }
         return rows.stream().map(m -> view(m, a)).toList();
     }
 

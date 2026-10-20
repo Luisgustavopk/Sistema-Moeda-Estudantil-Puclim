@@ -61,8 +61,8 @@ public class CommunityService {
         if(input.budget()<Math.multiplyExact(input.reward(),input.capacity())) throw ApiException.bad("Orçamento deve cobrir recompensa × vagas.");
         if(!input.deadline().isAfter(clock.instant())) throw ApiException.bad("Prazo deve estar no futuro.");
         SponsoredChallenge c;
-        if(id==null) {c=new SponsoredChallenge();c.company=p;db.save(c);} else {c=ownedChallenge(id,p);if(!Set.of("PROPOSTA","PENDENTE_FINANCIAMENTO").contains(c.status)) throw new ApiException(409,"Proposta não pode ser editada neste estado.");}
-        c.title=input.title().trim();c.description=input.description().trim();c.reward=input.reward();c.capacity=input.capacity();c.budget=input.budget();c.deadline=input.deadline();return challengeView(c);
+        if(id==null) {c=new SponsoredChallenge();c.company=p;} else {c=ownedChallenge(id,p);if(!Set.of("PROPOSTA","PENDENTE_FINANCIAMENTO").contains(c.status)) throw new ApiException(409,"Proposta não pode ser editada neste estado.");}
+        c.title=input.title().trim();c.description=input.description().trim();c.reward=input.reward();c.capacity=input.capacity();c.budget=input.budget();c.deadline=input.deadline();if(id==null)db.save(c);return challengeView(c);
     }
     public GamificationResponses.Challenge challengeState(String id,String action) {
         Partner p=identity.requirePartner("EMPRESA");identity.locked(p.id);SponsoredChallenge c=ownedChallenge(id,p);

@@ -16,7 +16,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import br.pucminas.puclim.config.GamificationPolicy;
-import br.pucminas.puclim.dto.response.GamificationResponses.*;
 import br.pucminas.puclim.dto.response.GamificationResponses.Badge;
 import br.pucminas.puclim.dto.response.GamificationResponses.LevelChange;
 import br.pucminas.puclim.dto.response.GamificationResponses.Notice;

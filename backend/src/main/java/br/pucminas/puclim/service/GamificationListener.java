@@ -8,7 +8,6 @@ import org.springframework.transaction.annotation.Transactional;
 import br.pucminas.puclim.entity.BadgeDefinition;
 import br.pucminas.puclim.entity.Student;
 import br.pucminas.puclim.repository.GamificationRepository;
-import br.pucminas.puclim.service.GamificationEvents.*;
 import br.pucminas.puclim.service.GamificationEvents.AdvantageDonated;
 import br.pucminas.puclim.service.GamificationEvents.AdvantageRedeemed;
 import br.pucminas.puclim.service.GamificationEvents.BadgeUnlocked;

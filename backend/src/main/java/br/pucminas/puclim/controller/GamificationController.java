@@ -15,7 +15,6 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import br.pucminas.puclim.dto.request.GamificationRequests;
-import br.pucminas.puclim.dto.response.GamificationResponses.*;
 import br.pucminas.puclim.dto.response.GamificationResponses.Beneficiary;
 import br.pucminas.puclim.dto.response.GamificationResponses.Challenge;
 import br.pucminas.puclim.dto.response.GamificationResponses.Donation;
@@ -28,6 +27,7 @@ import br.pucminas.puclim.dto.response.GamificationResponses.Question;
 import br.pucminas.puclim.dto.response.GamificationResponses.Quiz;
 import br.pucminas.puclim.dto.response.GamificationResponses.QuizStatus;
 import br.pucminas.puclim.dto.response.GamificationResponses.Ranking;
+import br.pucminas.puclim.service.AccountService;
 import br.pucminas.puclim.service.CommunityService;
 import br.pucminas.puclim.service.MissionService;
 import br.pucminas.puclim.service.ProgressionService;
@@ -43,14 +43,24 @@ public class GamificationController {
     private final MissionService missions;
     private final RewardService rewards;
     private final CommunityService community;
+    private final br.pucminas.puclim.config.GamificationPolicy policy;
+    private final AccountService identity;
 
     public GamificationController(ProgressionService p, QuizService q, MissionService m, RewardService r,
-            CommunityService c) {
+            CommunityService c, br.pucminas.puclim.config.GamificationPolicy policy, AccountService identity) {
         progression = p;
         quizzes = q;
         missions = m;
         rewards = r;
         community = c;
+        this.policy = policy;
+        this.identity = identity;
+    }
+
+    @GetMapping("/contexto")
+    public java.util.Map<String,Object> context() {
+        identity.current();
+        return java.util.Map.of("semester", progression.semester(), "today", progression.today(), "maxAllocation", policy.getMaxAllocation());
     }
 
     @GetMapping("/perfil")
@@ -76,6 +86,7 @@ public class GamificationController {
     }
 
     @PostMapping("/notificacoes/{id}/ler")
+    @org.springframework.web.bind.annotation.ResponseStatus(org.springframework.http.HttpStatus.NO_CONTENT)
     public void read(@PathVariable String id) {
         progression.readNotice(id);
     }
@@ -96,6 +107,7 @@ public class GamificationController {
     }
 
     @DeleteMapping("/perguntas/{id}")
+    @org.springframework.web.bind.annotation.ResponseStatus(org.springframework.http.HttpStatus.NO_CONTENT)
     public void deleteQuestion(@PathVariable String id) {
         quizzes.deleteQuestion(id);
     }
@@ -172,11 +184,13 @@ public class GamificationController {
     }
 
     @PostMapping("/fundo/{semester}/reprocessar")
+    @org.springframework.web.bind.annotation.ResponseStatus(org.springframework.http.HttpStatus.NO_CONTENT)
     public void retry(@PathVariable String semester) {
         rewards.retryOwn(semester);
     }
 
     @PostMapping("/fundo/{semester}/encerrar")
+    @org.springframework.web.bind.annotation.ResponseStatus(org.springframework.http.HttpStatus.NO_CONTENT)
     public void closeSemester(@PathVariable String semester) {
         rewards.closeOwn(semester);
     }

@@ -1,11 +1,5 @@
 package br.pucminas.puclim.service;
 
-import br.pucminas.puclim.dto.request.LoginRequest;
-import br.pucminas.puclim.dto.request.TeacherImportRowRequest;
-import br.pucminas.puclim.dto.response.TeacherImportErrorResponse;
-import br.pucminas.puclim.dto.response.TeacherImportResponse;
-import br.pucminas.puclim.dto.response.TeacherInitialAccessResponse;
-
 import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.nio.charset.StandardCharsets;
@@ -26,6 +20,10 @@ import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.support.TransactionTemplate;
 import org.springframework.web.multipart.MultipartFile;
 
+import br.pucminas.puclim.dto.request.TeacherImportRowRequest;
+import br.pucminas.puclim.dto.response.TeacherImportErrorResponse;
+import br.pucminas.puclim.dto.response.TeacherImportResponse;
+import br.pucminas.puclim.dto.response.TeacherInitialAccessResponse;
 import br.pucminas.puclim.entity.Account;
 import br.pucminas.puclim.entity.Teacher;
 import br.pucminas.puclim.exception.ApiException;

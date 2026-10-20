@@ -68,7 +68,6 @@ public class QuizService {
         if (id == null) {
             q = new QuizQuestion();
             q.teacher = db.get(Teacher.class, a.id);
-            db.save(q);
         } else {
             q = db.lock(QuizQuestion.class, id);
             if (!q.teacher.id.equals(a.id))
@@ -80,6 +79,7 @@ public class QuizService {
         q.options.addAll(input.options().stream().map(String::trim).toList());
         q.correctIndex = input.correctIndex();
         q.active = input.active();
+        if (id == null) db.save(q);
         return questionView(q);
     }
 
@@ -158,7 +158,7 @@ public class QuizService {
                 correct++;
         }
         q.correctCount = correct;
-        q.completedAt = clock.instant();
+        q.completedAt = clock.instant().truncatedTo(java.time.temporal.ChronoUnit.MICROS);
         StudentProgress p = progression.progress(a.id);
         p.streak = q.day.minusDays(1).equals(p.lastQuiz) ? p.streak + 1 : 1;
         p.bestStreak = Math.max(p.bestStreak, p.streak);

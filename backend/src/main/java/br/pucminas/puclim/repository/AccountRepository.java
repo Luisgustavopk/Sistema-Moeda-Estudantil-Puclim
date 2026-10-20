@@ -3,12 +3,10 @@ package br.pucminas.puclim.repository;
 import java.util.Optional;
 
 import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.jpa.repository.Lock;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import br.pucminas.puclim.entity.Account;
-import jakarta.persistence.LockModeType;
 
 public interface AccountRepository extends JpaRepository<Account, String> {
     Optional<Account> findByLoginOrEmail(String login, String email);
