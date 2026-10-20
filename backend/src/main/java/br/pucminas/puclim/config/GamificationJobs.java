@@ -8,6 +8,7 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
 import br.pucminas.puclim.service.MissionService;
+import br.pucminas.puclim.service.CommunityService;
 import br.pucminas.puclim.service.ProgressionService;
 import br.pucminas.puclim.service.RewardService;
 
@@ -17,13 +18,15 @@ public class GamificationJobs {
     private final MissionService missions;
     private final RewardService rewards;
     private final ProgressionService progression;
+    private final CommunityService community;
     private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(GamificationJobs.class);
 
-    public GamificationJobs(JdbcTemplate j, MissionService m, RewardService r, ProgressionService p) {
+    public GamificationJobs(JdbcTemplate j, MissionService m, RewardService r, ProgressionService p, CommunityService c) {
         jdbc = j;
         missions = m;
         rewards = r;
         progression = p;
+        community = c;
     }
 
     @Scheduled(fixedDelayString = "${puclim.gamification.job-delay-ms:60000}")
@@ -32,6 +35,8 @@ public class GamificationJobs {
         // to retry after restart.
         for (String id : jdbc.queryForList("SELECT id FROM missions WHERE status='DISPONIVEL'", String.class))
             attempt(() -> missions.expire(id));
+        for (String id : jdbc.queryForList("SELECT id FROM sponsored_challenges WHERE status IN ('PROPOSTA','PENDENTE_FINANCIAMENTO')", String.class))
+            attempt(() -> community.expireChallenge(id));
         for (String id : jdbc.queryForList("SELECT id FROM reward_payments WHERE status='PENDENTE' ORDER BY date",
                 String.class))
             attempt(() -> rewards.retryPayment(id));

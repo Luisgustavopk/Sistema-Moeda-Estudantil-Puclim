@@ -9,6 +9,10 @@ import {
   RouteGuard,
 } from '@/features/auth/components/RouteGuard'
 import { NotFoundPage } from './NotFoundPage'
+import { PublicProfilePage, RankingPage } from '@/features/gamificacao/ProfileRanking'
+import { QuestionsPage, QuizPage } from '@/features/gamificacao/QuizPages'
+import { MissionsPage } from '@/features/gamificacao/MissionsPage'
+import { FundPage, RewardsPage, DonationsPage, ChallengesPage } from '@/features/gamificacao/EconomyPages'
 
 const LoginPage = lazy(() =>
   import('@/features/auth/pages/LoginPage').then((module) => ({
@@ -121,16 +125,26 @@ export default function App() {
           <Route element={<AppLayout />}>
             <Route path="/perfil" element={<ProfilePage />} />
             <Route path="/notificacoes" element={<NotificationsPage />} />
+            <Route element={<RouteGuard roles={['ALUNO', 'PROFESSOR']} />}>
+              <Route path="/ranking" element={<RankingPage />} />
+              <Route path="/perfis/:id" element={<PublicProfilePage />} />
+            </Route>
             <Route element={<RouteGuard roles={['ALUNO']} />}>
               <Route path="/aluno" element={<StudentDashboardPage />} />
               <Route path="/aluno/catalogo" element={<CatalogPage />} />
               <Route path="/aluno/extrato" element={<StatementPage />} />
               <Route path="/aluno/cupons" element={<CouponsPage />} />
+              <Route path="/aluno/conquistas" element={<PublicProfilePage />} />
+              <Route path="/aluno/quiz" element={<QuizPage />} />
+              <Route path="/aluno/missoes" element={<MissionsPage />} />
+              <Route path="/aluno/recompensas" element={<RewardsPage />} />
             </Route>
             <Route element={<RouteGuard roles={['PROFESSOR']} />}>
               <Route path="/professor" element={<TeacherDashboardPage />} />
               <Route path="/professor/enviar" element={<TransferPage />} />
               <Route path="/professor/extrato" element={<StatementPage />} />
+              <Route path="/professor/perguntas" element={<QuestionsPage />} />
+              <Route path="/professor/missoes" element={<MissionsPage />} />
             </Route>
             <Route element={<RouteGuard roles={['EMPRESA']} />}>
               <Route path="/empresa" element={<PartnerDashboardPage />} />
@@ -148,9 +162,14 @@ export default function App() {
                   element={<AdvantageFormPage />}
                 />
                 <Route path="/empresa/cupons" element={<CheckCouponPage />} />
+                <Route path="/empresa/desafios" element={<ChallengesPage />} />
               </Route>
               <Route element={<RouteGuard partnerKind="ENSINO" />}>
                 <Route path="/empresa/professores" element={<TeachersPage />} />
+                <Route path="/empresa/fundo" element={<FundPage />} />
+              </Route>
+              <Route element={<RouteGuard partnerKind="BENEFICIARIA" />}>
+                <Route path="/empresa/doacoes" element={<DonationsPage />} />
               </Route>
             </Route>
           </Route>

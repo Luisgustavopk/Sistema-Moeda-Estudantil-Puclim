@@ -6,6 +6,7 @@ import { PageHeading } from '@/shared/components/ui/PageHeading'
 import { QueryState, EmptyState } from '@/shared/components/ui/Feedback'
 import { dateTime } from '@/shared/utils/format'
 import { DATA_MODE } from '@/shared/lib/http'
+import { Inbox } from '@/features/gamificacao/Inbox'
 export function NotificationsPage() {
   const { user } = useAuth()
   const query = useQuery({
@@ -26,6 +27,7 @@ export function NotificationsPage() {
           enviada para endereços reais.
         </p>
       )}
+      <Inbox />
       <section className="card">
         <QueryState
           loading={query.isLoading}

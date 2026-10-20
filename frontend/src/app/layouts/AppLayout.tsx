@@ -25,6 +25,7 @@ import { ThemeToggle } from '@/shared/components/ui/ThemeToggle'
 import { DATA_MODE } from '@/shared/lib/http'
 import { useToast } from '@/shared/hooks/toast-context'
 import { errorMessage } from '@/shared/lib/errors'
+import { AchievementFeed } from '@/features/gamificacao/Inbox'
 
 export function AppLayout() {
   const { user, logout } = useAuth()
@@ -54,12 +55,20 @@ export function AppLayout() {
           { path: '/aluno/catalogo', label: 'Vantagens', icon: Gift },
           { path: '/aluno/extrato', label: 'Meu extrato', icon: Wallet },
           { path: '/aluno/cupons', label: 'Meus cupons', icon: Ticket },
+          { path: '/aluno/conquistas', label: 'Conquistas', icon: Sparkles },
+          { path: '/ranking', label: 'Rankings', icon: Users },
+          { path: '/aluno/quiz', label: 'Quiz diário', icon: GraduationCap },
+          { path: '/aluno/missoes', label: 'Missões', icon: Send },
+          { path: '/aluno/recompensas', label: 'Recompensas', icon: Gift },
         ]
       : user.role === 'PROFESSOR'
         ? [
             { path: '/professor', label: 'Meu painel', icon: Home },
             { path: '/professor/enviar', label: 'Enviar moedas', icon: Send },
             { path: '/professor/extrato', label: 'Meu extrato', icon: Wallet },
+            { path: '/professor/perguntas', label: 'Perguntas', icon: GraduationCap },
+            { path: '/professor/missoes', label: 'Missões', icon: Send },
+            { path: '/ranking', label: 'Rankings e perfis', icon: Users },
           ]
         : [
             { path: '/empresa', label: 'Meu painel', icon: Home },
@@ -70,6 +79,7 @@ export function AppLayout() {
                     label: 'Minhas vantagens',
                     icon: Gift,
                   },
+                  { path: '/empresa/desafios', label: 'Desafios', icon: Sparkles },
                   {
                     path: '/empresa/cupons',
                     label: 'Conferir cupons',
@@ -84,9 +94,11 @@ export function AppLayout() {
                     label: 'Professores',
                     icon: Users,
                   },
+                  { path: '/empresa/fundo', label: 'Fundo institucional', icon: Wallet },
                 ]
               : []),
           ]
+  if (user.partnerKind === 'BENEFICIARIA') items.push({ path: '/empresa/doacoes', label: 'Doações recebidas', icon: Gift })
   const roleLabel =
     user.role === 'ALUNO'
       ? 'Aluno'
@@ -111,6 +123,7 @@ export function AppLayout() {
             )?.label || 'Meu espaço'
   return (
     <div className="app-shell">
+      <AchievementFeed />
       <a className="skip-link" href="#conteudo">
         Pular para o conteúdo
       </a>

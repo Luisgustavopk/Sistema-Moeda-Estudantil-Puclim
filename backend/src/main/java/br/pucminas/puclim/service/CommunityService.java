@@ -69,10 +69,16 @@ public class CommunityService {
         switch(action) {
             case "enviar" -> {if(!c.status.equals("PROPOSTA") || !c.deadline.isAfter(clock.instant())) throw new ApiException(409,"Proposta não pode ser enviada.");c.status="PENDENTE_FINANCIAMENTO";}
             case "cancelar" -> {if(!Set.of("PROPOSTA","PENDENTE_FINANCIAMENTO","CANCELADO").contains(c.status)) throw new ApiException(409,"Desafio não pode ser cancelado.");c.status="CANCELADO";}
+            case "encerrar" -> {if(!Set.of("PROPOSTA","PENDENTE_FINANCIAMENTO","ENCERRADO").contains(c.status)) throw new ApiException(409,"Desafio não pode ser encerrado.");c.status="ENCERRADO";}
             case "publicar" -> throw new ApiException(409,"Publicação indisponível: a origem financeira do patrocínio ainda precisa ser definida e autorizada.");
             default -> throw ApiException.bad("Ação inválida.");
         }
         return challengeView(c);
+    }
+    public void expireChallenge(String id) {
+        SponsoredChallenge initial=db.get(SponsoredChallenge.class,id);identity.locked(initial.company.id);
+        SponsoredChallenge c=db.lock(SponsoredChallenge.class,id);
+        if(!c.deadline.isAfter(clock.instant()) && Set.of("PROPOSTA","PENDENTE_FINANCIAMENTO").contains(c.status)) c.status="ENCERRADO";
     }
     private SponsoredChallenge ownedChallenge(String id,Partner p) {SponsoredChallenge c=db.lock(SponsoredChallenge.class,id);if(!c.company.id.equals(p.id)) throw ApiException.forbidden();return c;}
     private GamificationResponses.Challenge challengeView(SponsoredChallenge c) {return new GamificationResponses.Challenge(c.id,c.title,c.description,c.reward,c.capacity,c.budget,c.deadline,c.status,c.company.account.name);}

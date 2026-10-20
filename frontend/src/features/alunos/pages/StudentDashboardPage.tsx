@@ -15,6 +15,7 @@ import { PageHeading } from '@/shared/components/ui/PageHeading'
 import { QueryState } from '@/shared/components/ui/Feedback'
 import type { Advantage } from '@/shared/types/domain'
 import { number } from '@/shared/utils/format'
+import { DashboardProgress } from '@/features/gamificacao/ProfileRanking'
 
 export function StudentDashboardPage() {
   const { user } = useAuth()
@@ -46,6 +47,7 @@ export function StudentDashboardPage() {
       <div className="dashboard-grid">
         <div className="dashboard-column">
           <BalanceCard balance={user?.balance || 0} />
+          <DashboardProgress />
           <div className="stat-grid">
             <section className="card stat-card">
               <div>

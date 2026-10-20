@@ -23,6 +23,7 @@ import br.pucminas.puclim.dto.response.GamificationResponses.Profile;
 import br.pucminas.puclim.dto.response.GamificationResponses.Rank;
 import br.pucminas.puclim.dto.response.GamificationResponses.Ranking;
 import br.pucminas.puclim.entity.Account;
+import br.pucminas.puclim.entity.Partner;
 import br.pucminas.puclim.entity.BadgeAward;
 import br.pucminas.puclim.entity.BadgeDefinition;
 import br.pucminas.puclim.entity.InboxNotification;
@@ -145,12 +146,7 @@ public class ProgressionService {
         Student student = db.get(Student.class, id);
         if (!student.account.active)
             throw ApiException.missing();
-        // Profiles are visible to students and teachers of the same teaching
-        // institution.
-        String institution = viewer.role.equals("ALUNO") ? db.get(Student.class, viewer.id).institution.id
-                : db.get(Teacher.class, viewer.id).institution.id;
-        if (!institution.equals(student.institution.id))
-            throw ApiException.forbidden();
+        // Only authenticated students and teachers can view this allowlisted public projection.
         identity.locked(id);
         recalculate(id); // also brings legacy receipts into the new progression model
         StudentProgress p = progress(id);
@@ -188,8 +184,9 @@ public class ProgressionService {
                 : db.get(Teacher.class, a.id).institution.id;
         if (institution == null || institution.isBlank())
             institution = ownInstitution;
-        if (!ownInstitution.equals(institution))
-            throw ApiException.forbidden();
+        Partner selectedInstitution = db.get(Partner.class, institution);
+        if (!selectedInstitution.kind.equals("ENSINO") || !selectedInstitution.account.active)
+            throw ApiException.bad("Instituição de ensino inválida.");
         if (!Set.of("MOEDAS", "STREAK").contains(type) || page < 0 || size < 1 || size > 100)
             throw ApiException.bad("Filtro ou paginação inválidos.");
         List<Rank> all = rankRows(institution, semester, type);

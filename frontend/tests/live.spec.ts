@@ -32,6 +32,7 @@ const login = async (page: Page, user: string, secret = password) => {
   await page.getByLabel('Login ou e-mail').fill(user)
   await page.getByLabel('Senha', { exact: true }).fill(secret)
   await page.getByRole('button', { name: 'Entrar na minha conta' }).click()
+  await expect(page).not.toHaveURL(/\/login$/)
 }
 const logout = async (page: Page) => {
   await page.getByRole('button', { name: 'Sair da conta' }).click()

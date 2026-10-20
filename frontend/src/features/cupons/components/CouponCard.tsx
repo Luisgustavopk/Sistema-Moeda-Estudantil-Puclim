@@ -4,6 +4,7 @@ import type { Coupon } from '@/shared/types/domain'
 import { dateTime } from '@/shared/utils/format'
 import { Button } from '@/shared/components/ui/Button'
 import { useToast } from '@/shared/hooks/toast-context'
+import { DonateCoupon } from '@/features/gamificacao/DonateCoupon'
 export function CouponCard({ coupon }: { coupon: Coupon }) {
   const [copied, setCopied] = useState(false)
   const toast = useToast()
@@ -19,7 +20,7 @@ export function CouponCard({ coupon }: { coupon: Coupon }) {
           >
             {coupon.status === 'VALIDO'
               ? 'Disponível para usar'
-              : 'Já utilizado'}
+              : coupon.status === 'DOADO' ? 'Doado' : 'Já utilizado'}
           </span>
         </div>
       </div>
@@ -27,7 +28,7 @@ export function CouponCard({ coupon }: { coupon: Coupon }) {
       <p className="small muted">
         {coupon.status === 'VALIDO'
           ? 'Apresente este código no atendimento presencial.'
-          : `Utilizado em ${dateTime(coupon.usedAt || coupon.date)}.`}
+          : coupon.status === 'DOADO' ? 'Doado definitivamente a uma instituição beneficiária.' : `Utilizado em ${dateTime(coupon.usedAt || coupon.date)}.`}
       </p>
       <div className="coupon-footer">
         <span className="small muted">
@@ -49,6 +50,7 @@ export function CouponCard({ coupon }: { coupon: Coupon }) {
           {copied ? 'Copiado' : 'Copiar'}
         </Button>
       </div>
+      {coupon.status === 'VALIDO' && <DonateCoupon code={coupon.code} />}
     </article>
   )
 }

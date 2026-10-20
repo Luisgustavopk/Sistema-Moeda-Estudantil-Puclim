@@ -26,6 +26,7 @@ test('uma resposta de sessão atrasada não restaura a conta após logout', asyn
     (url) => url.pathname.startsWith('/api/'),
     async (route) => {
       const path = new URL(route.request().url()).pathname
+      if (path === '/api/gamificacao/perfil') return route.fulfill({ status: 503, json: { message: 'Progresso temporariamente indisponível.' } })
       if (path === '/api/auth/login') {
         authenticated = true
         return route.fulfill({ json: student })
@@ -78,6 +79,7 @@ test('modo API exibe erro e permite repetir a consulta sem recorrer à demonstra
     (url) => url.pathname.startsWith('/api/'),
     async (route) => {
       const path = new URL(route.request().url()).pathname
+      if (path === '/api/gamificacao/perfil') return route.fulfill({ status: 503, json: { message: 'Progresso temporariamente indisponível.' } })
       if (path === '/api/auth/login') {
         authenticated = true
         return route.fulfill({ json: student })
