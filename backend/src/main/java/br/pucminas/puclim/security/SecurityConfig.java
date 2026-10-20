@@ -59,6 +59,7 @@ public class SecurityConfig {
                         .requestMatchers(org.springframework.http.HttpMethod.POST, "/api/vantagens/*/resgates")
                         .hasRole("ALUNO")
                         .requestMatchers("/api/vantagens/**", "/api/cupons/**").authenticated()
+                        .requestMatchers("/api/gamificacao/**").authenticated()
                         .anyRequest().denyAll())
                 .exceptionHandling(errors -> errors
                         .authenticationEntryPoint((req, res, e) -> error(res, 401, "Entre no sistema."))

@@ -29,10 +29,11 @@ public class FinancialService {
     private final SemesterCreditRepository credits;
     private final OperationRepository operations;
     private final OutboxService outbox;
+    private final org.springframework.context.ApplicationEventPublisher events;
 
     public FinancialService(AccountService i, StudentRepository s, TeacherRepository t, AdvantageRepository v,
             CouponRepository c, LedgerEntryRepository l, SemesterCreditRepository sc, OperationRepository o,
-            OutboxService n) {
+            OutboxService n, org.springframework.context.ApplicationEventPublisher events) {
         identity = i;
         students = s;
         teachers = t;
@@ -42,9 +43,10 @@ public class FinancialService {
         credits = sc;
         operations = o;
         outbox = n;
+        this.events = events;
     }
 
-    private Map<String, Account> lockAccounts(String... ids) {
+    public Map<String, Account> lockAccounts(String... ids) {
         Map<String, Account> result = new HashMap<>();
         Arrays.stream(ids).distinct().sorted().forEach(id -> result.put(id, identity.locked(id)));
         return result;
@@ -64,7 +66,7 @@ public class FinancialService {
         account.balance = value;
     }
 
-    private LedgerEntry entry(Account account, String kind, long amount, String description, String counterpart,
+    public LedgerEntry entry(Account account, String kind, long amount, String description, String counterpart,
             String reason, String operationId) {
         addBalance(account, amount);
         LedgerEntry e = new LedgerEntry();
@@ -132,6 +134,7 @@ public class FinancialService {
         outbox.enqueue(target, "Você recebeu moedas no Puclim",
                 source.name + " enviou " + input.amount() + " moedas.\nMotivo: " + input.reason().trim());
         remember(source, key, fp, "TRANSFER", sent.id);
+        events.publishEvent(new GamificationEvents.CoinsReceived(student.id, operationId, input.amount(), true));
         return DomainMapper.transaction(sent);
     }
 
@@ -165,6 +168,7 @@ public class FinancialService {
                 + "\nApresente este código no atendimento da empresa. O cupom pode ser utilizado uma única vez.";
         outbox.enqueue(studentAccount, "Seu cupom Puclim", detail);
         outbox.enqueue(companyAccount, "Novo resgate no Puclim", "Aluno: " + c.studentName + "\n" + detail);
+        events.publishEvent(new GamificationEvents.AdvantageRedeemed(student.id, c.id));
         return DomainMapper.coupon(c);
     }
 
