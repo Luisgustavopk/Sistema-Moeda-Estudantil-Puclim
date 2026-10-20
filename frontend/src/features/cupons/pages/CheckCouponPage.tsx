@@ -96,14 +96,14 @@ export function CheckCouponPage() {
                 <span
                   className={`badge ${result.status === 'VALIDO' ? 'badge-success' : ''}`}
                 >
-                  {result.status === 'VALIDO' ? 'Válido' : 'Já utilizado'}
+                  {result.status === 'VALIDO' ? 'Válido' : result.status === 'DOADO' ? 'Doado' : 'Já utilizado'}
                 </span>
               </div>
               {result.status === 'VALIDO' ? (
                 <Button onClick={() => setConfirm(true)}>
                   <CheckCircle2 size={17} /> Confirmar utilização
                 </Button>
-              ) : (
+              ) : result.status === 'DOADO' ? <p className="small muted">Este cupom foi doado a uma instituição beneficiária e está invalidado para uso pelo aluno.</p> : (
                 <p className="small muted">
                   Este cupom foi utilizado em{' '}
                   {dateTime(result.usedAt || result.date)} e não pode ser

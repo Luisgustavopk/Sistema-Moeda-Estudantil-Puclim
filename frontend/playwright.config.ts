@@ -1,4 +1,6 @@
 import { defineConfig } from '@playwright/test'
+const demoPort = process.env.PLAYWRIGHT_DEMO_PORT || '5173'
+const apiPort = process.env.PLAYWRIGHT_API_PORT || '5174'
 
 export default defineConfig({
   testDir: './tests',
@@ -18,24 +20,24 @@ export default defineConfig({
     {
       name: 'demo',
       testMatch: 'sprint3.spec.ts',
-      use: { baseURL: 'http://127.0.0.1:5173' },
+      use: { baseURL: `http://127.0.0.1:${demoPort}` },
     },
     {
       name: 'api',
       testMatch: 'api.spec.ts',
-      use: { baseURL: 'http://127.0.0.1:5174' },
+      use: { baseURL: `http://127.0.0.1:${apiPort}` },
     },
   ],
   webServer: [
     {
-      command: 'npm run dev -- --host 127.0.0.1 --port 5173',
-      url: 'http://127.0.0.1:5173',
+      command: `npm run dev -- --host 127.0.0.1 --port ${demoPort} --strictPort`,
+      url: `http://127.0.0.1:${demoPort}`,
       env: { VITE_DATA_MODE: 'demo' },
       reuseExistingServer: false,
     },
     {
-      command: 'npm run dev -- --host 127.0.0.1 --port 5174',
-      url: 'http://127.0.0.1:5174',
+      command: `npm run dev -- --host 127.0.0.1 --port ${apiPort} --strictPort`,
+      url: `http://127.0.0.1:${apiPort}`,
       env: { VITE_DATA_MODE: 'api' },
       reuseExistingServer: false,
     },

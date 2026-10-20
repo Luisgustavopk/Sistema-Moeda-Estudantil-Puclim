@@ -12,6 +12,7 @@ export function CouponsPage() {
   const query = useQuery({
     queryKey: ['coupons', user?.id],
     queryFn: cuponsApi.list,
+    refetchInterval: 15000,
   })
   const coupons =
     query.data?.filter((item) => status === 'all' || item.status === status) ||
@@ -28,6 +29,7 @@ export function CouponsPage() {
           { value: 'all', label: 'Todos' },
           { value: 'VALIDO', label: 'Disponíveis' },
           { value: 'UTILIZADO', label: 'Utilizados' },
+          { value: 'DOADO', label: 'Doados' },
         ].map((item) => (
           <button
             key={item.value}

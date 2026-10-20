@@ -87,7 +87,7 @@ export type AdvantageInput = Pick<
 export interface Transaction {
   id: string
   date: string
-  kind: 'COTA' | 'RECEBIMENTO' | 'ENVIO' | 'RESGATE'
+  kind: 'COTA' | 'RECEBIMENTO' | 'ENVIO' | 'RESGATE' | 'MISSAO' | 'RESERVA' | 'LIBERACAO' | 'BONUS' | 'RECOMPENSA' | 'PREMIO' | 'DOACAO'
   amount: number
   description: string
   counterpart?: string
@@ -104,7 +104,7 @@ export interface Coupon {
   advantageName: string
   cost: number
   date: string
-  status: 'VALIDO' | 'UTILIZADO'
+  status: 'VALIDO' | 'UTILIZADO' | 'DOADO'
   usedAt?: string
 }
 export interface ImportRow {

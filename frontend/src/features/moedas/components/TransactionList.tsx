@@ -59,7 +59,7 @@ export function TransactionList({
               <span
                 className={`amount ${transaction.amount > 0 ? 'positive' : 'negative'}`}
               >
-                {transaction.amount > 0 ? '+' : '−'}
+                {transaction.amount > 0 ? '+' : transaction.amount < 0 ? '−' : ''}
                 {number(Math.abs(transaction.amount))}
               </span>
               {compact && (

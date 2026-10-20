@@ -136,11 +136,18 @@ export function StatementPage() {
               <>
                 <option value="COTA">Cota semestral</option>
                 <option value="ENVIO">Envio de moedas</option>
+                <option value="RESERVA">Reserva de missão</option>
+                <option value="LIBERACAO">Liberação de reserva</option>
               </>
             ) : (
               <>
                 <option value="RECEBIMENTO">Reconhecimentos</option>
                 <option value="RESGATE">Resgates</option>
+                <option value="MISSAO">Missões</option>
+                <option value="BONUS">Bônus</option>
+                <option value="RECOMPENSA">Recompensas de streak</option>
+                <option value="PREMIO">Prêmios do semestre</option>
+                <option value="DOACAO">Doações</option>
               </>
             )}
           </select>

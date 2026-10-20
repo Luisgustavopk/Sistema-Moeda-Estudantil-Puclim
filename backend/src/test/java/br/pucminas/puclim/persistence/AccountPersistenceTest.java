@@ -50,7 +50,8 @@ class AccountPersistenceTest extends AbstractDatabaseTest {
         assertThrows(DataIntegrityViolationException.class,
                 () -> jdbc.update("UPDATE accounts SET email = ? WHERE id = ?",
                         first.email(), second.id()));
-        assertThrows(DataIntegrityViolationException.class,
+        // MySQL reports CHECK violations with SQLState HY000; MariaDB uses an integrity SQLState.
+        assertThrows(org.springframework.dao.DataAccessException.class,
                 () -> jdbc.update("UPDATE accounts SET balance = -1 WHERE id = ?", first.id()));
         assertEquals(second.registration().get("cpf"), students.findById(second.id()).orElseThrow().cpf);
         assertEquals(0, accounts.findById(first.id()).orElseThrow().balance);
