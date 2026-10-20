@@ -20,7 +20,9 @@ export function CouponCard({ coupon }: { coupon: Coupon }) {
           >
             {coupon.status === 'VALIDO'
               ? 'Disponível para usar'
-              : coupon.status === 'DOADO' ? 'Doado' : 'Já utilizado'}
+              : coupon.status === 'DOADO'
+                ? 'Doado'
+                : 'Já utilizado'}
           </span>
         </div>
       </div>
@@ -28,7 +30,9 @@ export function CouponCard({ coupon }: { coupon: Coupon }) {
       <p className="small muted">
         {coupon.status === 'VALIDO'
           ? 'Apresente este código no atendimento presencial.'
-          : coupon.status === 'DOADO' ? 'Doado definitivamente a uma instituição beneficiária.' : `Utilizado em ${dateTime(coupon.usedAt || coupon.date)}.`}
+          : coupon.status === 'DOADO'
+            ? 'Doado definitivamente a uma instituição beneficiária.'
+            : `Utilizado em ${dateTime(coupon.usedAt || coupon.date)}.`}
       </p>
       <div className="coupon-footer">
         <span className="small muted">

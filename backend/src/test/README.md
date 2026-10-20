@@ -29,6 +29,8 @@ java/br/pucminas/puclim/
 | Outbox persistida | [OutboxPersistenceTest](java/br/pucminas/puclim/persistence/OutboxPersistenceTest.java) | Destinatários/código compartilhado, contato atualizado e rollback conjunto |
 | CPF | [CpfValidationTest](java/br/pucminas/puclim/unit/CpfValidationTest.java) | Normalização e rejeição de documentos inválidos |
 | CNPJ | [CnpjValidationTest](java/br/pucminas/puclim/unit/CnpjValidationTest.java) | Normalização e dígitos verificadores |
+| Gamificação integrada | [GamificationIntegrationTest](java/br/pucminas/puclim/integration/GamificationIntegrationTest.java) | 19 cenários de perfis, ranking, quizzes, streak, missões, reservas, bônus, Fundo, doações, premiação, notificações, propostas e rollback por eventos |
+| Política de gamificação | [GamificationPolicyTest](java/br/pucminas/puclim/unit/GamificationPolicyTest.java) | Limites de níveis, bônus, teto, arredondamento e semestres |
 
 `AbstractDatabaseTest` compartilha o contexto Spring Boot, HTTP em porta aleatória e configuração de banco. `ApiTestClient` gerencia cookies, CSRF, JSON e multipart. `TestDataFactory` cria fixtures independentes; `TestPayloads` e `TestDocuments` geram suas entradas. `ConcurrentTestActions` usa uma barreira de início e timeout para duas operações reais. `SmtpTestServer` recebe mensagens por conexão SMTP; o teste sempre restaura o JavaMailSender após alterar a porta. `TestSessionRegistry` controla o timeout de uma sessão específica, sem uma flag global para a próxima sessão.
 
@@ -40,7 +42,7 @@ Dentro de `backend/`, sem banco, execute:
 sh ./mvnw verify
 ```
 
-Os quatro testes unitários são executados. As 31 verificações de integração/persistência ficam explicitamente ignoradas quando `TEST_DB_URL` não está definida. Cada classe de banco possui sua condição explícita, além de herdar a configuração do contexto.
+Os sete testes unitários são executados. As 50 verificações de integração/persistência ficam explicitamente ignoradas quando `TEST_DB_URL` não está definida. Cada classe de banco possui sua condição explícita, além de herdar a configuração do contexto.
 
 Para banco real, use uma instância dedicada de MySQL/MariaDB com banco e usuário já criados:
 
@@ -67,4 +69,4 @@ No PowerShell, configure `$env:TEST_DB_URL`, `$env:TEST_DB_USER`, `$env:TEST_DB_
 
 ## Última validação
 
-Em 14/10/2026, os 35 testes passaram em MariaDB 11.8.1 isolado, inclusive repetindo a suíte no mesmo banco. Um método de cupons foi executado sozinho e passou. Sem TEST_DB_URL, os 4 unitários passaram e os 31 testes de banco foram ignorados. O suporte a jdbc:mysql permanece, mas MySQL e Playwright não foram executados novamente nesta reorganização.
+Em 20/10/2026, `verify` passou com os 57 testes executados em Java 17 e MySQL 8.0.44 isolado, sem testes ignorados. V1 e V2 foram validadas, o pacote foi gerado e a suíte Playwright live passou contra esse pacote. A validação anterior de 14/10/2026 executou os 35 testes então existentes em MariaDB 11.8.1; a suíte ampliada ainda não foi repetida nesse motor. Consulte [o relatório da gamificação](../../../Artefatos/gamificacao-validacao.md) para resultados e limitações.

@@ -66,7 +66,11 @@ export function AppLayout() {
             { path: '/professor', label: 'Meu painel', icon: Home },
             { path: '/professor/enviar', label: 'Enviar moedas', icon: Send },
             { path: '/professor/extrato', label: 'Meu extrato', icon: Wallet },
-            { path: '/professor/perguntas', label: 'Perguntas', icon: GraduationCap },
+            {
+              path: '/professor/perguntas',
+              label: 'Perguntas',
+              icon: GraduationCap,
+            },
             { path: '/professor/missoes', label: 'Missões', icon: Send },
             { path: '/ranking', label: 'Rankings e perfis', icon: Users },
           ]
@@ -79,7 +83,11 @@ export function AppLayout() {
                     label: 'Minhas vantagens',
                     icon: Gift,
                   },
-                  { path: '/empresa/desafios', label: 'Desafios', icon: Sparkles },
+                  {
+                    path: '/empresa/desafios',
+                    label: 'Desafios',
+                    icon: Sparkles,
+                  },
                   {
                     path: '/empresa/cupons',
                     label: 'Conferir cupons',
@@ -94,11 +102,20 @@ export function AppLayout() {
                     label: 'Professores',
                     icon: Users,
                   },
-                  { path: '/empresa/fundo', label: 'Fundo institucional', icon: Wallet },
+                  {
+                    path: '/empresa/fundo',
+                    label: 'Fundo institucional',
+                    icon: Wallet,
+                  },
                 ]
               : []),
           ]
-  if (user.partnerKind === 'BENEFICIARIA') items.push({ path: '/empresa/doacoes', label: 'Doações recebidas', icon: Gift })
+  if (user.partnerKind === 'BENEFICIARIA')
+    items.push({
+      path: '/empresa/doacoes',
+      label: 'Doações recebidas',
+      icon: Gift,
+    })
   const roleLabel =
     user.role === 'ALUNO'
       ? 'Aluno'

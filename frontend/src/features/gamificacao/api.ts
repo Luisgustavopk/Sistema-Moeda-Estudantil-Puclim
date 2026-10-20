@@ -99,6 +99,8 @@ export const gameApi = {
       challengeId ? 'PUT' : 'POST',
       input,
     ),
-  challengeAction: (challengeId: string, action: 'enviar' | 'cancelar' | 'encerrar') =>
-    request<T.Challenge>(`/desafios/${id(challengeId)}/${action}`, 'POST'),
+  challengeAction: (
+    challengeId: string,
+    action: 'enviar' | 'cancelar' | 'encerrar',
+  ) => request<T.Challenge>(`/desafios/${id(challengeId)}/${action}`, 'POST'),
 }

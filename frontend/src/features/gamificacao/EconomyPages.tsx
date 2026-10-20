@@ -336,7 +336,11 @@ export function ChallengesPage() {
               >
                 Cancelar proposta
               </Button>
-              <Button variant="secondary" loading={action.isPending} onClick={() => action.mutate({ id: c.id, action: 'encerrar' })}>
+              <Button
+                variant="secondary"
+                loading={action.isPending}
+                onClick={() => action.mutate({ id: c.id, action: 'encerrar' })}
+              >
                 Encerrar proposta
               </Button>
             </div>

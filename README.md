@@ -6,9 +6,11 @@ Projeto desenvolvido para o Laboratório de Desenvolvimento de Software da PUC M
 
 O frontend da sprint 3 está implementado: acesso e cadastros, perfis, painéis por papel, envio de moedas, extratos, catálogo, gestão de vantagens, resgates, cupons, importação de professores e notificações. O visual segue o protótipo em estilo **clay, petróleo e ouro**, com barra lateral e opção de modo escuro. O perfil é definido pelo login; não há seletor de papel, estilo ou paleta.
 
-O backend permanece com a estrutura inicial. Seus endpoints, entidades, tabelas de negócio, migrations e regras ainda não foram implementados. Por isso, o frontend inicia em **modo de demonstração**, com dados fictícios persistidos no navegador, sem conexão com MySQL ou envio de e-mails reais. Há um adaptador separado para a futura API, que pode ser selecionado por configuração; erros da API nunca acionam automaticamente a demonstração.
+O backend implementa os fluxos de contas, autenticação por sessão e CSRF, cotas, transferências, extratos, vantagens, cupons e outbox de e-mails. O frontend usa a API real por padrão; o modo de demonstração é opcional e explícito. Erros da API nunca acionam dados fictícios.
 
-As interfaces da sprint 3 cobrem as histórias obrigatórias US01–US20. O contrato HTTP está preparado no frontend e ainda precisa ser implementado e validado no backend. Pastas reservadas para evolução possuem `.gitkeep` para serem preservadas pelo Git.
+US20–US37 possuem backend persistente e integração React para perfis públicos, rankings, níveis, badges, quizzes, streak, missões, bônus, doações, premiação semestral, notificações e Fundo institucional. US38 permite gerenciar propostas; publicação financeira e pagamentos aguardam a definição da origem autorizada das moedas patrocinadas. Consulte a [documentação da gamificação](Artefatos/gamificacao-implementacao.md) para o estado de cada história, contratos, regras financeiras e migração de bancos legados.
+
+Os [resultados da validação](Artefatos/gamificacao-validacao.md) registram os testes executados, ambientes e limitações desta entrega.
 
 ## Tecnologias
 
@@ -18,15 +20,15 @@ As interfaces da sprint 3 cobrem as histórias obrigatórias US01–US20. O cont
 | --- | --- | --- |
 | Java | 17 | Linguagem do backend; base LTS compatível com o Spring Boot escolhido |
 | Spring Boot | 4.1.1 | Inicialização, configuração e execução da aplicação |
-| Spring Web MVC | Gerenciada pelo Spring Boot | Base para a futura API REST |
+| Spring Web MVC | Gerenciada pelo Spring Boot | API REST |
 | Spring Data JPA + Hibernate | Gerenciada pelo Spring Boot | Repositórios e mapeamento objeto-relacional |
-| Spring Validation | Gerenciada pelo Spring Boot | Validação futura dos dados recebidos |
-| Spring Security | Gerenciada pelo Spring Boot | Base para autenticação e autorização futuras |
+| Spring Validation | Gerenciada pelo Spring Boot | Validação dos dados recebidos |
+| Spring Security | Gerenciada pelo Spring Boot | Sessões, CSRF e autorização por papel |
 | MySQL Connector/J | Gerenciada pelo Spring Boot | Driver JDBC de conexão com o MySQL |
 | Flyway + módulo MySQL | Gerenciada pelo Spring Boot | Versionamento e execução das migrations |
 | Maven Wrapper | Maven 3.10.0 | Build reproduzível sem instalação global do Maven |
 
-As versões das dependências do backend são coordenadas pelo parent do Spring Boot em `backend/pom.xml`, evitando combinações manuais incompatíveis. A dependência de testes está preparada, mas nenhum teste de negócio foi criado nesta etapa.
+As versões das dependências do backend são coordenadas pelo parent do Spring Boot em `backend/pom.xml`. Há testes unitários, de integração HTTP, persistência, concorrência e rollback; consulte [backend/src/test/README.md](backend/src/test/README.md).
 
 ### Frontend
 
@@ -34,7 +36,7 @@ As versões das dependências do backend são coordenadas pelo parent do Spring 
 | --- | --- |
 | React 19 + TypeScript 6 | Componentes de interface e verificação estática de tipos |
 | Vite 8 | Servidor de desenvolvimento e build dos arquivos estáticos |
-| React Router | Infraestrutura para navegação entre as futuras páginas |
+| React Router | Navegação entre páginas e rotas protegidas |
 | TanStack Query | Consultas, cache e atualização dos dados vindos da API |
 | React Hook Form + Zod | Formulários e validação dos dados no navegador |
 | Tailwind CSS 4 | Estilização por classes utilitárias |
@@ -123,7 +125,7 @@ backend/
 | `security` | Implementar autenticação e autorização |
 | `config` | Concentrar configurações da aplicação |
 
-Regras de negócio ficarão nos serviços. Os controllers não acessarão o banco diretamente. As respostas usarão DTOs para evitar exposição de credenciais e permitir controle dos dados pessoais retornados.
+Regras de negócio ficam nos serviços. Controllers delegam a eles, e respostas usam DTOs para controlar os dados públicos e privados retornados.
 
 ### Frontend: organização por funcionalidade
 
@@ -191,20 +193,20 @@ As alterações do schema serão versionadas em `backend/src/main/resources/db/m
 
 O Hibernate está configurado com `ddl-auto: validate`: ele verificará o alinhamento entre entidades e schema, enquanto o Flyway será responsável pelas alterações estruturais. Não utilizamos `ddl-auto: update` para evoluir o banco automaticamente.
 
-A pasta de migrations ainda está vazia. Não foram criadas tabelas de negócio nem dados iniciais. A modelagem existente deverá ser revisada antes da primeira migration, especialmente os campos obrigatórios do aluno, os vínculos institucionais e as referências das transações.
+`V1__existing_schema.sql` inicializa o modelo anterior e `V2__gamification.sql` adiciona a gamificação e o catálogo de badges. Bancos novos são inicializados pelo Flyway; bancos legados exigem inspeção e baseline explícitos conforme a [estratégia documentada](Artefatos/gamificacao-implementacao.md#banco-novo-e-banco-legado).
 
-### Diretrizes para a implementação
+### Regras da implementação
 
-- Quantidades de moedas usarão valores inteiros, com `BIGINT` no MySQL e `long` no Java.
-- CPF, CNPJ, login/e-mail e código de cupom terão restrições de unicidade conforme as regras definidas.
-- Credenciais serão separadas dos dados específicos dos perfis; senhas serão armazenadas apenas como hash.
-- Transferências e resgates atualizarão saldo e histórico dentro de uma transação no serviço.
-- A implementação terá controle de concorrência para impedir gastos simultâneos acima do saldo; `@Transactional` sozinho não garante essa regra.
-- O saldo deverá permanecer consistente com o histórico de transações.
-- O tratamento de exclusão de cadastros com histórico será definido antes dos CRUDs finais, evitando apagar transações e cupons associados por cascata.
-- Imagens de vantagens terão sua referência registrada no banco; o armazenamento dos arquivos será definido na implementação.
+- Quantidades de moedas usam valores inteiros, com `BIGINT` no MySQL e `long` no Java.
+- CPF, CNPJ, login/e-mail e código de cupom possuem unicidade no banco.
+- Credenciais são separadas dos dados específicos dos perfis; senhas são armazenadas como hash.
+- Transferências e resgates atualizam saldo e histórico dentro de uma transação no serviço.
+- Locks e idempotência impedem gastos simultâneos acima do saldo; `@Transactional` sozinho não garante essa regra.
+- O saldo é conciliado com o histórico de transações.
+- Cadastros com histórico são desativados, preservando transações e cupons associados.
+- Imagens de vantagens possuem referência registrada no banco e arquivos no diretório configurado.
 
-Essas diretrizes descrevem a arquitetura escolhida; as regras de negócio ainda serão implementadas.
+Essas regras são implementadas nos serviços, com locks, idempotência e constraints de banco. Cadastros com histórico são desativados, preservando extratos e cupons. Imagens usam o diretório configurado em `UPLOAD_DIRECTORY`.
 
 ## Executar o ambiente inicial
 
@@ -222,23 +224,23 @@ Se usar Docker, na raiz do repositório:
 ```powershell
 Copy-Item .env.example .env
 # Edite .env e substitua as duas senhas de exemplo antes de iniciar.
-docker compose up -d mysql
+docker compose --profile mysql up -d mysql mailpit
 docker compose ps
 ```
 
-O serviço publica o MySQL apenas em `127.0.0.1:3306` por padrão. O volume `mysql_data` preserva os dados entre reinicializações. As variáveis de usuário e senha do container são aplicadas na inicialização de um volume vazio; editar `.env` não altera usuários já existentes no banco.
+O serviço publica o MySQL apenas em `127.0.0.1:3307` por padrão. O volume `mysql_data` preserva os dados entre reinicializações. As variáveis de usuário e senha do container são aplicadas na inicialização de um volume vazio; editar `.env` não altera usuários já existentes no banco.
 
 Também é possível usar uma instalação própria do MySQL: crie o banco `puclim` com `utf8mb4` e um usuário com permissões sobre esse banco. O usuário precisará executar as futuras migrations.
 
 ### 2. Executar o backend
 
-O Spring Boot lê variáveis de ambiente do processo. Ele **não carrega automaticamente** o `.env` usado pelo Docker Compose. No PowerShell, configure a mesma senha do usuário do banco:
+O Spring Boot carrega opcionalmente o `.env` na raiz ou no diretório atual e aceita variáveis do processo. Se preferir configurar pelo PowerShell, use a mesma senha do usuário do banco:
 
 ```powershell
 $env:DB_PASSWORD = '<senha definida para DB_USER>'
 # Opcionais; os valores abaixo já são os padrões:
 $env:DB_USER = 'puclim'
-$env:DB_URL = 'jdbc:mysql://localhost:3306/puclim?connectionTimeZone=UTC'
+$env:DB_URL = 'jdbc:mysql://127.0.0.1:3307/puclim?connectionTimeZone=UTC'
 Set-Location backend
 .\mvnw.cmd spring-boot:run
 ```
@@ -247,7 +249,7 @@ Se modificar `DB_NAME` ou `DB_PORT` no `.env`, ajuste também `DB_URL`. A porta 
 
 Em Linux/macOS, use `export DB_PASSWORD='<senha>'` e `sh ./mvnw spring-boot:run` dentro de `backend/`.
 
-Não existem endpoints de negócio nesta etapa. O Spring Security conserva sua configuração automática inicial, que pode gerar uma senha temporária no console; ela não representa o mecanismo de login do Puclim, que será implementado posteriormente.
+A API usa as contas cadastradas e professores importados pela instituição. Não há conta administrativa padrão. O primeiro acesso do professor exige trocar a senha temporária. E-mails locais podem ser inspecionados no Mailpit em `http://localhost:8025`.
 
 ### 3. Executar o frontend
 
@@ -261,7 +263,7 @@ npm run dev
 
 No PowerShell, se a política de execução bloquear `npm.ps1`, utilize `npm.cmd` nos mesmos comandos.
 
-Acesse `http://localhost:5173`. Para testar o frontend isoladamente, não é necessário iniciar o backend ou o MySQL. As contas de demonstração são:
+Acesse `http://localhost:5173`. O modo integrado requer o backend e o banco. Para testar somente as telas anteriores sem esses serviços, configure explicitamente `VITE_DATA_MODE=demo` antes de iniciar o Vite. A gamificação requer a API real. As contas exclusivas da demonstração são:
 
 | Perfil | Login/e-mail | Senha inicial |
 | --- | --- | --- |
@@ -272,7 +274,7 @@ Acesse `http://localhost:5173`. Para testar o frontend isoladamente, não é nec
 
 Alterações da demonstração são preservadas neste navegador. Para recomeçar, remova as chaves `puclim.demo.v1` do armazenamento local e `puclim.demo.session` do armazenamento da sessão, pelas ferramentas do navegador. Professores importados recebem uma senha temporária na demonstração e devem substituí-la no primeiro acesso.
 
-Para integrar ao backend quando os endpoints estiverem prontos, copie `frontend/.env.example` para `frontend/.env.local`, configure `VITE_DATA_MODE=api` e reinicie o Vite. `VITE_API_URL` define a base da API, por padrão `/api`. O proxy encaminha esse caminho ao backend em `http://localhost:8080` durante o desenvolvimento. Se alterar a porta do backend, ajuste o destino em `vite.config.ts`.
+Para explicitar a integração, copie `frontend/.env.example` para `frontend/.env.local`, mantenha `VITE_DATA_MODE=api` e reinicie o Vite. `VITE_API_URL` define a base da API, por padrão `/api`. O proxy encaminha esse caminho ao backend em `http://localhost:8080`. Use `VITE_PROXY_TARGET` se a API estiver em outra porta.
 
 O proxy do Vite não faz parte do build de produção. O encaminhamento da API no ambiente publicado será definido durante a preparação da implantação.
 
@@ -303,7 +305,7 @@ Os testes usam Chrome em modo invisível, criam contextos isolados e iniciam/enc
 
 Use `npm run format` para formatar o frontend. Resultados, screenshots e traces dos testes ficam em `frontend/test-results/` e são ignorados pelo Git.
 
-Esses comandos verificam o frontend e o empacotamento do backend. Ainda não há testes de integração com MySQL nem validação dos endpoints reais do Spring Boot; o build do backend não exige um banco em execução nesta etapa.
+Com `TEST_DB_URL`, `TEST_DB_USER` e `TEST_DB_PASSWORD` de um banco dedicado, `verify` também executa testes de integração e persistência em MySQL/MariaDB. Sem `TEST_DB_URL`, as classes de banco são explicitamente ignoradas. `npm run test:e2e:live` executa os fluxos anteriores e de gamificação contra a API real; configure `LIVE_API_TARGET` quando necessário. Os testes aceitam portas alternativas via `PLAYWRIGHT_DEMO_PORT`, `PLAYWRIGHT_API_PORT` e `PLAYWRIGHT_LIVE_PORT`.
 
 ## Artefatos e referências
 

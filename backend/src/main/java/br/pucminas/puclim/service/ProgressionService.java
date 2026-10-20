@@ -173,7 +173,8 @@ public class ProgressionService {
     }
 
     private Integer position(List<Rank> rows, String id) {
-        return rows.stream().filter(r -> r.studentId().equals(id)).map(Rank::position).findFirst().orElse(null);
+        return rows.stream().filter(r -> r.studentId().equals(id)).map(rank -> rank.position()).findFirst()
+                .orElse(null);
     }
 
     public Ranking ranking(String institution, String semester, String type, int page, int size) {
@@ -218,11 +219,11 @@ public class ProgressionService {
             result.add(new Rank(0, s.id, s.account.name, s.course, s.institution.account.name, received,
                     streaks.getOrDefault(s.id, 0), policy.level(total(s.id)), row == null ? null : (Instant) row[2]));
         }
-        Comparator<Rank> comparator = type.equals("STREAK") ? Comparator.comparingInt(Rank::streak).reversed()
-                : Comparator.comparingLong(Rank::received).reversed()
-                        .thenComparing(Comparator.comparingInt(Rank::streak).reversed());
-        result.sort(comparator.thenComparing(Rank::firstCoin, Comparator.nullsLast(Comparator.naturalOrder()))
-                .thenComparing(Rank::studentId));
+        Comparator<Rank> comparator = type.equals("STREAK") ? Comparator.comparingInt(rank -> rank.streak())
+                : Comparator.comparingLong((Rank rank) -> rank.received()).reversed()
+                        .thenComparing(Comparator.comparingInt((Rank rank) -> rank.streak()).reversed());
+        result.sort(comparator.thenComparing(rank -> rank.firstCoin(), Comparator.nullsLast(Comparator.naturalOrder()))
+                .thenComparing(rank -> rank.studentId()));
         List<Rank> positioned = new ArrayList<>();
         int pos = 1;
         for (Rank r : result)

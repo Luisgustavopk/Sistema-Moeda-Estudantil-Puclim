@@ -3,7 +3,6 @@ package br.pucminas.puclim.support;
 import java.io.ByteArrayOutputStream;
 import java.net.CookieManager;
 import java.net.CookiePolicy;
-import java.net.HttpCookie;
 import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
@@ -40,7 +39,7 @@ public final class ApiTestClient {
     private String cookie(String name) {
         return cookies.getCookieStore().getCookies().stream()
                 .filter(cookie -> cookie.getName().equals(name) && !cookie.hasExpired())
-                .map(HttpCookie::getValue).findFirst().orElseThrow();
+                .map(cookie -> cookie.getValue()).findFirst().orElseThrow();
     }
 
     public HttpResponse<String> send(HttpRequest request) throws Exception {

@@ -62,7 +62,7 @@ public class QuizService {
         Account a = identity.require("PROFESSOR");
         identity.locked(a.id);
         if (input.correctIndex() >= input.options().size()
-                || input.options().stream().map(String::trim).distinct().count() != input.options().size())
+                || input.options().stream().map(option -> option.trim()).distinct().count() != input.options().size())
             throw ApiException.bad("Informe alternativas distintas e uma única resposta correta.");
         QuizQuestion q;
         if (id == null) {
@@ -76,7 +76,7 @@ public class QuizService {
         q.prompt = input.prompt().trim();
         q.area = input.area().trim();
         q.options.clear();
-        q.options.addAll(input.options().stream().map(String::trim).toList());
+        q.options.addAll(input.options().stream().map(option -> option.trim()).toList());
         q.correctIndex = input.correctIndex();
         q.active = input.active();
         if (id == null) db.save(q);

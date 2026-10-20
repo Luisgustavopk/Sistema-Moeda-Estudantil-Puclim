@@ -24,12 +24,12 @@ class GamificationIntegrationTest extends AbstractDatabaseTest {
     static class TimeConfiguration {
         @Bean
         @Primary
-        MutableClock testClock() {
+        public MutableClock testClock() {
             return new MutableClock();
         }
 
         @Bean
-        FailureProbe failureProbe() {
+        public FailureProbe failureProbe() {
             return new FailureProbe();
         }
     }
@@ -37,14 +37,17 @@ class GamificationIntegrationTest extends AbstractDatabaseTest {
     static class MutableClock extends Clock {
         volatile Instant value = Instant.now();
 
+        @Override
         public ZoneId getZone() {
             return ZoneId.of("America/Sao_Paulo");
         }
 
+        @Override
         public Clock withZone(ZoneId zone) {
             return Clock.fixed(value, zone);
         }
 
+        @Override
         public Instant instant() {
             return value;
         }
@@ -72,15 +75,17 @@ class GamificationIntegrationTest extends AbstractDatabaseTest {
     LedgerEntryRepository ledger;
     @Autowired
     br.pucminas.puclim.service.MissionService missions;
+    @Autowired
+    br.pucminas.puclim.service.CommunityService community;
 
     @BeforeEach
-    void resetClock() {
+    public void resetClock() {
         clock.value = Instant.now();
         probe.failFor.set(null);
     }
 
     @AfterEach
-    void restoreClock() {
+    public void restoreClock() {
         clock.value = Instant.now();
         probe.failFor.set(null);
     }
@@ -398,6 +403,12 @@ class GamificationIntegrationTest extends AbstractDatabaseTest {
         company.client().ok("POST", "/gamificacao/desafios/" + id + "/enviar", null);
         company.client().expect("POST", "/gamificacao/desafios/" + id + "/publicar", null, 409);
         company.client().ok("POST", "/gamificacao/desafios/" + id + "/cancelar", null);
+        String closed = company.client().ok("POST", "/gamificacao/desafios", input).path("id").asString();
+        assertEquals("ENCERRADO", company.client().ok("POST", "/gamificacao/desafios/" + closed + "/encerrar", null).path("status").asString());
+        String expired = company.client().ok("POST", "/gamificacao/desafios", input).path("id").asString();
+        clock.value = clock.value.plus(Duration.ofDays(31));
+        community.expireChallenge(expired);
+        assertEquals("ENCERRADO", jdbc.queryForObject("SELECT status FROM sponsored_challenges WHERE id=?", String.class, expired));
         input.put("budget", 100);
         company.client().expect("POST", "/gamificacao/desafios", input, 400);
         assertEquals(0, accounts.findById(company.id()).orElseThrow().balance);

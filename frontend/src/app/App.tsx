@@ -9,10 +9,18 @@ import {
   RouteGuard,
 } from '@/features/auth/components/RouteGuard'
 import { NotFoundPage } from './NotFoundPage'
-import { PublicProfilePage, RankingPage } from '@/features/gamificacao/ProfileRanking'
+import {
+  PublicProfilePage,
+  RankingPage,
+} from '@/features/gamificacao/ProfileRanking'
 import { QuestionsPage, QuizPage } from '@/features/gamificacao/QuizPages'
 import { MissionsPage } from '@/features/gamificacao/MissionsPage'
-import { FundPage, RewardsPage, DonationsPage, ChallengesPage } from '@/features/gamificacao/EconomyPages'
+import {
+  FundPage,
+  RewardsPage,
+  DonationsPage,
+  ChallengesPage,
+} from '@/features/gamificacao/EconomyPages'
 
 const LoginPage = lazy(() =>
   import('@/features/auth/pages/LoginPage').then((module) => ({
