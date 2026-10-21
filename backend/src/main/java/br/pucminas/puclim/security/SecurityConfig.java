@@ -55,6 +55,7 @@ public class SecurityConfig {
                         .permitAll()
                         .requestMatchers("/api/auth/**", "/api/conta/**", "/api/uploads/imagens/**").authenticated()
                         .requestMatchers("/api/instituicao/**").hasRole("EMPRESA")
+                        .requestMatchers("/api/transferencias-alunos/**").hasAnyRole("ALUNO", "PROFESSOR")
                         .requestMatchers("/api/alunos/selecionaveis", "/api/transferencias").hasRole("PROFESSOR")
                         .requestMatchers(org.springframework.http.HttpMethod.POST, "/api/vantagens/*/resgates")
                         .hasRole("ALUNO")

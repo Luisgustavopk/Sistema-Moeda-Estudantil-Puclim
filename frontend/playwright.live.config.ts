@@ -3,7 +3,11 @@ const port = process.env.PLAYWRIGHT_LIVE_PORT || '5175'
 
 export default defineConfig({
   testDir: './tests',
-  testMatch: ['live.spec.ts', 'gamification.live.spec.ts'],
+  testMatch: [
+    'live.spec.ts',
+    'gamification.live.spec.ts',
+    'peer-transfers.live.spec.ts',
+  ],
   timeout: 90000,
   expect: { timeout: 15000 },
   workers: 1,

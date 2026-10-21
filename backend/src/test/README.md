@@ -19,6 +19,7 @@ java/br/pucminas/puclim/
 | Professores | [TeacherImportIntegrationTest](java/br/pucminas/puclim/integration/TeacherImportIntegrationTest.java) | CSV, preview, relatório parcial, duplicidade, primeiro acesso e privacidade |
 | Contas | [AccountIntegrationTest](java/br/pucminas/puclim/integration/AccountIntegrationTest.java) | Atualização de perfil/contato, dados próprios e desativação |
 | Transferências | [TransferIntegrationTest](java/br/pucminas/puclim/integration/TransferIntegrationTest.java) | Quantidades/motivo/saldo, extratos, idempotência e concorrência |
+| Transferências entre alunos | [PeerTransferIntegrationTest](java/br/pucminas/puclim/integration/PeerTransferIntegrationTest.java) | Vínculos, critérios e versões, aprovação/rejeição, privacidade, autorização, inativação, saldo na aprovação, replay e concorrência |
 | Vantagens | [AdvantageIntegrationTest](java/br/pucminas/puclim/integration/AdvantageIntegrationTest.java) | Upload, propriedade, edição, catálogo e desativação |
 | Cupons | [CouponIntegrationTest](java/br/pucminas/puclim/integration/CouponIntegrationTest.java) | Resgate concorrente, replay, códigos únicos, autorização e utilização única |
 | Notificações | [NotificationIntegrationTest](java/br/pucminas/puclim/integration/NotificationIntegrationTest.java) | Falha SMTP sem rollback, retry e recebimento real dos dois e-mails com o mesmo código |

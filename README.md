@@ -278,6 +278,16 @@ Para explicitar a integração, copie `frontend/.env.example` para `frontend/.en
 
 O proxy do Vite não faz parte do build de produção. O encaminhamento da API no ambiente publicado será definido durante a preparação da implantação.
 
+## Transferências entre alunos
+
+No menu do professor, **Entre alunos** (`/professor/transferencias-alunos`) permite publicar os critérios de análise e vincular alunos ativos da mesma instituição. Um aluno pode ter mais de um professor vinculado. Os vínculos existentes com a instituição continuam válidos; não há vínculo automático com professores.
+
+No menu do aluno, **Transferências** (`/aluno/transferencias`) permite selecionar um professor em comum e outro aluno vinculado a ele, informar quantidade e motivo e aceitar os critérios. O pedido fica pendente, sem movimentar ou reservar moedas. O professor responsável aprova ou rejeita com parecer obrigatório. A aprovação revalida vínculos, contas ativas e saldo; uma falha mantém o pedido pendente e não gera movimentação parcial. Para remover um vínculo, o professor precisa analisar os pedidos pendentes daquele aluno primeiro.
+
+Cada solicitação preserva os critérios aceitos no envio, a decisão, o professor responsável e as datas. A aprovação gera débito e crédito pareados nos extratos dos alunos, sem consumir a cota do professor. Essas entradas não geram mérito, ranking, níveis ou bônus. As notificações de solicitação e decisão aparecem dentro do sistema. A funcionalidade exige a API real.
+
+A migration aditiva `V4__student_peer_transfers.sql` cria os vínculos, critérios e solicitações ao reiniciar o backend. Não é necessário resetar o banco nem alterar migrations anteriores. No Linux, execute `bash scripts/dev.sh up` e `bash scripts/dev.sh backend` a partir da raiz.
+
 ## Verificar a estrutura
 
 Frontend, dentro de `frontend/`:

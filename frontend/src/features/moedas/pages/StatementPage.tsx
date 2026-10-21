@@ -143,6 +143,8 @@ export function StatementPage() {
             ) : (
               <>
                 <option value="RECEBIMENTO">Reconhecimentos</option>
+                <option value="TRANSF_ENVIO">Transferências enviadas</option>
+                <option value="TRANSF_ENTRADA">Transferências recebidas</option>
                 <option value="RESGATE">Resgates</option>
                 <option value="MISSAO">Missões</option>
                 <option value="BONUS">Bônus</option>

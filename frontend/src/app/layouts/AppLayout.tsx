@@ -55,6 +55,11 @@ export function AppLayout() {
           { path: '/aluno', label: 'Meu espaço', icon: Home },
           { path: '/aluno/catalogo', label: 'Vantagens', icon: Gift },
           { path: '/aluno/extrato', label: 'Meu extrato', icon: Wallet },
+          {
+            path: '/aluno/transferencias',
+            label: 'Transferências',
+            icon: Send,
+          },
           { path: '/aluno/cupons', label: 'Meus cupons', icon: Ticket },
           { path: '/aluno/conquistas', label: 'Conquistas', icon: Sparkles },
           { path: '/ranking', label: 'Rankings', icon: Users },
@@ -66,6 +71,11 @@ export function AppLayout() {
         ? [
             { path: '/professor', label: 'Meu painel', icon: Home },
             { path: '/professor/enviar', label: 'Enviar moedas', icon: Send },
+            {
+              path: '/professor/transferencias-alunos',
+              label: 'Entre alunos',
+              icon: Users,
+            },
             { path: '/professor/extrato', label: 'Meu extrato', icon: Wallet },
             {
               path: '/professor/perguntas',

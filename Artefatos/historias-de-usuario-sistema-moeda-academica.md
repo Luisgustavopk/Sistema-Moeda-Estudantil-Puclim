@@ -370,6 +370,22 @@ A ordem abaixo segue a priorização do documento de apoio: perfil público, ran
 
 **Prioridade:** Extra (fase 2)
 
+### US39 · Transferir moedas entre alunos com mediação do professor
+**Como** aluno, **quero** solicitar uma transferência do meu saldo para outro aluno vinculado a um professor em comum, **para** reconhecer sua colaboração conforme os critérios desse professor.
+
+- O professor publica critérios e gerencia os vínculos de alunos da sua instituição. Cada aluno pode ter vários professores vinculados.
+- O aluno seleciona professor e destinatário, informa quantidade inteira positiva e motivo, e confirma a leitura dos critérios.
+- Ambos os alunos devem estar ativos e vinculados ao professor escolhido. Não é permitido transferir para si mesmo.
+- A solicitação fica pendente sem débito, crédito ou reserva. O saldo é verificado no envio e novamente na aprovação.
+- Somente o professor responsável pode aprovar ou rejeitar, sempre com parecer obrigatório.
+- Na aprovação, débito e crédito são atômicos e pareados; falhas não geram lançamentos parciais. Repetir o mesmo pedido ou decisão não movimenta moedas novamente.
+- Os critérios aceitos no envio são preservados mesmo após alterações futuras. Se forem alterados antes do envio, o aluno precisa ler e aceitar a versão atual.
+- Solicitação, decisão, professor, parecer e datas ficam no histórico dos participantes. Há notificações internas para o professor e os alunos.
+- Um vínculo com pedidos pendentes só pode ser removido após a análise desses pedidos.
+- A transferência não cria moedas, não usa o saldo do professor e não gera mérito, ranking, níveis ou bônus por recirculação.
+
+**Prioridade:** Extra solicitado pela equipe
+
 ## Requisitos não funcionais
 
 Estes itens não são histórias de usuário. São condições que o sistema precisa cumprir para sustentar as histórias acima.

@@ -110,6 +110,11 @@ const TransferPage = lazy(() =>
     default: module.TransferPage,
   })),
 )
+const PeerTransfersPage = lazy(() =>
+  import('@/features/moedas/pages/PeerTransfersPage').then((module) => ({
+    default: module.PeerTransfersPage,
+  })),
+)
 const StatementPage = lazy(() =>
   import('@/features/moedas/pages/StatementPage').then((module) => ({
     default: module.StatementPage,
@@ -190,6 +195,10 @@ export default function App() {
               <Route path="/aluno" element={<StudentDashboardPage />} />
               <Route path="/aluno/catalogo" element={<CatalogPage />} />
               <Route path="/aluno/extrato" element={<StatementPage />} />
+              <Route
+                path="/aluno/transferencias"
+                element={<PeerTransfersPage />}
+              />
               <Route path="/aluno/cupons" element={<CouponsPage />} />
               <Route path="/aluno/conquistas" element={<AchievementsPage />} />
               <Route path="/aluno/quiz" element={<QuizPage />} />
@@ -203,6 +212,10 @@ export default function App() {
             <Route element={<RouteGuard roles={['PROFESSOR']} />}>
               <Route path="/professor" element={<TeacherDashboardPage />} />
               <Route path="/professor/enviar" element={<TransferPage />} />
+              <Route
+                path="/professor/transferencias-alunos"
+                element={<PeerTransfersPage />}
+              />
               <Route path="/professor/extrato" element={<StatementPage />} />
               <Route path="/professor/perguntas" element={<QuestionsPage />} />
               <Route path="/professor/missoes" element={<MissionsPage />} />

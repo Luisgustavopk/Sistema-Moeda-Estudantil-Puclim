@@ -99,6 +99,8 @@ export interface Transaction {
     | 'RECOMPENSA'
     | 'PREMIO'
     | 'DOACAO'
+    | 'TRANSF_ENVIO'
+    | 'TRANSF_ENTRADA'
   amount: number
   description: string
   counterpart?: string
