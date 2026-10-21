@@ -5,7 +5,7 @@
 .profile-showcase .public-profile-hero {
   --profile-cover: 80px;
   display: grid;
-  grid-template-columns: 90px minmax(0, 1fr) 150px;
+  grid-template-columns: 120px minmax(0, 1fr) 150px;
   align-items: center;
   gap: 24px;
   padding: calc(var(--profile-cover) + 24px) 24px 24px;
@@ -17,8 +17,8 @@
   height: var(--profile-cover);
 }
 .public-avatar {
-  width: 90px;
-  height: 90px;
+  width: 120px;
+  height: 120px;
   padding: 4px;
   border: 1px solid var(--border);
   border-radius: 23px;
@@ -356,13 +356,13 @@
 @container profile (max-width: 620px) {
   .profile-showcase .public-profile-hero {
     --profile-cover: 56px;
-    grid-template-columns: 68px minmax(0, 1fr);
+    grid-template-columns: 88px minmax(0, 1fr);
     gap: 16px;
     padding: calc(var(--profile-cover) + 20px) 20px 20px;
   }
   .public-avatar {
-    width: 68px;
-    height: 68px;
+    width: 88px;
+    height: 88px;
     border-radius: 18px;
   }
   .public-avatar .avatar,
