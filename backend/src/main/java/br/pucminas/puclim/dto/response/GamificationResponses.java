@@ -13,7 +13,7 @@ public final class GamificationResponses {
     }
 
     public record Rank(int position, String studentId, String name, String course, String institution, long received,
-            int streak, int level, Instant firstCoin) {
+            int streak, int level, Instant firstCoin, String avatar) {
     }
 
     public record Ranking(List<Rank> content, int page, int size, int total, Rank own, String semester, String type) {

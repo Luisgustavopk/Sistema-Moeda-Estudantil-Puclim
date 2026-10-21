@@ -1,3 +1,4 @@
+import { chooseOption } from './select-option'
 import { expect, test, type Page } from '@playwright/test'
 import { fileURLToPath } from 'node:url'
 
@@ -72,11 +73,10 @@ test('cadastro do aluno valida CPF e senhas e cria conta com saldo zero', async 
   await page.getByLabel('E-mail', { exact: true }).fill('joana@puclim.demo')
   await page.getByLabel('Login', { exact: true }).fill('joana')
   await page.getByLabel('CPF', { exact: true }).fill('00000000000')
-  await page.getByLabel('RG', { exact: true }).fill('MG123456')
   await page
     .getByLabel('Endereço completo')
     .fill('Rua das Ideias, 20, Belo Horizonte, MG')
-  await page.getByLabel('Instituição de ensino').selectOption('institution')
+  await chooseOption(page.getByLabel('Instituição de ensino'), 'institution')
   await page.getByLabel('Curso', { exact: true }).fill('Engenharia de Software')
   await page.getByLabel('Senha', { exact: true }).fill('Joana@2026')
   await page.getByLabel('Confirmar senha').fill('Outra@2026')
@@ -88,7 +88,7 @@ test('cadastro do aluno valida CPF e senhas e cria conta com saldo zero', async 
   await page.getByRole('button', { name: 'Criar minha conta' }).click()
   await expect(page.getByRole('heading', { name: 'Olá, Joana!' })).toBeVisible()
   await expect(page.getByLabel('Saldo de moedas')).toContainText('0')
-  await page.getByRole('link', { name: 'Meu perfil', exact: true }).click()
+  await page.getByRole('link', { name: 'Minha conta', exact: true }).click()
   await expect(page.getByLabel('CPF', { exact: true })).toHaveValue(
     '39053344705',
   )
@@ -98,7 +98,7 @@ test('cadastro de empresa valida CNPJ e respeita o tipo do parceiro', async ({
   page,
 }) => {
   await page.goto('/cadastro/empresa')
-  await page.getByLabel('Tipo de organização').selectOption('BENEFICIARIA')
+  await chooseOption(page.getByLabel('Tipo de organização'), 'BENEFICIARIA')
   await page.getByLabel('Nome da organização').fill('Instituto Novos Caminhos')
   await page.getByLabel('CNPJ', { exact: true }).fill('00000000000000')
   await page.getByLabel('Telefone com DDD').fill('31999995555')
@@ -462,6 +462,13 @@ test('layout mobile, navegação, foco do diálogo e ausência de overflow', asy
   await page.setViewportSize({ width: 390, height: 844 })
   await page.getByRole('button', { name: 'Ver detalhes' }).first().click()
   await expect(page.getByRole('dialog')).toBeVisible()
+  await page
+    .getByRole('dialog')
+    .evaluate((element) =>
+      Promise.all(
+        element.getAnimations().map((animation) => animation.finished),
+      ),
+    )
   expect(
     await page.evaluate(() =>
       document.querySelector('dialog')?.contains(document.activeElement),
@@ -475,13 +482,21 @@ test('layout mobile, navegação, foco do diálogo e ausência de overflow', asy
   ]) {
     await page.setViewportSize({ width, height })
     const bounds = await page.getByRole('dialog').boundingBox()
-    expect(bounds!.x).toBeGreaterThanOrEqual(16)
-    expect(bounds!.y).toBeGreaterThanOrEqual(16)
+    if (width < 768) {
+      expect(bounds!.x).toBe(0)
+      expect(bounds!.width).toBe(width)
+      expect(Math.abs(bounds!.y + bounds!.height - height)).toBeLessThanOrEqual(
+        1,
+      )
+    } else {
+      expect(bounds!.x).toBeGreaterThanOrEqual(16)
+      expect(bounds!.y).toBeGreaterThanOrEqual(16)
+      expect(
+        Math.abs(bounds!.y + bounds!.height / 2 - height / 2),
+      ).toBeLessThanOrEqual(1)
+    }
     expect(
       Math.abs(bounds!.x + bounds!.width / 2 - width / 2),
-    ).toBeLessThanOrEqual(1)
-    expect(
-      Math.abs(bounds!.y + bounds!.height / 2 - height / 2),
     ).toBeLessThanOrEqual(1)
     await expect(
       page.getByRole('button', { name: 'Quero resgatar' }),

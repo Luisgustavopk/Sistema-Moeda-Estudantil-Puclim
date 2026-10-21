@@ -42,14 +42,16 @@ public class ProgressionService {
     private final GamificationPolicy policy;
     private final Clock clock;
     private final ApplicationEventPublisher events;
+    private final ProfileCustomizationService appearances;
 
     public ProgressionService(GamificationRepository db, AccountService identity, GamificationPolicy policy,
-            Clock clock, ApplicationEventPublisher events) {
+            Clock clock, ApplicationEventPublisher events, ProfileCustomizationService appearances) {
         this.db = db;
         this.identity = identity;
         this.policy = policy;
         this.clock = clock;
         this.events = events;
+        this.appearances = appearances;
     }
 
     public LocalDate today() {
@@ -216,10 +218,12 @@ public class ProgressionService {
                 institution)) {
             Object[] row = totals.get(s.id);
             long received = row == null ? 0 : ((Number) row[1]).longValue();
-            result.add(new Rank(0, s.id, s.account.name, s.course, s.institution.account.name, received,
-                    streaks.getOrDefault(s.id, 0), policy.level(total(s.id)), row == null ? null : (Instant) row[2]));
+            var appearance = appearances.settings(s.id, s.account.name);
+            result.add(new Rank(0, s.id, appearance.displayName, s.course, s.institution.account.name, received,
+                    streaks.getOrDefault(s.id, 0), policy.level(total(s.id)), row == null ? null : (Instant) row[2],
+                    appearances.rankingAvatar(appearance, s)));
         }
-        Comparator<Rank> comparator = type.equals("STREAK") ? Comparator.comparingInt(rank -> rank.streak())
+        Comparator<Rank> comparator = type.equals("STREAK") ? Comparator.comparingInt((Rank rank) -> rank.streak()).reversed()
                 : Comparator.comparingLong((Rank rank) -> rank.received()).reversed()
                         .thenComparing(Comparator.comparingInt((Rank rank) -> rank.streak()).reversed());
         result.sort(comparator.thenComparing(rank -> rank.firstCoin(), Comparator.nullsLast(Comparator.naturalOrder()))
@@ -228,7 +232,7 @@ public class ProgressionService {
         int pos = 1;
         for (Rank r : result)
             positioned.add(new Rank(pos++, r.studentId(), r.name(), r.course(), r.institution(), r.received(),
-                    r.streak(), r.level(), r.firstCoin()));
+                    r.streak(), r.level(), r.firstCoin(), r.avatar()));
         return positioned;
     }
 

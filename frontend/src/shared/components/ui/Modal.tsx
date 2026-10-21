@@ -1,35 +1,55 @@
-import { useEffect, useRef, type ReactNode } from 'react'
+import { useEffect, useId, useRef, useState, type ReactNode } from 'react'
 import { X } from 'lucide-react'
 export function Modal({
   title,
   children,
   onClose,
   busy = false,
+  size = 'normal',
 }: {
   title: string
   children: ReactNode
   onClose: () => void
   busy?: boolean
+  size?: 'normal' | 'wide'
 }) {
   const ref = useRef<HTMLDialogElement>(null)
+  const trigger = useRef(document.activeElement as HTMLElement | null)
+  const titleId = useId()
+  const [closing, setClosing] = useState(false)
+  const closeTimer = useRef<ReturnType<typeof setTimeout> | undefined>(
+    undefined,
+  )
+  const close = () => {
+    if (busy || closing) return
+    if (matchMedia('(prefers-reduced-motion: reduce)').matches) {
+      onClose()
+      return
+    }
+    setClosing(true)
+    closeTimer.current = setTimeout(onClose, 140)
+  }
   useEffect(() => {
     const dialog = ref.current
+    const previousFocus = trigger.current
     const previousOverflow = document.body.style.overflow
     document.body.style.overflow = 'hidden'
     dialog?.showModal()
     return () => {
       dialog?.close()
+      clearTimeout(closeTimer.current)
       document.body.style.overflow = previousOverflow
+      previousFocus?.focus({ preventScroll: true })
     }
   }, [])
   return (
     <dialog
       ref={ref}
-      className="modal"
-      aria-labelledby="modal-title"
+      className={`modal ${size === 'wide' ? 'modal-wide' : ''} ${closing ? 'is-closing' : ''}`}
+      aria-labelledby={titleId}
       onCancel={(event) => {
         event.preventDefault()
-        if (!busy) onClose()
+        close()
       }}
       onClick={(event) => {
         if (event.target !== event.currentTarget || busy) return
@@ -40,17 +60,17 @@ export function Modal({
           event.clientY < bounds.top ||
           event.clientY > bounds.bottom
         )
-          onClose()
+          close()
       }}
     >
       <div className="modal-content">
         <div className="modal-heading">
-          <h2 id="modal-title">{title}</h2>
+          <h2 id={titleId}>{title}</h2>
           <button
             type="button"
             className="icon-button"
             aria-label="Fechar janela"
-            onClick={onClose}
+            onClick={close}
             disabled={busy}
           >
             <X size={20} />

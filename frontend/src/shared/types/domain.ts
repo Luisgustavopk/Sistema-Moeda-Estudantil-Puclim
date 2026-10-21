@@ -11,7 +11,7 @@ export interface Account {
   balance: number
   active: boolean
   cpf?: string
-  rg?: string
+  rg?: string | null
   address?: string
   course?: string
   institutionId?: string
@@ -46,7 +46,7 @@ export interface StudentRegistration {
   login: string
   password: string
   cpf: string
-  rg: string
+  rg?: string | null
   address: string
   course: string
   institutionId: string

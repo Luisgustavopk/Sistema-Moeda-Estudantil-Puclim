@@ -1,3 +1,4 @@
+import { FormSelect } from '@/shared/components/ui/Select'
 import { ArrowRight } from 'lucide-react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
@@ -94,7 +95,7 @@ export function StudentRegistrationPage() {
             aria-invalid={!!errors.cpf}
           />
         </Field>
-        <Field id="rg" label="RG" error={errors.rg?.message}>
+        <Field id="rg" label="RG — opcional" error={errors.rg?.message}>
           <input
             id="rg"
             placeholder="Seu documento de identidade"
@@ -121,9 +122,10 @@ export function StudentRegistrationPage() {
           label="Instituição de ensino"
           error={errors.institutionId?.message}
         >
-          <select
+          <FormSelect
             id="institutionId"
-            {...form.register('institutionId')}
+            control={form.control}
+            name="institutionId"
             aria-invalid={!!errors.institutionId}
             disabled={institutions.isLoading || !!institutions.error}
           >
@@ -133,7 +135,7 @@ export function StudentRegistrationPage() {
                 {item.name}
               </option>
             ))}
-          </select>
+          </FormSelect>
         </Field>
         <Field id="course" label="Curso" error={errors.course?.message}>
           <input

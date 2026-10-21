@@ -1,6 +1,7 @@
+import { FormSelect } from '@/shared/components/ui/Select'
 import { useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
-import { useForm, useWatch } from 'react-hook-form'
+import { useForm } from 'react-hook-form'
 import { z } from 'zod'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useAuth } from '@/features/auth/hooks/auth-context'
@@ -8,10 +9,9 @@ import { PageHeading } from '@/shared/components/ui/PageHeading'
 import { Field } from '@/shared/components/ui/Field'
 import { Button } from '@/shared/components/ui/Button'
 import { QueryState, EmptyState } from '@/shared/components/ui/Feedback'
-import { dateTime } from '@/shared/utils/format'
 import { gameApi } from './api'
 import { useGameAction } from './hooks'
-import type { Question, Quiz } from './types'
+import type { Question } from './types'
 
 const questionSchema = z
   .object({
@@ -109,16 +109,17 @@ function QuestionForm({
         label="Alternativa correta"
         error={form.formState.errors.correctIndex?.message}
       >
-        <select
+        <FormSelect
           id="question-correct"
-          {...form.register('correctIndex', { valueAsNumber: true })}
+          control={form.control}
+          name="correctIndex"
         >
           {[0, 1, 2, 3, 4, 5].map((n) => (
             <option key={n} value={n}>
               {n + 1}ª alternativa
             </option>
           ))}
-        </select>
+        </FormSelect>
       </Field>
       <label>
         <input type="checkbox" {...form.register('active')} /> Pergunta ativa
@@ -200,151 +201,6 @@ export function QuestionsPage() {
           </div>
         </article>
       ))}
-    </>
-  )
-}
-const answerSchema = z.object({
-  answers: z.array(
-    z.number().int().min(0, 'Responda todas as perguntas.').max(5),
-  ),
-})
-function QuizForm({ quiz }: { quiz: Quiz }) {
-  const form = useForm<z.infer<typeof answerSchema>>({
-    resolver: zodResolver(answerSchema),
-    defaultValues: { answers: quiz.items.map(() => -1) },
-  })
-  const submit = useGameAction(
-    (answers: number[]) => gameApi.submitQuiz(quiz.id, answers),
-    'Quiz concluído! Seu progresso foi atualizado.',
-  )
-  const answers = useWatch({ control: form.control, name: 'answers' })
-  return (
-    <form
-      onSubmit={form.handleSubmit((values) => submit.mutate(values.answers))}
-    >
-      {quiz.items.map((q, i) => (
-        <fieldset className="card" key={q.id}>
-          <legend>
-            {i + 1}. {q.prompt}
-          </legend>
-          <p>{q.area}</p>
-          {q.options.map((option, j) => (
-            <label className="row" key={j}>
-              <input
-                type="radio"
-                value={j}
-                checked={answers[i] === j}
-                onChange={() =>
-                  form.setValue(`answers.${i}`, j, { shouldValidate: true })
-                }
-                name={`question-${q.id}`}
-              />
-              {option}
-            </label>
-          ))}
-          {form.formState.errors.answers?.[i] && (
-            <p role="alert" className="field-error">
-              Selecione uma resposta.
-            </p>
-          )}
-        </fieldset>
-      ))}
-      <Button type="submit" loading={submit.isPending}>
-        Concluir quiz
-      </Button>
-    </form>
-  )
-}
-function QuizResult({ quiz }: { quiz: Quiz }) {
-  return (
-    <section className="card">
-      <h2>Resultado de {quiz.day}</h2>
-      <p>
-        Nota {quiz.grade.toLocaleString('pt-BR')} / 10 · {quiz.correctCount}{' '}
-        acertos · {quiz.errors} erros · Streak de {quiz.streak} dias
-      </p>
-      {quiz.items.map((q) => (
-        <article className="row" key={q.id}>
-          <div>
-            <h3>{q.prompt}</h3>
-            <p>
-              Sua resposta:{' '}
-              {q.selectedIndex === null ? '—' : q.options[q.selectedIndex]}
-            </p>
-            <p>
-              Gabarito:{' '}
-              {q.correctIndex === null ? '—' : q.options[q.correctIndex]}
-            </p>
-          </div>
-        </article>
-      ))}
-    </section>
-  )
-}
-export function QuizPage() {
-  const { user } = useAuth()
-  const query = useQuery({
-    queryKey: ['game', 'quizzes', user?.id],
-    queryFn: gameApi.quizzes,
-    refetchInterval: 60000,
-  })
-  const start = useGameAction(
-    () => gameApi.startQuiz(),
-    'Quiz disponível. Bom estudo!',
-  )
-  return (
-    <>
-      <PageHeading
-        title="Quiz diário"
-        description="Conclua o quiz para manter sua sequência de dias."
-      />
-      <QueryState
-        loading={query.isLoading}
-        error={query.error}
-        retry={query.refetch}
-      />
-      {query.data && (
-        <>
-          <section className="card">
-            <h2>{query.data.streak} dias de streak</h2>
-            <p>
-              Melhor sequência: {query.data.bestStreak} dias ·{' '}
-              {query.data.daysToReward} dias para a próxima recompensa.
-            </p>
-            {query.data.today?.completedAt && (
-              <p>
-                Quiz de hoje concluído. Próximo quiz disponível em{' '}
-                {dateTime(query.data.nextAvailable)}.
-              </p>
-            )}
-          </section>
-          {!query.data.today && (
-            <Button loading={start.isPending} onClick={() => start.mutate()}>
-              Iniciar quiz de hoje
-            </Button>
-          )}
-          {query.data.today && !query.data.today.completedAt && (
-            <QuizForm key={query.data.today.id} quiz={query.data.today} />
-          )}
-          {query.data.today?.completedAt && (
-            <QuizResult quiz={query.data.today} />
-          )}
-          <section className="card">
-            <h2>Histórico de quizzes</h2>
-            {query.data.history.length === 0 && (
-              <p>Seu primeiro resultado aparecerá aqui.</p>
-            )}
-            {query.data.history.map((q) => (
-              <details key={q.id}>
-                <summary>
-                  {q.day} · Nota {q.grade} · {q.correctCount} acertos
-                </summary>
-                <QuizResult quiz={q} />
-              </details>
-            ))}
-          </section>
-        </>
-      )}
     </>
   )
 }

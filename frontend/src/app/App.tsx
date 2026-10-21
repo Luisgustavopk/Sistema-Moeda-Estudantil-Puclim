@@ -9,18 +9,66 @@ import {
   RouteGuard,
 } from '@/features/auth/components/RouteGuard'
 import { NotFoundPage } from './NotFoundPage'
-import {
-  PublicProfilePage,
-  RankingPage,
-} from '@/features/gamificacao/ProfileRanking'
-import { QuestionsPage, QuizPage } from '@/features/gamificacao/QuizPages'
-import { MissionsPage } from '@/features/gamificacao/MissionsPage'
-import {
-  FundPage,
-  RewardsPage,
-  DonationsPage,
-  ChallengesPage,
-} from '@/features/gamificacao/EconomyPages'
+const PublicProfilePage = lazy(() =>
+  import('@/features/gamificacao/ProfileRanking').then((module) => ({
+    default: module.PublicProfilePage,
+  })),
+)
+const RankingPage = lazy(() =>
+  import('@/features/gamificacao/RankingPage').then((module) => ({
+    default: module.RankingPage,
+  })),
+)
+const QuestionsPage = lazy(() =>
+  import('@/features/gamificacao/QuizPages').then((module) => ({
+    default: module.QuestionsPage,
+  })),
+)
+const QuizPage = lazy(() =>
+  import('@/features/gamificacao/QuizStudentPage').then((module) => ({
+    default: module.QuizPage,
+  })),
+)
+const QuizHistoryPage = lazy(() =>
+  import('@/features/gamificacao/QuizHistoryPage').then((module) => ({
+    default: module.QuizHistoryPage,
+  })),
+)
+const AchievementsPage = lazy(() =>
+  import('@/features/gamificacao/AchievementsPage').then((module) => ({
+    default: module.AchievementsPage,
+  })),
+)
+const ProfileEditPage = lazy(() =>
+  import('@/features/gamificacao/ProfileEditPage').then((module) => ({
+    default: module.ProfileEditPage,
+  })),
+)
+const MissionsPage = lazy(() =>
+  import('@/features/gamificacao/MissionsPage').then((module) => ({
+    default: module.MissionsPage,
+  })),
+)
+const FundPage = lazy(() =>
+  import('@/features/gamificacao/EconomyPages').then((module) => ({
+    default: module.FundPage,
+  })),
+)
+const RewardsPage = lazy(() =>
+  import('@/features/gamificacao/EconomyPages').then((module) => ({
+    default: module.RewardsPage,
+  })),
+)
+const DonationsPage = lazy(() =>
+  import('@/features/gamificacao/EconomyPages').then((module) => ({
+    default: module.DonationsPage,
+  })),
+)
+const ChallengesPage = lazy(() =>
+  import('@/features/gamificacao/EconomyPages').then((module) => ({
+    default: module.ChallengesPage,
+  })),
+)
 
 const LoginPage = lazy(() =>
   import('@/features/auth/pages/LoginPage').then((module) => ({
@@ -138,12 +186,17 @@ export default function App() {
               <Route path="/perfis/:id" element={<PublicProfilePage />} />
             </Route>
             <Route element={<RouteGuard roles={['ALUNO']} />}>
+              <Route path="/perfil/editar" element={<ProfileEditPage />} />
               <Route path="/aluno" element={<StudentDashboardPage />} />
               <Route path="/aluno/catalogo" element={<CatalogPage />} />
               <Route path="/aluno/extrato" element={<StatementPage />} />
               <Route path="/aluno/cupons" element={<CouponsPage />} />
-              <Route path="/aluno/conquistas" element={<PublicProfilePage />} />
+              <Route path="/aluno/conquistas" element={<AchievementsPage />} />
               <Route path="/aluno/quiz" element={<QuizPage />} />
+              <Route
+                path="/aluno/quiz/historico"
+                element={<QuizHistoryPage />}
+              />
               <Route path="/aluno/missoes" element={<MissionsPage />} />
               <Route path="/aluno/recompensas" element={<RewardsPage />} />
             </Route>

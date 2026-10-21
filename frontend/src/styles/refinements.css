@@ -1,0 +1,658 @@
+:root {
+  --motion-ease: cubic-bezier(0.22, 1, 0.36, 1);
+  --badge-steel: #526773;
+  --badge-copper: #a35a2b;
+  --badge-teal: #137a88;
+  --badge-amber: #a47406;
+  --badge-champagne: #f0cd7c;
+}
+[data-theme='dark'] {
+  --badge-steel: #b0c2cd;
+  --badge-copper: #eba16c;
+  --badge-teal: #58ccda;
+  --badge-amber: #eebd45;
+  --badge-champagne: #ffe4a4;
+}
+.styled-select {
+  display: inline-flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  width: 100%;
+  min-width: 0;
+  min-height: 48px;
+  padding: 12px 14px;
+  border-radius: 12px;
+  border: 1px solid color-mix(in srgb, var(--muted) 32%, transparent);
+  background: color-mix(in srgb, var(--surface) 65%, var(--canvas));
+  box-shadow: inset 0 2px 3px
+    color-mix(in srgb, var(--petroleum) 5%, transparent);
+  color: var(--ink);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+.styled-select > span:first-child {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.styled-select > span:last-child {
+  display: flex;
+  color: var(--primary);
+  flex-shrink: 0;
+}
+.styled-select:focus-visible,
+.styled-select[data-state='open'] {
+  border-color: var(--primary);
+  outline: 2px solid var(--primary);
+  outline-offset: 2px;
+}
+.styled-select:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+.styled-select[aria-invalid='true'] {
+  border-color: var(--danger);
+}
+.select-menu {
+  z-index: 100;
+  min-width: var(--radix-select-trigger-width);
+  max-width: min(440px, calc(100vw - 24px));
+  max-height: min(320px, var(--radix-select-content-available-height));
+  overflow: hidden;
+  padding: 6px;
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  background: var(--surface);
+  color: var(--ink);
+  box-shadow:
+    0 12px 32px #0003,
+    inset 0 1px 0 #ffffff15;
+  transform-origin: var(--radix-select-content-transform-origin);
+}
+.select-viewport {
+  padding: 0;
+}
+.select-option {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  min-height: 44px;
+  padding: 10px 12px;
+  font-size: 0.9375rem;
+  line-height: 1.4;
+  border-radius: 10px;
+  cursor: pointer;
+  outline: none;
+  user-select: none;
+}
+.select-option > span:first-child {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+.select-option > span:last-child {
+  flex-shrink: 0;
+}
+.select-option[data-state='checked'] {
+  color: var(--primary);
+  font-weight: 650;
+  background: color-mix(in srgb, var(--primary) 8%, var(--surface));
+}
+.select-option[data-highlighted] {
+  background: var(--primary);
+  color: var(--on-primary);
+}
+.select-option[data-disabled] {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+.select-scroll {
+  display: grid;
+  place-items: center;
+  padding: 5px;
+  color: var(--primary);
+}
+@media (min-width: 768px) {
+  .modal.modal-wide {
+    width: min(860px, calc(100vw - 64px));
+  }
+}
+.modal-wide .modal-heading {
+  position: sticky;
+  top: 0;
+  z-index: 2;
+  background: var(--surface);
+  padding-block: 12px;
+  margin-top: -12px;
+}
+.quiz-result-heading {
+  display: grid;
+  grid-template-columns: 120px minmax(0, 1fr);
+  align-items: center;
+}
+.quiz-result-heading > div {
+  display: grid;
+  gap: 8px;
+  min-width: 0;
+}
+.streak-inline {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+.streak-milestone {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 16px;
+  border-radius: 14px;
+  background: var(--gold-soft);
+  font-weight: 650;
+}
+.streak-flame {
+  display: inline-block;
+  position: relative;
+  flex-shrink: 0;
+  color: var(--primary);
+  vertical-align: middle;
+}
+.streak-flame > svg {
+  width: 100%;
+  height: 100%;
+  transform-origin: 50% 90%;
+  overflow: visible;
+}
+.flame-outer {
+  fill: currentColor;
+  transform-origin: 50% 92%;
+}
+.flame-core {
+  fill: var(--merit-gold);
+  transform-origin: 50% 90%;
+}
+.streak-number {
+  align-items: center;
+  flex-wrap: wrap;
+}
+.streak-number .streak-flame {
+  color: var(--primary);
+}
+.streak-flame > i {
+  display: none;
+  position: absolute;
+  width: 8%;
+  height: 8%;
+  border-radius: 50%;
+  background: var(--merit-gold);
+  top: 18%;
+  left: 30%;
+  pointer-events: none;
+}
+.streak-flame > i:last-child {
+  left: 65%;
+}
+.streak-flame:not(.is-burning) {
+  color: var(--muted);
+}
+.merit-medal.finish-steel {
+  --finish: var(--badge-steel);
+}
+.merit-medal.finish-bronze {
+  --finish: var(--badge-copper);
+}
+.merit-medal.finish-teal {
+  --finish: var(--badge-teal);
+}
+.merit-medal.finish-gold {
+  --finish: var(--badge-amber);
+}
+.merit-medal.finish-legendary {
+  --finish: var(--badge-champagne);
+  color: var(--badge-champagne);
+  background: var(--petroleum);
+  border-color: var(--badge-champagne);
+  box-shadow:
+    var(--inset),
+    0 0 0 3px color-mix(in srgb, var(--badge-champagne) 18%, transparent);
+}
+.merit-medal[data-rarity='rara'] {
+  border-radius: 26%;
+  border-width: 2px;
+}
+.merit-medal[data-rarity='epica'] {
+  border-radius: 32% 32% 44% 44%;
+  border-width: 3px;
+}
+.merit-medal[data-rarity='lendaria'] {
+  border-radius: 34% 34% 46% 46%;
+  border-style: double;
+  border-width: 5px;
+}
+.merit-medal[data-unlocked='false'] {
+  background: color-mix(in srgb, var(--finish) 7%, var(--surface));
+  border-color: color-mix(in srgb, var(--finish) 35%, var(--surface));
+  color: color-mix(in srgb, var(--finish) 55%, var(--muted));
+  box-shadow: var(--inset);
+}
+.merit-medal[data-unlocked='false'] > svg:first-child {
+  opacity: 0.6;
+}
+.medal-ornaments {
+  position: absolute;
+  inset: 1px;
+  pointer-events: none;
+  opacity: 0.7;
+}
+.medal-ornaments > svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+.medal-reflection {
+  position: absolute;
+  inset: 4px;
+  border-radius: inherit;
+  pointer-events: none;
+  overflow: hidden;
+}
+.medal-reflection::before {
+  content: '';
+  position: absolute;
+  inset: -40%;
+  background: linear-gradient(
+    110deg,
+    transparent 40%,
+    #fff5 49%,
+    transparent 58%
+  );
+  transform: translateX(-100%);
+}
+.merit-medal .medal-lock {
+  z-index: 1;
+}
+.badge-detail .merit-medal {
+  width: 132px;
+  height: 132px;
+}
+.badge-detail .merit-medal > svg:first-child {
+  width: 48px;
+  height: 48px;
+}
+.ranking-list-avatar {
+  width: 44px;
+  height: 44px;
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+  line-height: 1;
+}
+.ranking-list-avatar .avatar,
+.ranking-list-avatar .profile-initials {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  object-fit: cover;
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+  font-size: 0.875rem;
+  line-height: 1;
+}
+.ranking-list-avatar .profile-initials > svg {
+  width: 24px;
+  height: 24px;
+}
+.rank-avatar .profile-initials {
+  width: 58px;
+  height: 58px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+  font-size: 1.125rem;
+  line-height: 1;
+}
+.rank-avatar .avatar {
+  object-fit: cover;
+}
+.rank-avatar .profile-initials > svg {
+  width: 30px;
+  height: 30px;
+}
+.podium-1 .rank-avatar .profile-initials {
+  width: 76px;
+  height: 76px;
+  font-size: 1.5rem;
+}
+.podium-1 .rank-avatar .profile-initials > svg {
+  width: 40px;
+  height: 40px;
+}
+.podium-member > strong:first-of-type {
+  min-height: 2.8em;
+  display: grid;
+  align-items: center;
+  line-height: 1.4;
+  overflow-wrap: anywhere;
+}
+.podium-member {
+  transform-origin: bottom center;
+}
+.confirmation-feedback {
+  position: fixed;
+  z-index: 110;
+  bottom: max(28px, env(safe-area-inset-bottom));
+  left: 50%;
+  transform: translateX(-50%);
+  width: max-content;
+  max-width: calc(100vw - 32px);
+  display: grid;
+  justify-items: center;
+  gap: 4px;
+  color: var(--primary);
+  pointer-events: none;
+  font-weight: 650;
+}
+.confirmation-feedback > span:last-child {
+  padding: 10px 18px;
+  border-radius: 24px;
+  background: var(--surface);
+  color: var(--ink);
+  border: 1px solid var(--primary);
+  box-shadow: var(--shadow);
+}
+.confirmation-emblem {
+  width: 240px;
+  height: 88px;
+  display: grid;
+  place-items: center;
+  position: relative;
+}
+.sound-wavefronts {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+}
+.sound-core {
+  display: grid;
+  place-items: center;
+  width: 58px;
+  height: 58px;
+  border-radius: 50%;
+  background: var(--primary);
+  color: var(--on-primary);
+  box-shadow: var(--shadow);
+  z-index: 1;
+}
+.sound-bars {
+  width: 36px;
+  height: 30px;
+}
+.sound-bars rect {
+  transform-box: fill-box;
+  transform-origin: center;
+}
+.sound-wave {
+  transform-origin: 50% 50%;
+  opacity: 0.7;
+}
+[data-motion-paused] *,
+.streak-flame[data-motion-paused] > *,
+.medal-reflection[data-motion-paused]::before {
+  animation-play-state: paused !important;
+}
+@media (max-width: 767px) {
+  .confirmation-feedback {
+    bottom: calc(84px + env(safe-area-inset-bottom));
+  }
+  dialog .confirmation-feedback {
+    bottom: calc(20px + env(safe-area-inset-bottom));
+  }
+  .quiz-result-heading {
+    gap: 16px;
+    grid-template-columns: 88px minmax(0, 1fr);
+  }
+  .quiz-result-heading .grade-ring {
+    width: 88px;
+    height: 88px;
+  }
+  .rank-avatar .avatar,
+  .rank-avatar .profile-initials {
+    width: 40px;
+    height: 40px;
+    font-size: 0.875rem;
+  }
+  .podium-1 .rank-avatar .avatar,
+  .podium-1 .rank-avatar .profile-initials {
+    width: 46px;
+    height: 46px;
+    font-size: 1rem;
+  }
+  .rank-avatar .profile-initials > svg,
+  .podium-1 .rank-avatar .profile-initials > svg {
+    width: 24px;
+    height: 24px;
+  }
+}
+@media (prefers-reduced-motion: no-preference) {
+  .select-menu {
+    animation: menu-arrive 180ms var(--motion-ease);
+  }
+  .styled-select svg {
+    transition: transform 180ms var(--motion-ease);
+  }
+  .styled-select[data-state='open'] svg {
+    transform: rotate(180deg);
+  }
+  .modal {
+    animation: dialog-arrive 240ms var(--motion-ease);
+  }
+  .modal.is-closing {
+    animation: dialog-leave 140ms ease-in forwards;
+  }
+  .modal::backdrop {
+    animation: backdrop-arrive 180ms ease;
+  }
+  .button {
+    transition:
+      transform 140ms var(--motion-ease),
+      box-shadow 140ms,
+      background-color 180ms;
+  }
+  .button:active:not(:disabled) {
+    transform: translateY(2px) scale(0.99);
+  }
+  .streak-flame.is-burning > svg {
+    animation: flame-breathe 1200ms ease-in-out infinite;
+  }
+  .is-burning .flame-outer {
+    animation: flame-lick 760ms ease-in-out infinite alternate;
+  }
+  .is-burning .flame-core {
+    animation: flame-lick 540ms ease-in-out -240ms infinite alternate-reverse;
+  }
+  .streak-flame.is-burning > i {
+    display: block;
+    animation: ember-rise 1500ms ease-out infinite;
+  }
+  .streak-flame.is-burning > i:last-child {
+    animation-delay: -750ms;
+  }
+  .merit-medal {
+    transition: transform 220ms var(--motion-ease);
+  }
+  button:hover > .merit-medal[data-unlocked='true'],
+  button:focus-visible > .merit-medal[data-unlocked='true'] {
+    transform: translateY(-2px) rotate(-2deg);
+  }
+  button:hover .medal-reflection::before,
+  button:focus-visible .medal-reflection::before {
+    animation: medal-shine 1100ms var(--motion-ease);
+  }
+  .badge-detail .finish-legendary .medal-reflection::before {
+    animation: medal-shine 6s var(--motion-ease) infinite;
+  }
+  .podium-member {
+    animation: podium-arrive 420ms var(--motion-ease) both;
+  }
+  .podium-2 {
+    animation-delay: 60ms;
+  }
+  .podium-3 {
+    animation-delay: 120ms;
+  }
+  .podium-1 .podium-place svg {
+    animation: trophy-glint 900ms ease 450ms;
+  }
+  .ring-value,
+  .grade-value {
+    animation: ring-fill 650ms var(--motion-ease);
+    transition: stroke-dasharray 500ms var(--motion-ease);
+  }
+  .day-complete .week-mark {
+    animation: day-settle 240ms var(--motion-ease);
+  }
+  .check-hero .check-icon {
+    animation: day-settle 300ms var(--motion-ease);
+  }
+  .confirmation-feedback {
+    animation: confirmation-arrive 220ms var(--motion-ease);
+  }
+  .confirmation-feedback .sound-bars rect {
+    animation: sound-bar 420ms ease-in-out infinite alternate;
+  }
+  .sound-bars rect:nth-child(2n) {
+    animation-delay: -160ms;
+  }
+  .sound-bars rect:nth-child(3n) {
+    animation-delay: -280ms;
+  }
+  .sound-wave {
+    animation: sound-ripple 1200ms ease-out infinite;
+  }
+  .sound-wave:nth-child(2) {
+    animation-delay: -800ms;
+  }
+  .sound-wave:nth-child(3) {
+    animation-delay: -400ms;
+  }
+}
+@keyframes menu-arrive {
+  from {
+    opacity: 0;
+    transform: translateY(-4px) scale(0.98);
+  }
+}
+@keyframes dialog-arrive {
+  from {
+    opacity: 0;
+    transform: translateY(8px) scale(0.99);
+  }
+}
+@keyframes dialog-leave {
+  to {
+    opacity: 0;
+    transform: translateY(5px) scale(0.995);
+  }
+}
+@keyframes backdrop-arrive {
+  from {
+    opacity: 0;
+  }
+}
+@keyframes flame-breathe {
+  0%,
+  100% {
+    transform: scale(0.96, 0.94) rotate(-3deg);
+  }
+  50% {
+    transform: scale(1.03, 1.06) rotate(3deg);
+  }
+}
+@keyframes flame-lick {
+  from {
+    transform: skewX(-5deg) scaleY(0.88);
+  }
+  to {
+    transform: skewX(5deg) scaleY(1.08);
+  }
+}
+@keyframes ember-rise {
+  0%,
+  100% {
+    opacity: 0;
+    transform: translate(0, 0) scale(0.8);
+  }
+  20% {
+    opacity: 0.9;
+  }
+  85% {
+    opacity: 0;
+    transform: translate(5px, -18px) scale(0.25);
+  }
+}
+@keyframes medal-shine {
+  0%,
+  25% {
+    transform: translateX(-100%);
+  }
+  60%,
+  100% {
+    transform: translateX(100%);
+  }
+}
+@keyframes podium-arrive {
+  from {
+    opacity: 0.3;
+    transform: translateY(8px);
+  }
+}
+@keyframes trophy-glint {
+  45% {
+    transform: scale(1.12);
+    opacity: 0.7;
+  }
+}
+@keyframes ring-fill {
+  from {
+    stroke-dasharray: 0 100;
+  }
+}
+@keyframes day-settle {
+  from {
+    opacity: 0.5;
+    transform: scale(0.94);
+  }
+}
+@keyframes confirmation-arrive {
+  from {
+    opacity: 0;
+    transform: translate(-50%, 6px);
+  }
+}
+@keyframes sound-bar {
+  from {
+    transform: scaleY(0.45);
+  }
+  to {
+    transform: scaleY(1);
+  }
+}
+@keyframes sound-ripple {
+  0% {
+    opacity: 0;
+    transform: scale(0.65);
+  }
+  25% {
+    opacity: 0.9;
+  }
+  100% {
+    opacity: 0;
+    transform: scale(1.15);
+  }
+}

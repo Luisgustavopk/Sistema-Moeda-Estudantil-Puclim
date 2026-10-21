@@ -1,3 +1,4 @@
+import { FormSelect } from '@/shared/components/ui/Select'
 import { useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { useForm } from 'react-hook-form'
@@ -54,10 +55,11 @@ export function DonateCoupon({ code }: { code: string }) {
             label="Instituição beneficiária"
             error={form.formState.errors.beneficiaryId?.message}
           >
-            <select
+            <FormSelect
               id={`beneficiary-${code}`}
               disabled={review}
-              {...form.register('beneficiaryId')}
+              control={form.control}
+              name="beneficiaryId"
             >
               <option value="">Selecione</option>
               {query.data?.map((b) => (
@@ -65,7 +67,7 @@ export function DonateCoupon({ code }: { code: string }) {
                   {b.name}
                 </option>
               ))}
-            </select>
+            </FormSelect>
           </Field>
           {query.data?.length === 0 && (
             <p>Nenhuma instituição beneficiária está disponível.</p>

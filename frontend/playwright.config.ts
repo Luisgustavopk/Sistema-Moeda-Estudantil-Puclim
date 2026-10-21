@@ -1,6 +1,7 @@
 import { defineConfig } from '@playwright/test'
 const demoPort = process.env.PLAYWRIGHT_DEMO_PORT || '5173'
 const apiPort = process.env.PLAYWRIGHT_API_PORT || '5174'
+const reuseServers = process.env.PLAYWRIGHT_REUSE_SERVER === '1'
 
 export default defineConfig({
   testDir: './tests',
@@ -19,12 +20,18 @@ export default defineConfig({
   projects: [
     {
       name: 'demo',
-      testMatch: 'sprint3.spec.ts',
+      testMatch: ['sprint3.spec.ts', 'profile-customization.spec.ts'],
       use: { baseURL: `http://127.0.0.1:${demoPort}` },
     },
     {
       name: 'api',
-      testMatch: 'api.spec.ts',
+      testMatch: [
+        'api.spec.ts',
+        'gamification.spec.ts',
+        'design-round1.spec.ts',
+        'design-round2.spec.ts',
+        'refinements.spec.ts',
+      ],
       use: { baseURL: `http://127.0.0.1:${apiPort}` },
     },
   ],
@@ -32,14 +39,20 @@ export default defineConfig({
     {
       command: `npm run dev -- --host 127.0.0.1 --port ${demoPort} --strictPort`,
       url: `http://127.0.0.1:${demoPort}`,
-      env: { VITE_DATA_MODE: 'demo' },
-      reuseExistingServer: false,
+      env: {
+        VITE_DATA_MODE: 'demo',
+        VITE_CACHE_DIR: `.cache/vite-playwright-demo-${demoPort}`,
+      },
+      reuseExistingServer: reuseServers,
     },
     {
       command: `npm run dev -- --host 127.0.0.1 --port ${apiPort} --strictPort`,
       url: `http://127.0.0.1:${apiPort}`,
-      env: { VITE_DATA_MODE: 'api' },
-      reuseExistingServer: false,
+      env: {
+        VITE_DATA_MODE: 'api',
+        VITE_CACHE_DIR: `.cache/vite-playwright-api-${apiPort}`,
+      },
+      reuseExistingServer: reuseServers,
     },
   ],
 })

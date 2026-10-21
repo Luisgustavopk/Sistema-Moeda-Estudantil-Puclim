@@ -1,3 +1,4 @@
+import { Select } from '@/shared/components/ui/Select'
 import { Download, Search, Wallet } from 'lucide-react'
 import { useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
@@ -123,10 +124,10 @@ export function StatementPage() {
               onChange={(event) => setSearch(event.target.value)}
             />
           </div>
-          <select
+          <Select
             aria-label="Tipo de movimentação"
             value={kind}
-            onChange={(event) => setKind(event.target.value)}
+            onValueChange={(value) => setKind(value)}
             style={{ width: 'auto' }}
           >
             <option value="all">Todos os tipos</option>
@@ -150,7 +151,7 @@ export function StatementPage() {
                 <option value="DOACAO">Doações</option>
               </>
             )}
-          </select>
+          </Select>
         </div>
         <div className="form-grid" style={{ marginBottom: 20 }}>
           <div className="field">

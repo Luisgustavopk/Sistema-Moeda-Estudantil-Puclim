@@ -123,7 +123,7 @@ class GamificationIntegrationTest extends AbstractDatabaseTest {
         for (int i = 0; i < 2; i++) {
             var profile = f.teacher().client().ok("GET", "/gamificacao/perfis/" + f.student().id(), null);
             assertEquals(2, profile.path("level").asInt());
-            assertEquals(100, profile.path("totalReceived").asLong());
+            assertEquals(100, profile.path("stats").path("totalReceived").asLong());
             for (String key : List.of("cpf", "rg", "address", "email", "login", "passwordHash", "balance"))
                 assertFalse(profile.has(key), key);
         }
