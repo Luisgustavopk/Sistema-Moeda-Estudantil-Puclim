@@ -1,9 +1,10 @@
-import { Download, FileSpreadsheet, Upload, Users } from 'lucide-react'
+import { Download, FileSpreadsheet, Plus, Upload, Users } from 'lucide-react'
 import { useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { useAuth } from '@/features/auth/hooks/auth-context'
 import { instituicoesApi } from '../api/instituicoes.api'
 import { parseTeachersCsv } from '../utils/parse-teachers'
+import { TeacherRegistrationModal } from '../components/TeacherRegistrationModal'
 import { PageHeading } from '@/shared/components/ui/PageHeading'
 import { Avatar } from '@/shared/components/ui/Avatar'
 import { Button } from '@/shared/components/ui/Button'
@@ -24,6 +25,7 @@ export function TeachersPage() {
   const [fileName, setFileName] = useState('')
   const [fileError, setFileError] = useState('')
   const [result, setResult] = useState<ImportResult | null>(null)
+  const [registering, setRegistering] = useState(false)
   const query = useQuery({
     queryKey: ['teachers', user?.id],
     queryFn: instituicoesApi.teachers,
@@ -51,21 +53,29 @@ export function TeachersPage() {
       <PageHeading
         eyebrow="Quem reconhece também faz parte"
         title="Professores da instituição"
-        description="Importe a lista de professores e prepare seus primeiros acessos."
+        description="Cadastre professores individualmente ou importe uma lista para ampliar sua equipe."
         action={
-          <Button
-            variant="secondary"
-            onClick={() =>
-              downloadText(
-                'modelo-professores.csv',
-                'nome;cpf;departamento;email;login\r\nProfessor Exemplo;39053344705;Engenharia de Software;professor.exemplo@exemplo.com;professor.exemplo\r\n',
-              )
-            }
-          >
-            <Download size={17} /> Baixar modelo CSV
-          </Button>
+          <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap' }}>
+            <Button onClick={() => setRegistering(true)}>
+              <Plus size={17} /> Cadastrar professor
+            </Button>
+            <Button
+              variant="secondary"
+              onClick={() =>
+                downloadText(
+                  'modelo-professores.csv',
+                  'nome;cpf;departamento;email;login\r\nProfessor Exemplo;39053344705;Engenharia de Software;professor.exemplo@exemplo.com;professor.exemplo\r\n',
+                )
+              }
+            >
+              <Download size={17} /> Baixar modelo CSV
+            </Button>
+          </div>
         }
       />
+      {registering && (
+        <TeacherRegistrationModal onClose={() => setRegistering(false)} />
+      )}
       <section className="card">
         <div className="section-heading">
           <h2>Importar professores</h2>
@@ -266,7 +276,7 @@ export function TeachersPage() {
         {query.data?.length === 0 && (
           <EmptyState
             title="Sua equipe começa por aqui"
-            description="Importe os professores para que eles possam acessar o Puclim."
+            description="Cadastre um professor ou importe uma lista para preparar os acessos da sua equipe."
           />
         )}
         {query.data?.map((teacher) => (

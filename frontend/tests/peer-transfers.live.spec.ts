@@ -1,6 +1,8 @@
 import { expect, test, type Page } from '@playwright/test'
 import { chooseOption } from './select-option'
 
+test.use({ actionTimeout: 15000 })
+
 const password = 'Seguro@2026'
 let sequence = 0
 function documentNumber(cnpj = false) {

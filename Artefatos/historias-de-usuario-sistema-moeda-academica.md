@@ -73,12 +73,15 @@ Instituições são um tipo de empresa parceira: todas se cadastram pelo mesmo f
 
 **Prioridade:** Obrigatória
 
-### US05 · Importar meus professores
-**Como** instituição de ensino, **quero** importar a lista dos meus professores, **para** que eles já existam no sistema quando a parceria começar.
+### US05 · Cadastrar e importar meus professores
+**Como** instituição de ensino, **quero** cadastrar professores individualmente ou importar uma lista, **para** preparar os acessos iniciais e ampliar minha equipe conforme a instituição cresce.
 
 - Cada professor tem nome, CPF, departamento e fica vinculado à minha instituição.
+- O cadastro individual permite informar nome, CPF, departamento, e-mail e login pela tela de Professores, sem arquivo CSV.
+- CPF, e-mail e login duplicados são rejeitados nos dois fluxos. Erros no cadastro individual preservam os campos para correção.
 - A importação rejeita linhas com CPF repetido e mostra um relatório de erros.
 - Cada professor recebe acesso inicial e define a própria senha no primeiro login.
+- A instituição vê a senha temporária após cadastrar e pode cadastrar outro professor sem sair da tela. A senha deve ser entregue ao professor e não reaparece após fechar o resultado.
 
 **Prioridade:** Obrigatória
 

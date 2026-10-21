@@ -133,26 +133,29 @@ export function StatementPage() {
             <option value="all">Todos os tipos</option>
             <option value="in">Entradas</option>
             <option value="out">Saídas</option>
-            {teacher ? (
-              <>
-                <option value="COTA">Cota semestral</option>
-                <option value="ENVIO">Envio de moedas</option>
-                <option value="RESERVA">Reserva de missão</option>
-                <option value="LIBERACAO">Liberação de reserva</option>
-              </>
-            ) : (
-              <>
-                <option value="RECEBIMENTO">Reconhecimentos</option>
-                <option value="TRANSF_ENVIO">Transferências enviadas</option>
-                <option value="TRANSF_ENTRADA">Transferências recebidas</option>
-                <option value="RESGATE">Resgates</option>
-                <option value="MISSAO">Missões</option>
-                <option value="BONUS">Bônus</option>
-                <option value="RECOMPENSA">Recompensas de streak</option>
-                <option value="PREMIO">Prêmios do semestre</option>
-                <option value="DOACAO">Doações</option>
-              </>
-            )}
+            {(teacher
+              ? [
+                  ['COTA', 'Cota semestral'],
+                  ['ENVIO', 'Envio de moedas'],
+                  ['RESERVA', 'Reserva de missão'],
+                  ['LIBERACAO', 'Liberação de reserva'],
+                ]
+              : [
+                  ['RECEBIMENTO', 'Reconhecimentos'],
+                  ['TRANSF_ENVIO', 'Transferências enviadas'],
+                  ['TRANSF_ENTRADA', 'Transferências recebidas'],
+                  ['RESGATE', 'Resgates'],
+                  ['MISSAO', 'Missões'],
+                  ['BONUS', 'Bônus'],
+                  ['RECOMPENSA', 'Recompensas de streak'],
+                  ['PREMIO', 'Prêmios do semestre'],
+                  ['DOACAO', 'Doações'],
+                ]
+            ).map(([value, label]) => (
+              <option key={value} value={value}>
+                {label}
+              </option>
+            ))}
           </Select>
         </div>
         <div className="form-grid" style={{ marginBottom: 20 }}>

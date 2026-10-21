@@ -249,7 +249,9 @@ Se modificar `DB_NAME` ou `DB_PORT` no `.env`, ajuste também `DB_URL`. A porta 
 
 Em Linux/macOS, use `export DB_PASSWORD='<senha>'` e `sh ./mvnw spring-boot:run` dentro de `backend/`.
 
-A API usa as contas cadastradas e professores importados pela instituição. Não há conta administrativa padrão. O primeiro acesso do professor exige trocar a senha temporária. E-mails locais podem ser inspecionados no Mailpit em `http://localhost:8025`.
+A API usa as contas cadastradas e professores cadastrados pela instituição. Não há conta administrativa padrão. O primeiro acesso do professor exige trocar a senha temporária. E-mails locais podem ser inspecionados no Mailpit em `http://localhost:8025`.
+
+Na conta de **Instituição de ensino**, abra **Professores** (`/empresa/professores`) e clique em **Cadastrar professor** para adicionar uma pessoa por vez. Informe nome, CPF, departamento, e-mail e login. O vínculo com a instituição e a cota do semestre são criados automaticamente. Após salvar, a janela mostra a senha temporária e permite **Cadastrar outro professor**. Entregue o acesso ao professor antes de fechar o resultado; a senha não é enviada automaticamente por e-mail. A importação por CSV continua disponível na mesma tela. O cadastro individual reutiliza as validações e o processamento da importação, sem mudança no banco.
 
 ### 3. Executar o frontend
 

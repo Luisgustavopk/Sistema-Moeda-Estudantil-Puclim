@@ -36,6 +36,8 @@ const login = async (page: Page, user: string, secret = password) => {
   await expect(page).not.toHaveURL(/\/login$/)
 }
 const logout = async (page: Page) => {
+  const menu = page.getByRole('button', { name: 'Abrir menu' })
+  if (await menu.isVisible()) await menu.click()
   await page.getByRole('button', { name: 'Sair da conta' }).click()
   await expect(page).toHaveURL(/\/login$/)
 }
@@ -190,3 +192,134 @@ test('US01–US20: cadastro, importação, transferência, catálogo, resgate e 
     await page.evaluate(() => localStorage.getItem('puclim.demo.v1')),
   ).toBeNull()
 })
+
+for (const width of [1440, 390]) {
+  test(`cadastro individual de professores com validação, duplicidade e primeiro acesso (${width}px)`, async ({
+    page,
+  }, testInfo) => {
+    test.setTimeout(90000)
+    await page.setViewportSize({ width, height: 1000 })
+    const unique = `${width}${suffix}`
+    const firstCpf = documentNumber(String(Date.now() + width).slice(-9))
+    const secondCpf = documentNumber(String(Date.now() + width + 1).slice(-9))
+    await registerPartner(
+      page,
+      `InstituicaoIndividual${width}`,
+      documentNumber(String(Date.now() + width).slice(-12), true),
+      'ENSINO',
+    )
+    const institution = (await (
+      await page.request.get('/api/auth/session')
+    ).json()) as { id: string }
+    await page.goto('/empresa/professores')
+    await page
+      .getByRole('button', { name: 'Cadastrar professor', exact: true })
+      .click()
+    const dialog = page.getByRole('dialog')
+    await dialog
+      .getByRole('button', { name: 'Cadastrar professor', exact: true })
+      .click()
+    await expect(dialog.getByText('Nome completo obrigatório.')).toBeVisible()
+    await dialog
+      .getByLabel('Nome completo')
+      .fill(`Professor Individual ${unique}`)
+    await dialog.getByLabel('CPF', { exact: true }).fill('11111111111')
+    await dialog.getByLabel('Departamento', { exact: true }).fill('Computação')
+    await dialog
+      .getByLabel('E-mail', { exact: true })
+      .fill(`individual${unique}@example.test`)
+    await dialog
+      .getByLabel('Login', { exact: true })
+      .fill(`individual${unique}`)
+    await dialog
+      .getByRole('button', { name: 'Cadastrar professor', exact: true })
+      .click()
+    await expect(dialog.getByText('CPF inválido.')).toBeVisible()
+    await dialog.getByLabel('CPF', { exact: true }).fill(firstCpf)
+    await dialog
+      .getByRole('button', { name: 'Cadastrar professor', exact: true })
+      .click()
+    await expect(
+      dialog.getByRole('heading', {
+        name: 'Professor cadastrado',
+        exact: true,
+      }),
+    ).toBeVisible()
+    const temporaryPassword = await dialog.locator('code').innerText()
+    expect(temporaryPassword.length).toBeGreaterThanOrEqual(24)
+    const team = page
+      .locator('section')
+      .filter({ has: page.getByRole('heading', { name: 'Equipe cadastrada' }) })
+    await expect(
+      team.getByText(`Professor Individual ${unique}`, { exact: true }),
+    ).toBeVisible()
+    await dialog
+      .getByRole('button', { name: 'Cadastrar outro professor' })
+      .click()
+    await expect(dialog.getByLabel('Nome completo')).toHaveValue('')
+    await dialog.getByLabel('Nome completo').fill(`Segundo Professor ${unique}`)
+    await dialog.getByLabel('CPF', { exact: true }).fill(firstCpf)
+    await dialog.getByLabel('Departamento', { exact: true }).fill('Engenharia')
+    await dialog
+      .getByLabel('E-mail', { exact: true })
+      .fill(`segundo${unique}@example.test`)
+    await dialog.getByLabel('Login', { exact: true }).fill(`segundo${unique}`)
+    await dialog
+      .getByRole('button', { name: 'Cadastrar professor', exact: true })
+      .click()
+    await expect(dialog.getByRole('alert')).toContainText('já cadastrado')
+    await expect(dialog.getByLabel('Nome completo')).toHaveValue(
+      `Segundo Professor ${unique}`,
+    )
+    await expect(
+      team.getByText(`Segundo Professor ${unique}`, { exact: true }),
+    ).toHaveCount(0)
+    await dialog.getByLabel('CPF', { exact: true }).fill(secondCpf)
+    await dialog
+      .getByRole('button', { name: 'Cadastrar professor', exact: true })
+      .click()
+    await expect(
+      dialog.getByRole('heading', {
+        name: 'Professor cadastrado',
+        exact: true,
+      }),
+    ).toBeVisible()
+    await dialog.getByRole('button', { name: 'Concluir', exact: true }).click()
+    await expect(dialog).toHaveCount(0)
+    await expect(
+      team.getByText(`Segundo Professor ${unique}`, { exact: true }),
+    ).toBeVisible()
+    await expect(
+      page.getByText(temporaryPassword, { exact: true }),
+    ).toHaveCount(0)
+    expect(
+      await page.evaluate(
+        () => document.documentElement.scrollWidth <= window.innerWidth,
+      ),
+    ).toBeTruthy()
+    await page.screenshot({
+      path: testInfo.outputPath(`individual-teachers-${width}.png`),
+      fullPage: true,
+    })
+    await logout(page)
+    await login(page, `individual${unique}`, temporaryPassword)
+    await expect(page).toHaveURL(/\/primeiro-acesso$/)
+    await page.getByLabel('Senha temporária recebida').fill(temporaryPassword)
+    await page.getByLabel('Nova senha', { exact: true }).fill(password)
+    await page.getByLabel('Confirmar nova senha').fill(password)
+    await page
+      .getByRole('button', { name: 'Definir senha e continuar' })
+      .click()
+    await expect(page).toHaveURL(/\/professor$/)
+    const session = (await (
+      await page.request.get('/api/auth/session')
+    ).json()) as {
+      institutionId: string
+      balance: number
+      mustChangePassword: boolean
+    }
+    expect(session.institutionId).toBe(institution.id)
+    expect(session.balance).toBe(1000)
+    expect(session.mustChangePassword).toBe(false)
+  })
+}

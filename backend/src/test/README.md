@@ -71,3 +71,17 @@ No PowerShell, configure `$env:TEST_DB_URL`, `$env:TEST_DB_USER`, `$env:TEST_DB_
 ## Última validação
 
 Em 20/10/2026, `verify` passou com os 57 testes executados em Java 17 e MySQL 8.0.44 isolado, sem testes ignorados. V1 e V2 foram validadas, o pacote foi gerado e a suíte Playwright live passou contra esse pacote. A validação anterior de 14/10/2026 executou os 35 testes então existentes em MariaDB 11.8.1; a suíte ampliada ainda não foi repetida nesse motor. Consulte [o relatório da gamificação](../../../Artefatos/gamificacao-validacao.md) para resultados e limitações.
+
+### Transferências entre alunos — 21/10/2026
+
+Os nove cenários de `PeerTransferIntegrationTest` passaram em Java 17 e MariaDB 11.4, com as migrations V1–V4 aplicadas em banco dedicado. `verify` executou 72 testes, sem ignorados: 71 passaram e o teste existente `GamificationIntegrationTest.concurrentBonusesCannotConsumeTheSameFundBalance` falhou por deadlock no MariaDB (HTTP 409 em uma das duas requisições). A mesma falha foi reproduzida em uma cópia isolada do commit `4c750e2`, sem esta implementação. O fluxo de bônus do Fundo não foi alterado nesta entrega.
+
+Os cenários novos cobrem saldo inalterado enquanto pendente, aprovação/rejeição, critérios preservados e atualizados, instituição e vínculos, privacidade e papéis, contas desativadas, gasto durante a espera, replay e duas aprovações simultâneas. O saldo dos alunos é conciliado com os lançamentos e a transferência não aumenta o mérito acumulado.
+
+Na mesma validação, os dois cenários de `frontend/tests/peer-transfers.live.spec.ts` passaram contra a API real em banco separado, no Chrome com larguras de 1.440 px e 390 px. Exercitam vínculo e critérios pela tela do professor, solicitação pelo aluno, aprovação, rejeição, saldo, filtros do extrato e ausência de rolagem horizontal. `npm run build` e `npm run lint` também passaram. Para repetir somente esses fluxos, em `frontend/`, use `npm run test:e2e:live -- peer-transfers.live.spec.ts`; configure `LIVE_API_TARGET` para uma API de teste.
+
+### Cadastro individual de professores — 21/10/2026
+
+Os dois cenários novos em `frontend/tests/live.spec.ts` passaram contra a API real em Java 17 e MariaDB 11.4, nas larguras de 1.440 px e 390 px. Validam campos obrigatórios, CPF inválido, duplicidade, cadastro de outro professor, atualização da equipe, senha temporária, troca no primeiro acesso, vínculo institucional e cota inicial de 1.000 moedas. O cadastro usa o processamento existente de importação com uma única linha; não há nova migration. Build e lint do frontend passaram.
+
+A execução ampla de Playwright terminou com cinco cenários aprovados (cadastro individual em desktop/celular, fluxo anterior por CSV e transferências entre alunos em desktop/celular) e uma falha em `gamification.live.spec.ts`, que procura o texto `Reserva: 200 moedas` após publicar uma missão. A tela de missões não foi alterada neste pedido. Para selecionar apenas o arquivo de cadastro e importação, em `frontend/`, execute `npm run test:e2e:live -- '(^|/)live\.spec\.ts$'`, configurando `LIVE_API_TARGET` para uma API de teste.
