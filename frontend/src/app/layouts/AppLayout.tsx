@@ -26,6 +26,7 @@ import { DATA_MODE } from '@/shared/lib/http'
 import { useToast } from '@/shared/hooks/toast-context'
 import { errorMessage } from '@/shared/lib/errors'
 import { AchievementFeed } from '@/features/gamificacao/Inbox'
+import { ConfirmationFeedback } from '@/shared/components/ui/ConfirmationFeedback'
 
 export function AppLayout() {
   const { user, logout } = useAuth()
@@ -147,6 +148,7 @@ export function AppLayout() {
   return (
     <div className="app-shell">
       <AchievementFeed />
+      <ConfirmationFeedback />
       <a className="skip-link" href="#conteudo">
         Pular para o conteúdo
       </a>

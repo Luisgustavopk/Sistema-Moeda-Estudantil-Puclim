@@ -12,6 +12,10 @@ import { Coin } from '@/shared/components/ui/Brand'
 import { number } from '@/shared/utils/format'
 import { useAction } from '@/shared/hooks/use-action'
 import { DATA_MODE } from '@/shared/lib/http'
+import {
+  primeConfirmation,
+  celebrateSuccess,
+} from '@/shared/lib/confirmation-sound'
 
 export function RedeemDialog({
   advantage,
@@ -32,9 +36,12 @@ export function RedeemDialog({
   const submit = async () => {
     if (submitting.current) return
     submitting.current = true
+    primeConfirmation()
     try {
-      setCoupon(await action.mutateAsync(undefined))
+      const confirmed = await action.mutateAsync(undefined)
+      setCoupon(confirmed)
       setStep('success')
+      celebrateSuccess('redemption', confirmed.id)
     } catch {
       /* O erro é exibido no diálogo. */
     } finally {

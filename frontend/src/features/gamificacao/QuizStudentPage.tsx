@@ -15,6 +15,11 @@ import { Panel } from '@/shared/components/ui/ActivitySurface'
 
 import { QuizHistoryList } from './components/QuizHistoryList'
 import { quizDate } from './quiz-date'
+import { StreakFlame } from './components/StreakFlame'
+import {
+  primeConfirmation,
+  celebrateSuccess,
+} from '@/shared/lib/confirmation-sound'
 
 function WeekCalendar({
   status,
@@ -80,7 +85,10 @@ function QuizSession({
   const submit = useGameAction(
     (values: number[]) => gameApi.submitQuiz(quiz.id, values),
     'Quiz concluído! Seu progresso foi atualizado.',
-    onResult,
+    (completed) => {
+      onResult(completed)
+      celebrateSuccess('quiz', completed.id)
+    },
   )
   useEffect(() => {
     const media = window.matchMedia('(max-width: 767px)')
@@ -231,7 +239,10 @@ function QuizSession({
               <Button
                 disabled={answers.some((a) => a < 0)}
                 loading={submit.isPending}
-                onClick={() => submit.mutate(answers)}
+                onClick={() => {
+                  primeConfirmation()
+                  submit.mutate(answers)
+                }}
               >
                 Concluir quiz
               </Button>
@@ -257,7 +268,13 @@ function QuizSession({
   )
 }
 
-export function QuizResult({ quiz }: { quiz: Quiz }) {
+export function QuizResult({
+  quiz,
+  celebrate = false,
+}: {
+  quiz: Quiz
+  celebrate?: boolean
+}) {
   const { user } = useAuth()
   const payments = useQuery({
     queryKey: ['game', 'rewards', user?.id],
@@ -266,7 +283,14 @@ export function QuizResult({ quiz }: { quiz: Quiz }) {
   const linked =
     payments.data?.filter((p) => p.originOperationId === quiz.id) || []
   return (
-    <section className="card quiz-result">
+    <section
+      className={`card quiz-result ${celebrate ? 'merit-celebration' : ''}`}
+    >
+      {celebrate && quiz.streak > 0 && quiz.streak % 7 === 0 && (
+        <p className="streak-milestone">
+          <StreakFlame /> Um novo marco: {quiz.streak} dias de constância!
+        </p>
+      )}
       <div className="quiz-result-heading">
         <svg
           className="grade-ring"
@@ -291,13 +315,14 @@ export function QuizResult({ quiz }: { quiz: Quiz }) {
           </text>
         </svg>
         <div>
-          <h2>Resultado de {quiz.day}</h2>
+          <h2>Seu desempenho</h2>
           <p>
             Nota {quiz.grade.toLocaleString('pt-BR')} / 10 · {quiz.correctCount}{' '}
             acertos · {quiz.errors} erros
           </p>
-          <p>
-            <Flame size={18} aria-hidden="true" /> Streak de {quiz.streak} dias
+          <p className="streak-inline">
+            <StreakFlame size={18} active={quiz.streak > 0} /> Streak de{' '}
+            {quiz.streak} {quiz.streak === 1 ? 'dia' : 'dias'}
           </p>
         </div>
       </div>
@@ -361,17 +386,6 @@ export function QuizResult({ quiz }: { quiz: Quiz }) {
         Bônus sobre recebimentos posteriores aparecem como lançamentos separados
         no extrato.
       </p>
-      <div className="merit-links">
-        <Link className="button button-secondary" to="/aluno/conquistas">
-          Ver conquistas
-        </Link>
-        <Link className="button button-secondary" to="/ranking">
-          Ver ranking
-        </Link>
-        <Link className="text-link" to="/aluno/extrato">
-          Ver extrato
-        </Link>
-      </div>
     </section>
   )
 }
@@ -478,9 +492,9 @@ export function QuizPage() {
               <Panel className="quiz-consistency">
                 <div className="section-heading">
                   <h2>Sua constância</h2>
-                  <Flame size={22} aria-hidden="true" />
                 </div>
                 <p className="streak-number">
+                  <StreakFlame size={48} active={status.streak > 0} />
                   <strong>{status.streak}</strong>
                   <span>dias de streak</span>
                 </p>
@@ -527,8 +541,12 @@ export function QuizPage() {
             </div>
           )}
           {result && (
-            <Modal title="Quiz concluído" onClose={() => setResult(null)}>
-              <QuizResult quiz={result} />
+            <Modal
+              size="wide"
+              title="Quiz concluído"
+              onClose={() => setResult(null)}
+            >
+              <QuizResult quiz={result} celebrate />
               <Button variant="secondary" onClick={() => setResult(null)}>
                 Fechar resultado
               </Button>
@@ -554,6 +572,7 @@ export function QuizPage() {
           )}
           {historyResult && (
             <Modal
+              size="wide"
               title={`Resultado de ${quizDate(historyResult.day)}`}
               onClose={() => setHistoryResult(null)}
             >

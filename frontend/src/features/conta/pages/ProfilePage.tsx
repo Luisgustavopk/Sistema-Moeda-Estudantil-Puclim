@@ -25,6 +25,7 @@ import { ErrorNotice } from '@/shared/components/ui/Feedback'
 import { useAction } from '@/shared/hooks/use-action'
 import { useToast } from '@/shared/hooks/toast-context'
 import type { ProfileUpdate } from '@/shared/types/domain'
+import { SoundPreference } from '@/shared/components/ui/ConfirmationFeedback'
 
 export function ProfilePage() {
   const { user } = useAuth()
@@ -284,6 +285,7 @@ export function ProfilePage() {
             </div>
             <PasswordForm />
           </section>
+          {user.role !== 'PROFESSOR' && <SoundPreference />}
           {user.role !== 'PROFESSOR' && (
             <section className="card danger-zone account-section">
               <h2>Encerrar minha participação</h2>
