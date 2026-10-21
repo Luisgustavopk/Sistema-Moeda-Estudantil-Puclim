@@ -219,7 +219,7 @@ public class ProgressionService {
             result.add(new Rank(0, s.id, s.account.name, s.course, s.institution.account.name, received,
                     streaks.getOrDefault(s.id, 0), policy.level(total(s.id)), row == null ? null : (Instant) row[2]));
         }
-        Comparator<Rank> comparator = type.equals("STREAK") ? Comparator.comparingInt(rank -> rank.streak())
+        Comparator<Rank> comparator = type.equals("STREAK") ? Comparator.comparingInt((Rank rank) -> rank.streak()).reversed()
                 : Comparator.comparingLong((Rank rank) -> rank.received()).reversed()
                         .thenComparing(Comparator.comparingInt((Rank rank) -> rank.streak()).reversed());
         result.sort(comparator.thenComparing(rank -> rank.firstCoin(), Comparator.nullsLast(Comparator.naturalOrder()))
