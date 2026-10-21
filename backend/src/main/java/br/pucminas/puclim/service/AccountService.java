@@ -129,7 +129,9 @@ public class AccountService {
     Student s = new Student();
     s.account = a;
     s.cpf = cpf;
-    s.rg = input.rg().trim();
+    s.rg = input.rg() == null || input.rg().isBlank() ? null : input.rg().trim();
+    if (s.rg != null && s.rg.length() < 3)
+      throw ApiException.bad("Informe um RG válido ou deixe o campo vazio.");
     s.address = input.address().trim();
     s.course = input.course().trim();
     s.institution = institution;

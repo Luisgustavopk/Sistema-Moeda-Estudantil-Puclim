@@ -20,7 +20,7 @@ public class Student {
     public Account account;
     @Column(nullable = false, unique = true, length = 11)
     public String cpf;
-    @Column(nullable = false, length = 30)
+    @Column(length = 30)
     public String rg;
     @Column(nullable = false, length = 250)
     public String address;

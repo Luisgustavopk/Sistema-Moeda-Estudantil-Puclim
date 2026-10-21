@@ -17,7 +17,14 @@ export const studentSchema = z
     password: passwordRule,
     confirmation: z.string(),
     cpf: z.string().refine(validCpf, 'Informe um CPF válido.'),
-    rg: z.string().trim().min(3, 'Informe seu RG.').max(30),
+    rg: z
+      .string()
+      .trim()
+      .max(30)
+      .refine(
+        (value) => !value || value.length >= 3,
+        'Informe um RG válido ou deixe vazio.',
+      ),
     address: z
       .string()
       .trim()
