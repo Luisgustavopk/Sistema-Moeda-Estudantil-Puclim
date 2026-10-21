@@ -1,7 +1,7 @@
 import { useRef, useState } from 'react'
 import { Modal } from '@/shared/components/ui/Modal'
 import { Panel, ProgressRing } from '@/shared/components/ui/ActivitySurface'
-import { rarities } from '../badge-presentation'
+import { rarityPresentation } from '../badge-presentation'
 import { GraduationCap, Sparkles, Trophy, Flame } from 'lucide-react'
 import { Avatar } from '@/shared/components/ui/Avatar'
 import { dateTime, number } from '@/shared/utils/format'
@@ -147,7 +147,7 @@ export function ProfileShowcase({
                   <strong>{highlight.name}</strong>
                   <span>{highlight.description}</span>
                   <span className="small muted">
-                    {rarities[highlight.rarity]?.label || highlight.rarity} ·{' '}
+                    {rarityPresentation(highlight.rarity).label} ·{' '}
                     {dateTime(highlight.unlockedAt!)}
                   </span>
                 </span>
@@ -169,7 +169,7 @@ export function ProfileShowcase({
                     <BadgeMedal badge={b} />
                     <strong>{b.name}</strong>
                     <span className="small muted">
-                      {rarities[b.rarity]?.label || b.rarity}
+                      {rarityPresentation(b.rarity).label}
                     </span>
                   </button>
                 ))}
@@ -309,7 +309,7 @@ export function ProfileShowcase({
           <div className="badge-detail">
             <BadgeMedal badge={selected} />
             <span className="badge">
-              {rarities[selected.rarity]?.label || selected.rarity}
+              {rarityPresentation(selected.rarity).label}
             </span>
             <p>{selected.description}</p>
             <p>Conquistada em {dateTime(selected.unlockedAt!)}</p>

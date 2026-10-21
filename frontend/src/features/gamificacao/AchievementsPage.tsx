@@ -1,3 +1,4 @@
+import { Select } from '@/shared/components/ui/Select'
 import { useEffect, useRef, useState } from 'react'
 import { Link } from 'react-router'
 import { useQuery } from '@tanstack/react-query'
@@ -13,7 +14,13 @@ import {
   StatusBadge,
 } from '@/shared/components/ui/ActivitySurface'
 import { BadgeMedal } from './components/BadgeMedal'
-import { badgeRatio, badgeState, rarities } from './badge-presentation'
+import {
+  badgeRatio,
+  badgeState,
+  rarities,
+  normalizeRarity,
+  rarityPresentation,
+} from './badge-presentation'
 import type { Badge } from './types'
 
 export function AchievementsPage() {
@@ -56,7 +63,7 @@ export function AchievementsPage() {
     .filter(
       (b) =>
         (state === 'Todas' || badgeState(b) === state) &&
-        (rarity === 'Todas' || b.rarity === rarity),
+        (rarity === 'Todas' || normalizeRarity(b.rarity) === rarity),
     )
     .sort((a, b) =>
       sort === 'name'
@@ -164,9 +171,10 @@ export function AchievementsPage() {
             <div className="merit-selects">
               <label>
                 Raridade
-                <select
+                <Select
+                  aria-label="Raridade"
                   value={rarity}
-                  onChange={(e) => setRarity(e.target.value)}
+                  onValueChange={(value) => setRarity(value)}
                 >
                   <option value="Todas">Todas</option>
                   {Object.entries(rarities).map(([key, value]) => (
@@ -174,14 +182,18 @@ export function AchievementsPage() {
                       {value.label}
                     </option>
                   ))}
-                </select>
+                </Select>
               </label>
               <label>
                 Ordenar por
-                <select value={sort} onChange={(e) => setSort(e.target.value)}>
+                <Select
+                  aria-label="Ordenar por"
+                  value={sort}
+                  onValueChange={(value) => setSort(value)}
+                >
                   <option value="near">Mais próximas</option>
                   <option value="name">Nome</option>
-                </select>
+                </Select>
               </label>
             </div>
             {!filtered.length && (
@@ -200,7 +212,7 @@ export function AchievementsPage() {
                 >
                   <BadgeMedal badge={badge} />
                   <span className="small muted">
-                    {rarities[badge.rarity]?.label || badge.rarity}
+                    {rarityPresentation(badge.rarity).label}
                   </span>
                   <h3>{badge.name}</h3>
                   <StatusBadge
@@ -237,7 +249,7 @@ export function AchievementsPage() {
           <div className="badge-detail">
             <BadgeMedal badge={selected} />
             <span className="badge">
-              {rarities[selected.rarity]?.label || selected.rarity} ·{' '}
+              {rarityPresentation(selected.rarity).label} ·{' '}
               {badgeState(selected)}
             </span>
             <p>{selected.description}</p>
