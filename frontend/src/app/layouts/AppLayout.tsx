@@ -127,17 +127,23 @@ export function AppLayout() {
             ? 'Instituição beneficiária'
             : 'Empresa parceira'
   const activeLabel =
-    location.pathname === '/perfil'
-      ? 'Meu perfil'
-      : location.pathname === '/notificacoes'
-        ? 'Notificações'
-        : [...items]
-            .reverse()
-            .find(
-              (item) =>
-                location.pathname === item.path ||
-                location.pathname.startsWith(`${item.path}/`),
-            )?.label || 'Meu espaço'
+    location.pathname === '/aluno/quiz/historico'
+      ? 'Histórico de quizzes'
+      : location.pathname === '/perfil'
+        ? 'Minha conta'
+        : location.pathname === '/perfil/editar'
+          ? 'Editar perfil'
+          : location.pathname.startsWith('/perfis/')
+            ? 'Perfil de mérito'
+            : location.pathname === '/notificacoes'
+              ? 'Notificações'
+              : [...items]
+                  .reverse()
+                  .find(
+                    (item) =>
+                      location.pathname === item.path ||
+                      location.pathname.startsWith(`${item.path}/`),
+                  )?.label || 'Meu espaço'
   return (
     <div className="app-shell">
       <AchievementFeed />
@@ -196,15 +202,15 @@ export function AppLayout() {
             </NavLink>
             <NavLink
               to="/perfil"
-              aria-label="Meu perfil"
+              aria-label="Minha conta"
               className={({ isActive }) =>
                 `nav-link ${isActive ? 'active' : ''}`
               }
             >
               <UserRound size={19} />
-              <span>Meu perfil</span>
+              <span>Minha conta</span>
               <span className="nav-tooltip" aria-hidden="true">
-                Meu perfil
+                Minha conta
               </span>
             </NavLink>
           </nav>
@@ -219,7 +225,7 @@ export function AppLayout() {
             <Link
               to="/perfil"
               className="sidebar-profile"
-              aria-label="Abrir meu perfil"
+              aria-label="Abrir minha conta"
             >
               <Avatar name={user.name} />
               <div className="sidebar-user-info">
@@ -291,6 +297,26 @@ export function AppLayout() {
           </footer>
         </main>
       </div>
+      {user.role === 'ALUNO' && (
+        <nav className="mobile-bottom-nav" aria-label="Atalhos do aluno">
+          {[
+            { path: '/aluno', label: 'Início', icon: Home },
+            { path: '/aluno/conquistas', label: 'Conquistas', icon: Sparkles },
+            { path: '/aluno/quiz', label: 'Quiz', icon: GraduationCap },
+            { path: '/ranking', label: 'Ranking', icon: Users },
+          ].map(({ path, label, icon: Icon }) => (
+            <NavLink
+              key={path}
+              to={path}
+              end
+              className={({ isActive }) => (isActive ? 'active' : '')}
+            >
+              <Icon size={20} />
+              <span>{label}</span>
+            </NavLink>
+          ))}
+        </nav>
+      )}
     </div>
   )
 }

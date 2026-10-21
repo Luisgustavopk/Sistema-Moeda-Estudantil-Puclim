@@ -9,11 +9,13 @@ import {
   RouteGuard,
 } from '@/features/auth/components/RouteGuard'
 import { NotFoundPage } from './NotFoundPage'
-import {
-  PublicProfilePage,
-  RankingPage,
-} from '@/features/gamificacao/ProfileRanking'
-import { QuestionsPage, QuizPage } from '@/features/gamificacao/QuizPages'
+import { PublicProfilePage } from '@/features/gamificacao/ProfileRanking'
+import { RankingPage } from '@/features/gamificacao/RankingPage'
+import { QuestionsPage } from '@/features/gamificacao/QuizPages'
+import { QuizPage } from '@/features/gamificacao/QuizStudentPage'
+import { QuizHistoryPage } from '@/features/gamificacao/QuizHistoryPage'
+import { AchievementsPage } from '@/features/gamificacao/AchievementsPage'
+import { ProfileEditPage } from '@/features/gamificacao/ProfileEditPage'
 import { MissionsPage } from '@/features/gamificacao/MissionsPage'
 import {
   FundPage,
@@ -138,12 +140,17 @@ export default function App() {
               <Route path="/perfis/:id" element={<PublicProfilePage />} />
             </Route>
             <Route element={<RouteGuard roles={['ALUNO']} />}>
+              <Route path="/perfil/editar" element={<ProfileEditPage />} />
               <Route path="/aluno" element={<StudentDashboardPage />} />
               <Route path="/aluno/catalogo" element={<CatalogPage />} />
               <Route path="/aluno/extrato" element={<StatementPage />} />
               <Route path="/aluno/cupons" element={<CouponsPage />} />
-              <Route path="/aluno/conquistas" element={<PublicProfilePage />} />
+              <Route path="/aluno/conquistas" element={<AchievementsPage />} />
               <Route path="/aluno/quiz" element={<QuizPage />} />
+              <Route
+                path="/aluno/quiz/historico"
+                element={<QuizHistoryPage />}
+              />
               <Route path="/aluno/missoes" element={<MissionsPage />} />
               <Route path="/aluno/recompensas" element={<RewardsPage />} />
             </Route>
