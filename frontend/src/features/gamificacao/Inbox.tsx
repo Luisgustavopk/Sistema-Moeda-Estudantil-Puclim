@@ -1,13 +1,22 @@
-import { useEffect, useRef } from 'react'
+import { useEffect, useRef, useState } from 'react'
+import { Award, CheckCheck, Flag, TrendingUp } from 'lucide-react'
 import { useQuery } from '@tanstack/react-query'
 import { useAuth } from '@/features/auth/hooks/auth-context'
 import { useToast } from '@/shared/hooks/toast-context'
 import { DATA_MODE } from '@/shared/lib/http'
 import { Button } from '@/shared/components/ui/Button'
 import { QueryState } from '@/shared/components/ui/Feedback'
+import {
+  ExpandableMessage,
+  ListItem,
+  Panel,
+  StatusBadge,
+} from '@/shared/components/ui/ActivitySurface'
 import { dateTime } from '@/shared/utils/format'
 import { gameApi } from './api'
 import { useGameAction } from './hooks'
+import { Pagination } from '@/shared/components/ui/Pagination'
+import { usePagination } from '@/shared/hooks/use-pagination'
 
 function useInbox() {
   const { user } = useAuth()
@@ -39,38 +48,106 @@ export function AchievementFeed() {
 }
 export function Inbox() {
   const query = useInbox()
+  const [unread, setUnread] = useState(false)
   const read = useGameAction(gameApi.read, 'Notificação marcada como lida.')
-  if (DATA_MODE === 'demo') return null
+  const rows = query.data?.filter((n) => !unread || !n.readAt)
+  const pagination = usePagination(rows || [], 8)
+  if (DATA_MODE === 'demo')
+    return (
+      <Panel>
+        <p>
+          As atividades de gamificação estão disponíveis no ambiente integrado.
+        </p>
+      </Panel>
+    )
   return (
-    <section className="card">
-      <h2>Conquistas e atividades</h2>
+    <Panel className="inbox-panel">
+      <div className="section-heading">
+        <h2>Conquistas e atividades</h2>
+        <div
+          className="merit-filters"
+          role="group"
+          aria-label="Filtrar atividades"
+        >
+          <button
+            className="merit-chip"
+            aria-pressed={!unread}
+            onClick={() => {
+              setUnread(false)
+              pagination.setPage(1)
+            }}
+          >
+            Todas
+          </button>
+          <button
+            className="merit-chip"
+            aria-pressed={unread}
+            onClick={() => {
+              setUnread(true)
+              pagination.setPage(1)
+            }}
+          >
+            Não lidas
+            {query.data
+              ? ` (${query.data.filter((n) => !n.readAt).length})`
+              : ''}
+          </button>
+        </div>
+      </div>
       <QueryState
         loading={query.isLoading}
         error={query.error}
         retry={query.refetch}
       />
-      {query.data?.length === 0 && (
-        <p>Suas conquistas e novidades aparecerão aqui.</p>
+      {rows?.length === 0 && (
+        <p className="activity-empty">
+          {unread
+            ? 'Nenhuma atividade não lida. Tudo em dia!'
+            : 'Suas conquistas e novidades aparecerão aqui.'}
+        </p>
       )}
-      {query.data?.map((n) => (
-        <article className="row" key={n.id}>
-          <div className="row-text">
-            <strong>{n.title}</strong>
-            <span className="badge">{n.readAt ? 'Lida' : 'Nova'}</span>
-            <p className="notification-body">{n.message}</p>
-            <p>{dateTime(n.date)}</p>
-          </div>
-          {!n.readAt && (
-            <Button
-              variant="ghost"
-              loading={read.isPending}
-              onClick={() => read.mutate(n.id)}
+      <div className="activity-list">
+        {pagination.items.map((n) => {
+          const Icon = n.type.includes('BADGE')
+            ? Award
+            : n.type.includes('LEVEL')
+              ? TrendingUp
+              : Flag
+          return (
+            <ListItem
+              className={`notice-item ${!n.readAt ? 'is-unread' : ''}`}
+              key={n.id}
             >
-              Marcar como lida
-            </Button>
-          )}
-        </article>
-      ))}
-    </section>
+              <Icon size={24} className="activity-glyph" aria-hidden="true" />
+              <div className="activity-item-content">
+                <div className="activity-item-heading">
+                  <h3>{n.title}</h3>
+                  {!n.readAt && <StatusBadge tone="info">Nova</StatusBadge>}
+                </div>
+                <ExpandableMessage text={n.message} />
+                <time dateTime={n.date}>{dateTime(n.date)}</time>
+              </div>
+              {!n.readAt && (
+                <Button
+                  variant="ghost"
+                  className="notice-read"
+                  loading={read.isPending}
+                  onClick={() => read.mutate(n.id)}
+                >
+                  <CheckCheck size={16} aria-hidden="true" /> Marcar como lida
+                </Button>
+              )}
+            </ListItem>
+          )
+        })}
+      </div>
+      <Pagination
+        page={pagination.page}
+        total={rows?.length || 0}
+        size={8}
+        onChange={pagination.setPage}
+        label="Páginas de atividades"
+      />
+    </Panel>
   )
 }

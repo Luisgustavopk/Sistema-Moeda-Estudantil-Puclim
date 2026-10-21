@@ -1,9 +1,16 @@
-import { Save, ShieldCheck, Trash2 } from 'lucide-react'
+import {
+  Save,
+  ShieldCheck,
+  Trash2,
+  GraduationCap,
+  UserRound,
+  LockKeyhole,
+} from 'lucide-react'
 import { useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
-import { useNavigate } from 'react-router'
+import { Link, useNavigate } from 'react-router'
 import { useAuth } from '@/features/auth/hooks/auth-context'
 import { PasswordForm } from '@/features/auth/components/PasswordForm'
 import { instituicoesApi } from '@/features/instituicoes/api/instituicoes.api'
@@ -56,28 +63,40 @@ export function ProfilePage() {
     (value) => value.id === user.institutionId,
   )?.name
   return (
-    <>
+    <div className="merit-page account-settings">
       <PageHeading
         eyebrow="Seu espaço, do seu jeito"
-        title="Meu perfil"
+        title="Minha conta"
         description="Mantenha seus dados atualizados e cuide da sua conta."
+        action={
+          user.role === 'ALUNO' ? (
+            <Link className="button button-secondary" to={`/perfis/${user.id}`}>
+              Ver perfil público
+            </Link>
+          ) : undefined
+        }
       />
       <div className="profile-grid">
         <aside className="card profile-summary">
-          <Avatar name={user.name} large />
-          <h2>{user.name}</h2>
-          <p>{roleLabel}</p>
-          <span className="badge badge-gold">
-            {user.role === 'ALUNO'
-              ? user.course
-              : user.role === 'PROFESSOR'
-                ? user.department
-                : user.partnerKind === 'ENSINO'
-                  ? 'Instituição de ensino'
-                  : user.partnerKind === 'BENEFICIARIA'
-                    ? 'Instituição beneficiária'
-                    : 'Empresa parceira'}
-          </span>
+          <div className="account-identity">
+            <Avatar name={user.name} large />
+            <h2>{user.name}</h2>
+            <p>{roleLabel}</p>
+          </div>
+          <div className="account-course">
+            <GraduationCap size={20} aria-hidden="true" />
+            <span>
+              {user.role === 'ALUNO'
+                ? user.course
+                : user.role === 'PROFESSOR'
+                  ? user.department
+                  : user.partnerKind === 'ENSINO'
+                    ? 'Instituição de ensino'
+                    : user.partnerKind === 'BENEFICIARIA'
+                      ? 'Instituição beneficiária'
+                      : 'Empresa parceira'}
+            </span>
+          </div>
           <dl>
             <dt>Login</dt>
             <dd>{user.login}</dd>
@@ -91,11 +110,14 @@ export function ProfilePage() {
             )}
           </dl>
         </aside>
-        <div>
-          <section className="card">
-            <div className="section-heading">
-              <h2>Seus dados</h2>
-              <ShieldCheck size={21} className="muted" />
+        <div className="account-settings-panels">
+          <section className="card account-section">
+            <div className="settings-section-heading">
+              <UserRound size={22} aria-hidden="true" />
+              <div>
+                <h2>Seus dados</h2>
+                <p>Informações de contato e vínculo acadêmico.</p>
+              </div>
             </div>
             <form
               className="form-grid"
@@ -251,12 +273,19 @@ export function ProfilePage() {
               </div>
             </form>
           </section>
-          <section className="card" style={{ marginTop: 24 }}>
-            <h2 style={{ marginBottom: 20 }}>Segurança da conta</h2>
+          <section className="card account-section">
+            <div className="settings-section-heading">
+              <LockKeyhole size={22} aria-hidden="true" />
+              <div>
+                <h2>Segurança da conta</h2>
+                <p>Atualize sua senha para proteger o acesso.</p>
+              </div>
+              <ShieldCheck size={20} aria-hidden="true" />
+            </div>
             <PasswordForm />
           </section>
           {user.role !== 'PROFESSOR' && (
-            <section className="card danger-zone">
+            <section className="card danger-zone account-section">
               <h2>Encerrar minha participação</h2>
               <p>
                 Seu acesso será encerrado. O histórico e os cupons emitidos
@@ -328,6 +357,6 @@ export function ProfilePage() {
           </div>
         </Modal>
       )}
-    </>
+    </div>
   )
 }
