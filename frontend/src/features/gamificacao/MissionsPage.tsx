@@ -1,3 +1,4 @@
+import { Select } from '@/shared/components/ui/Select'
 import { useState } from 'react'
 import { ArrowUpRight, CalendarDays, Coins, Flag, Users } from 'lucide-react'
 import { Link } from 'react-router'
@@ -232,10 +233,10 @@ export function MissionsPage() {
         )}
         <label className="mission-filter">
           Estado
-          <select
+          <Select
             aria-label="Estado"
             value={filter}
-            onChange={(e) => setFilter(e.target.value)}
+            onValueChange={(value) => setFilter(value)}
           >
             <option value="all">Todos os estados</option>
             {Object.entries(states)
@@ -245,7 +246,7 @@ export function MissionsPage() {
                   {state.label}
                 </option>
               ))}
-          </select>
+          </Select>
         </label>
       </div>
       <QueryState

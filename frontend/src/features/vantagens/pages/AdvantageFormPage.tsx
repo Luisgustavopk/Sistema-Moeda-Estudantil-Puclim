@@ -1,3 +1,4 @@
+import { FormSelect } from '@/shared/components/ui/Select'
 import { ArrowLeft, ImagePlus, Save } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import { useForm } from 'react-hook-form'
@@ -144,13 +145,13 @@ export function AdvantageFormPage() {
             label="Categoria"
             error={errors.category?.message}
           >
-            <select id="category" {...form.register('category')}>
+            <FormSelect id="category" control={form.control} name="category">
               {['Alimentação', 'Material', 'Eventos', 'Descontos'].map(
                 (value) => (
                   <option key={value}>{value}</option>
                 ),
               )}
-            </select>
+            </FormSelect>
           </Field>
           <Field
             id="cost"

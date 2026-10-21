@@ -1,3 +1,4 @@
+import { Select } from '@/shared/components/ui/Select'
 import { useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { useForm } from 'react-hook-form'
@@ -89,10 +90,10 @@ export function RewardsPage() {
       <div className="reward-controls">
         <label>
           Período
-          <select
+          <Select
             aria-label="Período"
             value={semester}
-            onChange={(e) => setSemester(e.target.value)}
+            onValueChange={(value) => setSemester(value)}
           >
             <option value="all">Todo o histórico</option>
             {semesters.map((s) => (
@@ -100,19 +101,19 @@ export function RewardsPage() {
                 {s}
               </option>
             ))}
-          </select>
+          </Select>
         </label>
         <label>
           Situação
-          <select
+          <Select
             aria-label="Situação"
             value={status}
-            onChange={(e) => setStatus(e.target.value)}
+            onValueChange={(value) => setStatus(value)}
           >
             <option value="all">Todas</option>
             <option value="PAGO">Pagas</option>
             <option value="PENDENTE">Pendentes</option>
-          </select>
+          </Select>
         </label>
       </div>
       <QueryState

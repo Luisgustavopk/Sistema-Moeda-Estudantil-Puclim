@@ -1,3 +1,4 @@
+import { FormSelect } from '@/shared/components/ui/Select'
 import { useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { useForm } from 'react-hook-form'
@@ -108,16 +109,17 @@ function QuestionForm({
         label="Alternativa correta"
         error={form.formState.errors.correctIndex?.message}
       >
-        <select
+        <FormSelect
           id="question-correct"
-          {...form.register('correctIndex', { valueAsNumber: true })}
+          control={form.control}
+          name="correctIndex"
         >
           {[0, 1, 2, 3, 4, 5].map((n) => (
             <option key={n} value={n}>
               {n + 1}ª alternativa
             </option>
           ))}
-        </select>
+        </FormSelect>
       </Field>
       <label>
         <input type="checkbox" {...form.register('active')} /> Pergunta ativa

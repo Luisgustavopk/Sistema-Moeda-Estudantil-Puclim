@@ -1,3 +1,4 @@
+import { Select } from '@/shared/components/ui/Select'
 import { useState } from 'react'
 import { Link } from 'react-router'
 import { useQuery } from '@tanstack/react-query'
@@ -61,11 +62,11 @@ export function QuizHistoryPage() {
         <>
           <label className="history-month-filter">
             Período
-            <select
+            <Select
               aria-label="Período do histórico"
               value={month}
-              onChange={(e) => {
-                setMonth(e.target.value)
+              onValueChange={(value) => {
+                setMonth(value)
                 pagination.setPage(1)
               }}
             >
@@ -75,7 +76,7 @@ export function QuizHistoryPage() {
                   {quizDate(`${m}-01`, { month: 'long', year: 'numeric' })}
                 </option>
               ))}
-            </select>
+            </Select>
           </label>
           <Panel className="quiz-history-stats" label="Estatísticas do período">
             <div>
@@ -121,6 +122,7 @@ export function QuizHistoryPage() {
       )}
       {selected && (
         <Modal
+          size="wide"
           title={`Resultado de ${quizDate(selected.day)}`}
           onClose={() => setSelected(null)}
         >

@@ -8,6 +8,7 @@ import { AppProviders } from './app/providers'
 import './styles/globals.css'
 import './styles/profile-layout.css'
 import './styles/form-controls.css'
+import './styles/refinements.css'
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>

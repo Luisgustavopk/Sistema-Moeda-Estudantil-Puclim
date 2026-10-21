@@ -1,3 +1,4 @@
+import { FormSelect } from '@/shared/components/ui/Select'
 import { ArrowRight } from 'lucide-react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
@@ -50,7 +51,11 @@ export function PartnerRegistrationPage() {
           className="full"
           error={errors.partnerKind?.message}
         >
-          <select id="partnerKind" {...form.register('partnerKind')}>
+          <FormSelect
+            id="partnerKind"
+            control={form.control}
+            name="partnerKind"
+          >
             <option value="EMPRESA">Empresa · oferece vantagens</option>
             <option value="ENSINO">
               Instituição de ensino · vincula alunos e professores
@@ -58,7 +63,7 @@ export function PartnerRegistrationPage() {
             <option value="BENEFICIARIA">
               Instituição beneficiária · participa das futuras doações
             </option>
-          </select>
+          </FormSelect>
         </Field>
         <Field
           id="name"
