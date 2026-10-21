@@ -1,3 +1,4 @@
+import { chooseOption } from './select-option'
 import { expect, test } from '@playwright/test'
 
 test('demonstração: salvar personalização, recortar avatar e restaurar prévia', async ({
@@ -28,13 +29,11 @@ test('demonstração: salvar personalização, recortar avatar e restaurar prév
     context.fillRect(0, 0, 128, 128)
     return canvas.toDataURL('image/png').split(',')[1]
   })
-  await page
-    .getByLabel('Enviar avatar', { exact: false })
-    .setInputFiles({
-      name: 'avatar.png',
-      mimeType: 'image/png',
-      buffer: Buffer.from(png, 'base64'),
-    })
+  await page.getByLabel('Enviar avatar', { exact: false }).setInputFiles({
+    name: 'avatar.png',
+    mimeType: 'image/png',
+    buffer: Buffer.from(png, 'base64'),
+  })
   await expect(
     page.getByRole('dialog', { name: 'Recortar avatar' }),
   ).toBeVisible()
@@ -43,11 +42,12 @@ test('demonstração: salvar personalização, recortar avatar e restaurar prév
   await expect(page.locator('.editor-preview img.avatar')).toBeVisible()
   await page.getByRole('button', { name: 'Vitrines', exact: true }).click()
   await page.getByLabel('Primeira moeda', { exact: true }).check()
-  await page
-    .getByLabel('Conquista favorita', { exact: true })
-    .selectOption('demo-first-coin')
+  await chooseOption(
+    page.getByLabel('Conquista favorita', { exact: true }),
+    'demo-first-coin',
+  )
   await page.getByRole('button', { name: 'Salvar perfil' }).click()
-  await expect(page.getByText('Perfil salvo.', { exact: false })).toBeVisible()
+  await expect(page.getByText('Perfil salvo neste navegador.', { exact: false })).toBeVisible()
   await page
     .getByRole('link', { name: 'Ver perfil público', exact: true })
     .click()

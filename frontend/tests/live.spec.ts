@@ -1,3 +1,4 @@
+import { chooseOption } from './select-option'
 import { expect, test, type Page } from '@playwright/test'
 
 const suffix = Date.now().toString(36)
@@ -45,7 +46,7 @@ async function registerPartner(
   kind: string,
 ) {
   await page.goto('/cadastro/empresa')
-  await page.getByLabel('Tipo de organização').selectOption(kind)
+  await chooseOption(page.getByLabel('Tipo de organização'), kind)
   await page.getByLabel('Nome da organização').fill(`${name}${suffix}`)
   await page.getByLabel('CNPJ', { exact: true }).fill(cnpj)
   await page.getByLabel('Telefone com DDD').fill('31999999999')
@@ -88,11 +89,11 @@ test('US01–US20: cadastro, importação, transferência, catálogo, resgate e 
     .fill(`aluno${suffix}@example.test`)
   await page.getByLabel('Login', { exact: true }).fill(`aluno${suffix}`)
   await page.getByLabel('CPF', { exact: true }).fill(cpf)
-  await page.getByLabel('RG', { exact: true }).fill('MG123456')
+  await page.getByLabel('RG — opcional', { exact: true }).fill('MG123456')
   await page.getByLabel('Endereço completo').fill('Rua de Testes, 123')
-  await page
-    .getByLabel('Instituição de ensino')
-    .selectOption({ label: `InstituicaoLive${suffix}` })
+  await chooseOption(page.getByLabel('Instituição de ensino'), {
+    label: `InstituicaoLive${suffix}`,
+  })
   await page.getByLabel('Curso', { exact: true }).fill('Engenharia de Software')
   await page.getByLabel('Senha', { exact: true }).fill(password)
   await page.getByLabel('Confirmar senha').fill(password)

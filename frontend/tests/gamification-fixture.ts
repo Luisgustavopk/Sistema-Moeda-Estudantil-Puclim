@@ -1,5 +1,6 @@
 import type { Page } from '@playwright/test'
 import type { Profile, Quiz, Rank } from '../src/features/gamificacao/types'
+import type { ProfileCustomization } from '../src/features/gamificacao/profile-customization'
 
 // Respostas controladas apenas para testes; nunca importadas pela aplicação.
 export const student = {
@@ -134,6 +135,21 @@ export const ranks: Rank[] = Array.from({ length: 30 }, (_, i) => ({
 }))
 
 export async function mockGame(page: Page, role = 'ALUNO') {
+  let appearance: ProfileCustomization = {
+    displayName: student.name,
+    bio: '',
+    showRealName: false,
+    avatar: 'portrait',
+    frame: 'classic',
+    banner: 'petroleum',
+    featuredBadgeIds: profile.badges
+      .filter((b) => b.unlockedAt)
+      .map((b) => b.id),
+    favoriteBadgeId: null,
+    visibility: 'all',
+    showStats: true,
+    showActivity: true,
+  }
   let started = false
   let completed: Quiz | null = null
   await page.route(
@@ -146,11 +162,13 @@ export async function mockGame(page: Page, role = 'ALUNO') {
         data = { ...student, role }
       else if (path === '/api/instituicoes')
         data = [{ id: 'institution', name: 'PUC Minas' }]
-      else if (
-        path === '/api/gamificacao/perfil' ||
-        path.startsWith('/api/gamificacao/perfis/')
-      )
-        data = profile
+      else if (path === '/api/gamificacao/perfil/personalizacao') {
+        if (route.request().method() === 'PUT')
+          appearance = route.request().postDataJSON()
+        data = appearance
+      } else if (path === '/api/gamificacao/perfil') data = profile
+      else if (path.startsWith('/api/gamificacao/perfis/'))
+        data = publicProfileFixture(profile, appearance)
       else if (path === '/api/gamificacao/contexto')
         data = {
           today: '2026-10-20',
@@ -200,4 +218,67 @@ export async function mockGame(page: Page, role = 'ALUNO') {
       return route.fulfill({ json: data })
     },
   )
+}
+export function publicProfileFixture(
+  p: Profile = profile,
+  appearance?: ProfileCustomization,
+) {
+  const settings = appearance || {
+    displayName: p.name,
+    bio: '',
+    showRealName: false,
+    avatar: 'portrait',
+    frame: 'classic',
+    banner: 'petroleum',
+    featuredBadgeIds: p.badges.filter((b) => b.unlockedAt).map((b) => b.id),
+    favoriteBadgeId: null,
+    visibility: 'all',
+    showStats: true,
+    showActivity: true,
+  }
+  return {
+    id: p.id,
+    name: settings.displayName,
+    realName: settings.showRealName ? p.name : null,
+    course: p.course,
+    institution: p.institution,
+    level: p.level,
+    progressPercent: p.progressPercent,
+    maximumLevel: p.nextLevelAt === null,
+    appearance: settings,
+    badges: p.badges,
+    stats: settings.showStats
+      ? {
+          totalReceived: p.totalReceived,
+          nextLevelAt: p.nextLevelAt,
+          levelStart: p.levelStart,
+          streak: p.streak,
+          bestStreak: p.bestStreak,
+          coinPosition: p.coinPosition,
+          streakPosition: p.streakPosition,
+        }
+      : null,
+    activity: settings.showActivity
+      ? [
+          ...p.history.map((h) => ({
+            id: `level-${h.level}`,
+            date: h.date,
+            title: `Alcançou o nível ${h.level}`,
+            level: h.level,
+            badgeId: null,
+          })),
+          ...p.badges
+            .filter((b) => b.unlockedAt)
+            .map((b) => ({
+              id: `badge-${b.id}`,
+              date: b.unlockedAt!,
+              title: b.name,
+              level: null,
+              badgeId: b.id,
+            })),
+        ]
+          .sort((a, b) => b.date.localeCompare(a.date))
+          .slice(0, 4)
+      : null,
+  }
 }

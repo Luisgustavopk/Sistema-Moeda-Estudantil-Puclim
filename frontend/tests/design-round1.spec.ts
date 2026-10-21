@@ -1,4 +1,5 @@
-﻿import { expect, test } from '@playwright/test'
+import { chooseOption } from './select-option'
+import { expect, test } from '@playwright/test'
 import { mockDesignReview } from './design-round1-fixture'
 
 test('missões compactas: detalhes, aceite e entrega atualizam o estado', async ({
@@ -42,9 +43,10 @@ test('missões compactas: detalhes, aceite e entrega atualizam o estado', async 
     .getByRole('button', { name: 'Minhas participações', exact: true })
     .click()
   await expect(page.locator('.mission-tile')).toHaveCount(5)
-  await page
-    .getByLabel('Estado', { exact: true })
-    .selectOption('AGUARDANDO_APROVACAO')
+  await chooseOption(
+    page.getByLabel('Estado', { exact: true }),
+    'AGUARDANDO_APROVACAO',
+  )
   await expect(page.locator('.mission-tile')).toHaveCount(2)
 })
 
@@ -155,10 +157,10 @@ test('recompensas: totais reconciliam com o período e situação', async ({
   await page.goto('/aluno/recompensas')
   await expect(page.getByLabel('Resumo do período')).toContainText('120')
   await expect(page.getByLabel('Resumo do período')).toContainText('15')
-  await page.getByLabel('Período', { exact: true }).selectOption('2026-2')
+  await chooseOption(page.getByLabel('Período', { exact: true }), '2026-2')
   await expect(page.locator('.reward-row')).toHaveCount(2)
   await expect(page.getByLabel('Resumo do período')).toContainText('20')
-  await page.getByLabel('Situação', { exact: true }).selectOption('PENDENTE')
+  await chooseOption(page.getByLabel('Situação', { exact: true }), 'PENDENTE')
   await expect(page.locator('.reward-row')).toHaveCount(1)
   await expect(page.locator('.reward-row')).toContainText('Bônus de mérito')
   await expect(page.locator('.reward-row')).not.toContainText('Mariana Costa')

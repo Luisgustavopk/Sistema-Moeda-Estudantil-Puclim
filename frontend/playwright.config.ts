@@ -30,6 +30,7 @@ export default defineConfig({
         'gamification.spec.ts',
         'design-round1.spec.ts',
         'design-round2.spec.ts',
+        'refinements.spec.ts',
       ],
       use: { baseURL: `http://127.0.0.1:${apiPort}` },
     },

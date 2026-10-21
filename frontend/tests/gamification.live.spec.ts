@@ -1,3 +1,4 @@
+import { chooseOption } from './select-option'
 import { expect, test, type Page } from '@playwright/test'
 
 const password = 'Seguro@2026'
@@ -310,7 +311,10 @@ test('gamificação real: Fundo, perguntas, quiz, missão, conquistas, doação 
   await login(page, student)
   await page.goto('/aluno/cupons')
   await page.getByRole('button', { name: 'Doar vantagem' }).click()
-  await page.getByLabel('Instituição beneficiária').selectOption(beneficiary.id)
+  await chooseOption(
+    page.getByLabel('Instituição beneficiária'),
+    beneficiary.id,
+  )
   await page.getByRole('button', { name: 'Revisar doação' }).click()
   await page.getByRole('button', { name: 'Confirmar doação' }).click()
   await expect(page.getByText('Doado', { exact: true })).toBeVisible()

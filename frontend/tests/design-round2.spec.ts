@@ -1,6 +1,7 @@
-﻿import { expect, test, type Page } from '@playwright/test'
+import { chooseOption } from './select-option'
+import { expect, test, type Page } from '@playwright/test'
 import { mockDesignReview } from './design-round1-fixture'
-import { profile, quiz } from './gamification-fixture'
+import { profile, publicProfileFixture, quiz } from './gamification-fixture'
 
 async function extendedHistory(page: Page) {
   await mockDesignReview(page)
@@ -52,7 +53,7 @@ test('quiz: três recentes, histórico paginado, estatísticas do período e ret
   await expect(page.locator('.quiz-history-day')).toHaveCount(12)
   await page.getByRole('button', { name: 'Página 3', exact: true }).click()
   await expect(page.locator('.quiz-history-day')).toHaveCount(1)
-  await page.getByLabel('Período do histórico').selectOption('2026-10')
+  await chooseOption(page.getByLabel('Período do histórico'), '2026-10')
   await expect(
     page.getByRole('button', { name: 'Página 1', exact: true }),
   ).toHaveAttribute('aria-current', 'page')
@@ -147,13 +148,20 @@ test('editor: controles estilizados operam por teclado sem submissão pela prév
   await expect(page.locator('.editor-panel').getByRole('alert')).toHaveCount(0)
   await expect(
     page.getByRole('button', { name: 'Salvar perfil' }),
-  ).toBeDisabled()
+  ).toBeEnabled()
   await page.getByRole('button', { name: 'Vitrines', exact: true }).click()
   const select = page.getByLabel('Conquista favorita', { exact: true })
   await select.focus()
   await page.keyboard.press('ArrowDown')
+  await expect(
+    page.getByRole('option', { name: 'Sem favorita', exact: true }),
+  ).toBeFocused()
+  await page.keyboard.press('ArrowDown')
+  await expect(
+    page.getByRole('option', { name: 'Primeira moeda', exact: true }),
+  ).toBeFocused()
   await page.keyboard.press('Enter')
-  await expect(select).not.toHaveValue('')
+  await expect(select).toContainText('Primeira moeda')
 })
 
 for (const width of [360, 390, 768, 1280, 1440])
@@ -236,15 +244,15 @@ test('rodada 2: fonte ampliada, nomes extensos e estados vazios', async ({
   await page.setViewportSize({ width: 360, height: 900 })
   await page.emulateMedia({ reducedMotion: 'reduce' })
   await page.route(
-    (url) => url.pathname.startsWith('/api/gamificacao/perfi'),
+    (url) => url.pathname.startsWith('/api/gamificacao/perfis/'),
     (route) =>
       route.fulfill({
-        json: {
+        json: publicProfileFixture({
           ...profile,
           name: 'Maria Eduarda de Albuquerque e Vasconcelos',
           course: 'Engenharia de Computação e Sistemas de Informação',
           institution: 'Pontifícia Universidade Católica de Minas Gerais',
-        },
+        }),
       }),
   )
   for (const route of [

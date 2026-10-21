@@ -151,7 +151,7 @@ test('quiz: seleção pelo teclado, revisão e conclusão única', async ({
   ).toHaveCount(0)
 })
 
-test('editor: prévia, validação, saída pendente e API sem salvamento fictício', async ({
+test('editor: prévia, validação e confirmação de saída pendente', async ({
   page,
 }) => {
   await mockGame(page)
@@ -162,7 +162,7 @@ test('editor: prévia, validação, saída pendente e API sem salvamento fictíc
   )
   await expect(
     page.getByRole('button', { name: 'Salvar perfil' }),
-  ).toBeDisabled()
+  ).toBeEnabled()
   await page
     .getByRole('link', { name: 'Ver perfil público', exact: true })
     .click()
