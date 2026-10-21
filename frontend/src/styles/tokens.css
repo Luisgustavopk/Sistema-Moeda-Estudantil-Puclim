@@ -11,8 +11,12 @@
   --muted: #5b6b76;
   --primary: var(--petroleum);
   --on-primary: #fff;
-  --success: #2e8b57;
+  --success: #216d43;
   --danger: #b3392f;
+  --merit-bronze: #8a5128;
+  --merit-silver: #536b78;
+  --merit-gold: #85610a;
+  --merit-success: #216d43;
   --gold-soft: color-mix(in srgb, var(--gold) 25%, transparent);
   --border: color-mix(in srgb, var(--muted) 25%, transparent);
   --radius: 22px;
@@ -26,6 +30,11 @@
   --text-balance: clamp(3.25rem, 3.65vw, 4.75rem);
   --space-grid: clamp(1.125rem, 1.25vw, 1.75rem);
   --space-card: clamp(1.25rem, 1.4vw, 1.75rem);
+  --space-xs: 0.5rem;
+  --space-sm: 0.75rem;
+  --space-md: 1rem;
+  --space-lg: 1.5rem;
+  --space-xl: 2rem;
   --content-max: 108rem;
   --page-gutter: clamp(1.5rem, 4vw, 6rem);
   --shadow:
@@ -46,6 +55,12 @@
   --muted: #a4b8c4;
   --gold: #6cc3d5;
   --primary: var(--gold);
+  --merit-bronze: #edb88f;
+  --merit-silver: #becfd8;
+  --merit-gold: #edd078;
+  --merit-success: #8fdbaf;
+  --success: #8fdbaf;
+  --danger: #ffaaa0;
   --on-primary: #1b1b1b;
   --shadow:
     0 10px 22px rgba(0, 0, 0, 0.4), inset 0 3px 0 rgba(255, 255, 255, 0.06),
