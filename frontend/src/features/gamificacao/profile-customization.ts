@@ -1,5 +1,5 @@
 import { z } from 'zod'
-import { DATA_MODE } from '@/shared/lib/http'
+import { DATA_MODE, http } from '@/shared/lib/http'
 
 export const customizationSchema = z.object({
   displayName: z
@@ -29,10 +29,10 @@ export interface CustomizationAdapter {
 }
 export function defaultCustomization(name: string): ProfileCustomization {
   return {
-    displayName: name,
+    displayName: name.slice(0, 40),
     bio: '',
     showRealName: false,
-    avatar: 'initials',
+    avatar: 'portrait',
     frame: 'classic',
     banner: 'petroleum',
     featuredBadgeIds: [],
@@ -44,19 +44,33 @@ export function defaultCustomization(name: string): ProfileCustomization {
 }
 const key = (id: string) => `puclim.demo.profile.v1.${id}`
 export const customizationAdapter: CustomizationAdapter = {
-  canPersist: DATA_MODE === 'demo',
+  canPersist: true,
   load: async (id, name) => {
-    if (DATA_MODE !== 'demo') return defaultCustomization(name)
+    if (DATA_MODE !== 'demo')
+      return http<ProfileCustomization>('/gamificacao/perfil/personalizacao')
     const stored = localStorage.getItem(key(id))
     if (!stored) return defaultCustomization(name)
     return customizationSchema.parse(JSON.parse(stored))
   },
   save: async (id, input) => {
-    if (DATA_MODE !== 'demo')
-      throw new Error(
-        'A personalização ainda não está disponível na API. Seu perfil público não foi alterado.',
-      )
     const valid = customizationSchema.parse(input)
+    if (DATA_MODE !== 'demo') {
+      let avatar = valid.avatar
+      if (avatar.startsWith('data:image/')) {
+        const image = await fetch(avatar).then((response) => response.blob())
+        const body = new FormData()
+        body.append('file', image, 'avatar.png')
+        const uploaded = await http<{ url: string }>(
+          '/gamificacao/perfil/avatar',
+          { method: 'POST', body },
+        )
+        avatar = uploaded.url
+      }
+      return http<ProfileCustomization>('/gamificacao/perfil/personalizacao', {
+        method: 'PUT',
+        body: JSON.stringify({ ...valid, avatar }),
+      })
+    }
     try {
       localStorage.setItem(key(id), JSON.stringify(valid))
     } catch {

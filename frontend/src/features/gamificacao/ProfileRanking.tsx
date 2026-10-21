@@ -100,7 +100,7 @@ export function PublicProfilePage() {
     enabled: isDemo,
   })
   const query = useQuery({
-    queryKey: ['game', 'profile', id || user?.id],
+    queryKey: ['game', 'public-profile', id || user?.id],
     queryFn: () => gameApi.profile(id),
     enabled: !isDemo,
   })
@@ -159,16 +159,18 @@ export function PublicProfilePage() {
         <ProfileShowcase
           profile={profile}
           settings={
-            isDemo && settings.data
-              ? settings.data
-              : {
-                  ...defaultCustomization(profile.name),
-                  avatar: 'portrait',
-                  featuredBadgeIds: profile.badges
-                    .filter((b) => b.unlockedAt)
-                    .slice(0, 3)
-                    .map((b) => b.id),
-                }
+            profile.appearance
+              ? profile.appearance
+              : isDemo && settings.data
+                ? settings.data
+                : {
+                    ...defaultCustomization(profile.name),
+                    avatar: 'portrait',
+                    featuredBadgeIds: profile.badges
+                      .filter((b) => b.unlockedAt)
+                      .slice(0, 3)
+                      .map((b) => b.id),
+                  }
           }
         />
       )}

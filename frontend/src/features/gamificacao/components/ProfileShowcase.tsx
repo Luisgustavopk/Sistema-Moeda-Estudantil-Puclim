@@ -16,7 +16,8 @@ export function ProfileIdentity({
   name: string
   avatar: string
 }) {
-  return avatar.startsWith('data:image/') ? (
+  return avatar.startsWith('data:image/') ||
+    avatar.startsWith('/api/gamificacao/perfil/avatar/') ? (
     <img
       className="avatar avatar-large"
       src={avatar}
@@ -61,24 +62,30 @@ export function ProfileShowcase({
     favorite ||
     [...unlocked].sort((a, b) => b.unlockedAt!.localeCompare(a.unlockedAt!))[0]
   const additionalBadges = featured.filter((b) => b.id !== highlight?.id)
-  const activity = [
-    ...unlocked.map((b) => ({
-      id: `badge-${b.id}`,
-      date: b.unlockedAt!,
-      title: b.name,
-      badge: b,
-      level: null,
-    })),
-    ...profile.history.map((h) => ({
-      id: `level-${h.level}`,
-      date: h.date,
-      title: `Alcançou o nível ${h.level}`,
-      badge: null,
-      level: h.level,
-    })),
-  ]
-    .sort((a, b) => b.date.localeCompare(a.date))
-    .slice(0, 4)
+  const activity =
+    profile.activity !== undefined
+      ? (profile.activity || []).map((item) => ({
+          ...item,
+          badge: unlocked.find((b) => b.id === item.badgeId) || null,
+        }))
+      : [
+          ...unlocked.map((b) => ({
+            id: `badge-${b.id}`,
+            date: b.unlockedAt!,
+            title: b.name,
+            badge: b,
+            level: null,
+          })),
+          ...profile.history.map((h) => ({
+            id: `level-${h.level}`,
+            date: h.date,
+            title: `Alcançou o nível ${h.level}`,
+            badge: null,
+            level: h.level,
+          })),
+        ]
+          .sort((a, b) => b.date.localeCompare(a.date))
+          .slice(0, 4)
   return (
     <div
       className={`profile-showcase banner-${settings.banner} ${preview ? 'is-preview' : ''}`}
@@ -92,9 +99,10 @@ export function ProfileShowcase({
         </div>
         <div className="public-identity">
           <p className="public-display-name">{settings.displayName}</p>
-          {settings.showRealName && settings.displayName !== profile.name && (
-            <p>{profile.name}</p>
-          )}
+          {settings.showRealName &&
+            settings.displayName !== (profile.realName ?? profile.name) && (
+              <p>{profile.realName ?? profile.name}</p>
+            )}
           <p>
             {profile.course} · {profile.institution}
           </p>
@@ -105,7 +113,7 @@ export function ProfileShowcase({
             <ProgressRing
               value={profile.progressPercent}
               label={
-                profile.nextLevelAt === null
+                (profile.maximumLevel ?? profile.nextLevelAt === null)
                   ? `Nível ${profile.level}. Maior nível disponível alcançado.`
                   : `Nível ${profile.level}. ${profile.progressPercent}% de progresso para o próximo nível.`
               }
@@ -115,9 +123,11 @@ export function ProfileShowcase({
             </ProgressRing>
           </div>
           <span className="small muted">
-            {profile.nextLevelAt === null
+            {(profile.maximumLevel ?? profile.nextLevelAt === null)
               ? 'Nível máximo'
-              : `${number(Math.max(0, profile.nextLevelAt - profile.totalReceived))} moedas para evoluir`}
+              : profile.statsHidden
+                ? `${profile.progressPercent}% para o próximo nível`
+                : `${number(Math.max(0, (profile.nextLevelAt ?? 0) - profile.totalReceived))} moedas para evoluir`}
           </span>
         </div>
       </section>

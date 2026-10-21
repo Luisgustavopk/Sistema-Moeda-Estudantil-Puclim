@@ -27,8 +27,25 @@ export const gameApi = {
     request<{ semester: string; today: string; maxAllocation: number }>(
       '/contexto',
     ),
-  profile: (studentId?: string) =>
-    request<T.Profile>(studentId ? `/perfis/${id(studentId)}` : '/perfil'),
+  profile: async (studentId?: string): Promise<T.Profile> => {
+    if (!studentId) return request<T.Profile>('/perfil')
+    const p = await request<T.PublicProfileDto>(`/perfis/${id(studentId)}`)
+    return {
+      ...p,
+      appearance: { ...p.appearance, visibility: 'all' },
+      ...(p.stats || {
+        totalReceived: 0,
+        nextLevelAt: null,
+        levelStart: 0,
+        streak: 0,
+        bestStreak: 0,
+        coinPosition: null,
+        streakPosition: null,
+      }),
+      statsHidden: p.stats === null,
+      history: [],
+    }
+  },
   ranking: (
     semester: string,
     type: string,

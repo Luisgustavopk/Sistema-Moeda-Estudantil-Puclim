@@ -19,6 +19,7 @@ export interface Rank {
   streak: number
   level: number
   firstCoin: string | null
+  avatar?: string
 }
 export interface Ranking {
   content: Rank[]
@@ -30,6 +31,19 @@ export interface Ranking {
   type: string
 }
 export interface Profile {
+  realName?: string | null
+  appearance?: import('./profile-customization').ProfileCustomization
+  statsHidden?: boolean
+  maximumLevel?: boolean
+  activity?:
+    | {
+        id: string
+        title: string
+        date: string
+        level: number | null
+        badgeId: string | null
+      }[]
+    | null
   id: string
   name: string
   course: string
@@ -45,6 +59,32 @@ export interface Profile {
   streakPosition: number | null
   badges: Badge[]
   history: { level: number; total: number; date: string }[]
+}
+export interface PublicProfileDto {
+  id: string
+  name: string
+  realName: string | null
+  course: string
+  institution: string
+  level: number
+  progressPercent: number
+  maximumLevel: boolean
+  appearance: Omit<
+    import('./profile-customization').ProfileCustomization,
+    'visibility'
+  >
+  badges: Badge[]
+  activity: NonNullable<Profile['activity']> | null
+  stats: Pick<
+    Profile,
+    | 'totalReceived'
+    | 'nextLevelAt'
+    | 'levelStart'
+    | 'streak'
+    | 'bestStreak'
+    | 'coinPosition'
+    | 'streakPosition'
+  > | null
 }
 export interface Notice {
   id: string

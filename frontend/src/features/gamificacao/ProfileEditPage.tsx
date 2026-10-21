@@ -1,3 +1,4 @@
+import { Select, FormSelect } from '@/shared/components/ui/Select'
 import { useRef, useState } from 'react'
 import { Link } from 'react-router'
 import { useForm, useWatch, type FieldPathValue } from 'react-hook-form'
@@ -67,11 +68,12 @@ export function ProfileEditPage() {
           </Link>
         }
       />
-      <p className="notice notice-info">
-        {DATA_MODE === 'demo'
-          ? 'Demonstração explícita: os marcos abaixo são exemplos. A personalização é salva somente neste navegador; a privacidade serve apenas para pré-visualização.'
-          : 'Pré-visualização: a API ainda não oferece personalização. Você pode experimentar; salvar e publicar estarão disponíveis após a integração.'}
-      </p>
+      {DATA_MODE === 'demo' && (
+        <p className="notice notice-info">
+          Demonstração explícita: a personalização é salva somente neste
+          navegador; a privacidade serve apenas para pré-visualização.
+        </p>
+      )}
       <QueryState
         loading={DATA_MODE === 'api' && profile.isLoading}
         error={profile.error}
@@ -111,6 +113,7 @@ function ProfileEditor({
     mode: 'onChange',
   })
   const values = useWatch({ control: form.control }) as ProfileCustomization
+  const valid = customizationSchema.safeParse(values).success
   const client = useQueryClient()
   const toast = useToast()
   const save = useMutation({
@@ -119,7 +122,13 @@ function ProfileEditor({
     onSuccess: (data) => {
       form.reset(data)
       client.setQueryData(['profile-customization', profile.id], data)
-      toast('Perfil salvo. Personalização de demonstração neste navegador.')
+      void client.invalidateQueries({ queryKey: ['game', 'public-profile'] })
+      void client.invalidateQueries({ queryKey: ['game', 'ranking'] })
+      toast(
+        DATA_MODE === 'demo'
+          ? 'Perfil salvo neste navegador.'
+          : 'Perfil salvo. Sua personalização foi atualizada.',
+      )
     },
     onError: (error) =>
       toast(`${errorMessage(error)} Revise os dados e tente salvar novamente.`),
@@ -221,7 +230,7 @@ function ProfileEditor({
                 : section === 'Vitrines'
                   ? 'Escolha os marcos que contam a sua história.'
                   : section === 'Privacidade'
-                    ? 'Confira quais informações aparecem na prévia.'
+                    ? 'Escolha quem pode ver seu perfil e suas informações.'
                     : 'Um fundo que combina com seu perfil.'}
           </p>
           {section === 'Geral' && (
@@ -320,11 +329,11 @@ function ProfileEditor({
                 </Button>
               </div>
               <p className="small muted">
-                Prévia de moldura por conquista:{' '}
+                Moldura por conquista:{' '}
                 {unlocked.length
                   ? 'você já possui uma conquista desbloqueada.'
                   : 'desbloqueie sua primeira conquista.'}{' '}
-                A regra definitiva depende do contrato de personalização.
+                A moldura Mérito fica disponível após a primeira conquista.
               </p>
             </>
           )}
@@ -401,11 +410,11 @@ function ProfileEditor({
                 </div>
               ))}
               <Field id="favorite-badge" label="Conquista favorita">
-                <select
+                <Select
                   id="favorite-badge"
                   value={values.favoriteBadgeId || ''}
-                  onChange={(e) =>
-                    set('favoriteBadgeId', e.target.value || null)
+                  onValueChange={(value) =>
+                    set('favoriteBadgeId', value || null)
                   }
                 >
                   <option value="">Sem favorita</option>
@@ -414,25 +423,26 @@ function ProfileEditor({
                       {b.name}
                     </option>
                   ))}
-                </select>
+                </Select>
               </Field>
             </>
           )}
           {section === 'Privacidade' && (
             <>
               <p className="notice notice-info">
-                Estas opções demonstram a aparência. O controle de acesso real
-                será aplicado pelo backend quando o contrato estiver disponível.
+                A visibilidade controla o acesso ao perfil. Sua classificação
+                continua no ranking, com seu nome de exibição.
               </p>
               <Field id="profile-visibility" label="Quem pode ver o perfil">
-                <select
+                <FormSelect
                   id="profile-visibility"
-                  {...form.register('visibility')}
+                  control={form.control}
+                  name="visibility"
                 >
-                  <option value="all">Todos os usuários autenticados</option>
+                  <option value="all">Alunos e professores autenticados</option>
                   <option value="institution">Só minha instituição</option>
                   <option value="private">Só eu</option>
-                </select>
+                </FormSelect>
               </Field>
               <label className="editor-check">
                 <input type="checkbox" {...form.register('showStats')} />
@@ -477,20 +487,11 @@ function ProfileEditor({
               <Button
                 type="submit"
                 loading={save.isPending}
-                disabled={
-                  !dirty ||
-                  !customizationAdapter.canPersist ||
-                  !form.formState.isValid
-                }
+                disabled={!dirty || !customizationAdapter.canPersist || !valid}
               >
                 Salvar perfil
               </Button>
             </div>
-            {!customizationAdapter.canPersist && (
-              <p className="small muted">
-                Salvar indisponível: personalização aguardando API.
-              </p>
-            )}
           </div>
         </section>
         <aside className="editor-preview">

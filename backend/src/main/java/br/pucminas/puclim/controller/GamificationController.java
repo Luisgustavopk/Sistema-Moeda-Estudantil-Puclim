@@ -45,9 +45,11 @@ public class GamificationController {
     private final CommunityService community;
     private final br.pucminas.puclim.config.GamificationPolicy policy;
     private final AccountService identity;
+    private final br.pucminas.puclim.service.ProfileCustomizationService profiles;
 
     public GamificationController(ProgressionService p, QuizService q, MissionService m, RewardService r,
-            CommunityService c, br.pucminas.puclim.config.GamificationPolicy policy, AccountService identity) {
+            CommunityService c, br.pucminas.puclim.config.GamificationPolicy policy, AccountService identity,
+            br.pucminas.puclim.service.ProfileCustomizationService profiles) {
         progression = p;
         quizzes = q;
         missions = m;
@@ -55,6 +57,7 @@ public class GamificationController {
         community = c;
         this.policy = policy;
         this.identity = identity;
+        this.profiles = profiles;
     }
 
     @GetMapping("/contexto")
@@ -69,8 +72,10 @@ public class GamificationController {
     }
 
     @GetMapping("/perfis/{id}")
-    public Profile profile(@PathVariable String id) {
-        return progression.profile(id);
+    public org.springframework.http.ResponseEntity<br.pucminas.puclim.service.ProfileCustomizationService.PublicProfile> profile(@PathVariable String id) {
+        var settings = profiles.assertCanView(id);
+        return org.springframework.http.ResponseEntity.ok().cacheControl(org.springframework.http.CacheControl.noStore())
+            .body(profiles.publicView(progression.profile(id), settings));
     }
 
     @GetMapping("/ranking")

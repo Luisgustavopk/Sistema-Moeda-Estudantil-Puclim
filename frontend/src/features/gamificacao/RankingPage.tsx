@@ -1,3 +1,4 @@
+import { Select } from '@/shared/components/ui/Select'
 import { useState } from 'react'
 import { Link } from 'react-router'
 import { useQuery } from '@tanstack/react-query'
@@ -5,7 +6,7 @@ import { Flame, Trophy } from 'lucide-react'
 import { useAuth } from '@/features/auth/hooks/auth-context'
 import { PageHeading } from '@/shared/components/ui/PageHeading'
 import { QueryState, EmptyState } from '@/shared/components/ui/Feedback'
-import { Avatar } from '@/shared/components/ui/Avatar'
+import { ProfileIdentity } from './components/ProfileShowcase'
 import { Button } from '@/shared/components/ui/Button'
 import { number } from '@/shared/utils/format'
 import { api } from '@/shared/lib/api'
@@ -95,11 +96,11 @@ export function RankingPage() {
         <div className="merit-selects">
           <label>
             Instituição
-            <select
+            <Select
               aria-label="Instituição do ranking"
               value={institution}
-              onChange={(e) => {
-                setInstitution(e.target.value)
+              onValueChange={(value) => {
+                setInstitution(value)
                 setPage(0)
               }}
             >
@@ -111,7 +112,7 @@ export function RankingPage() {
                   {i.name}
                 </option>
               ))}
-            </select>
+            </Select>
           </label>
           <label>
             Semestre
@@ -241,7 +242,10 @@ export function RankingPage() {
                       {row.position}º
                     </span>
                     <span className="rank-avatar">
-                      <Avatar name={row.name} large />
+                      <ProfileIdentity
+                        name={row.name}
+                        avatar={row.avatar || 'portrait'}
+                      />
                     </span>
                     <strong>{row.name}</strong>
                     <span className="small muted">Nível {row.level}</span>
@@ -271,7 +275,12 @@ export function RankingPage() {
                   key={row.studentId}
                 >
                   <strong className="rank-place">{row.position}º</strong>
-                  <Avatar name={row.name} />
+                  <span className="ranking-list-avatar">
+                    <ProfileIdentity
+                      name={row.name}
+                      avatar={row.avatar || 'portrait'}
+                    />
+                  </span>
                   <span className="rank-identity">
                     <strong>
                       {row.name}

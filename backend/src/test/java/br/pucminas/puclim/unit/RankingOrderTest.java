@@ -9,10 +9,15 @@ import br.pucminas.puclim.dto.response.GamificationResponses.Rank;
 import br.pucminas.puclim.entity.*;
 import br.pucminas.puclim.repository.GamificationRepository;
 import br.pucminas.puclim.service.ProgressionService;
+import br.pucminas.puclim.service.ProfileCustomizationService;
 
 class RankingOrderTest {
     // Exercises the actual rankRows method, without a database or changing live data.
     static class RankingData extends GamificationRepository {
+        final Map<String, ProfileCustomization> customizations = new HashMap<>();
+        @Override public <T> T optional(Class<T> type, String id) {
+            return type == ProfileCustomization.class ? type.cast(customizations.get(id)) : null;
+        }
         final List<Student> students = new ArrayList<>();
         final List<Object[]> receipts = new ArrayList<>(), streaks = new ArrayList<>();
 
@@ -43,6 +48,22 @@ class RankingOrderTest {
     }
 
     @Test
+    void rankingKeepsSavedAvatarChoicesAndUsesPortraitForUncustomizedProfiles() {
+        RankingData db = new RankingData();
+        db.add("default", 1, 100, "2026-10-01T12:00:00Z");
+        db.add("custom", 2, 200, "2026-10-02T12:00:00Z");
+        ProfileCustomization saved = new ProfileCustomization();
+        saved.studentId = "custom"; saved.displayName = "Nome escolhido"; saved.avatar = "initials";
+        db.customizations.put(saved.studentId, saved);
+        ProgressionService service = new ProgressionService(db, null, new GamificationPolicy(), Clock.systemUTC(), null,
+                new ProfileCustomizationService(db, null));
+        List<Rank> rows = service.rankRows("institution", "2026-2", "MOEDAS");
+        assertEquals("initials", rows.get(0).avatar());
+        assertEquals("Nome escolhido", rows.get(0).name());
+        assertEquals("portrait", rows.get(1).avatar());
+    }
+
+    @Test
     void greatestStreakComesFirstAndPositionsAreAssignedBeforePagination() {
         RankingData db = new RankingData();
         db.add("zero", 0, 0, null);
@@ -51,8 +72,11 @@ class RankingOrderTest {
         db.add("twenty-eight", 28, 200, "2026-10-05T12:00:00Z");
         db.add("fourteen-b", 14, 300, "2026-10-01T12:00:00Z");
         db.add("fourteen-a", 14, 400, "2026-10-01T12:00:00Z");
-        ProgressionService service = new ProgressionService(db, null, new GamificationPolicy(), Clock.systemUTC(), null);
+        ProgressionService service = new ProgressionService(db, null, new GamificationPolicy(), Clock.systemUTC(), null,
+                new ProfileCustomizationService(db, null));
         List<Rank> rows = service.rankRows("institution", "2026-2", "STREAK");
+        assertTrue(rows.stream().allMatch(row -> row.avatar().equals("portrait")),
+                "Perfis sem personalização mantêm o avatar ilustrado no ranking");
         assertEquals(List.of(28, 14, 14, 14, 7, 0), rows.stream().map(Rank::streak).toList());
         assertEquals(List.of("twenty-eight", "fourteen-a", "fourteen-b", "fourteen-late", "seven", "zero"),
                 rows.stream().map(Rank::studentId).toList());
