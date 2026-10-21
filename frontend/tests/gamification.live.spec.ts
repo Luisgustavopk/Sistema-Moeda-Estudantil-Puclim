@@ -195,11 +195,15 @@ test('gamificação real: Fundo, perguntas, quiz, missão, conquistas, doação 
   await login(page, student)
   await page.goto('/aluno/quiz')
   await page.getByRole('button', { name: 'Iniciar quiz de hoje' }).click()
-  await expect(page.locator('fieldset')).toHaveCount(5)
-  for (const fieldset of await page.locator('fieldset').all())
-    await fieldset
+  await expect(page.locator('fieldset')).toHaveCount(1)
+  for (let index = 0; index < 5; index++) {
+    await page
+      .locator('fieldset')
       .getByRole('radio', { name: 'Resposta correta', exact: true })
       .check()
+    if (index < 4)
+      await page.getByRole('button', { name: 'Próxima pergunta' }).click()
+  }
   await page.getByRole('button', { name: 'Concluir quiz' }).click()
   await expect(
     page.getByText('Quiz de hoje concluído.', { exact: false }),
@@ -263,7 +267,7 @@ test('gamificação real: Fundo, perguntas, quiz, missão, conquistas, doação 
   ).toBeVisible()
   await page.goto('/ranking')
   await expect(
-    page.getByRole('link', { name: student.name, exact: true }),
+    page.locator('.ranking-row').filter({ hasText: student.name }).first(),
   ).toBeVisible()
   await page.goto('/aluno/recompensas')
   await expect(page.getByText('Pago', { exact: true })).toBeVisible()

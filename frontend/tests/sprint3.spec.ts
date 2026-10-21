@@ -88,7 +88,7 @@ test('cadastro do aluno valida CPF e senhas e cria conta com saldo zero', async 
   await page.getByRole('button', { name: 'Criar minha conta' }).click()
   await expect(page.getByRole('heading', { name: 'Olá, Joana!' })).toBeVisible()
   await expect(page.getByLabel('Saldo de moedas')).toContainText('0')
-  await page.getByRole('link', { name: 'Meu perfil', exact: true }).click()
+  await page.getByRole('link', { name: 'Minha conta', exact: true }).click()
   await expect(page.getByLabel('CPF', { exact: true })).toHaveValue(
     '39053344705',
   )
@@ -475,13 +475,21 @@ test('layout mobile, navegação, foco do diálogo e ausência de overflow', asy
   ]) {
     await page.setViewportSize({ width, height })
     const bounds = await page.getByRole('dialog').boundingBox()
-    expect(bounds!.x).toBeGreaterThanOrEqual(16)
-    expect(bounds!.y).toBeGreaterThanOrEqual(16)
+    if (width < 768) {
+      expect(bounds!.x).toBe(0)
+      expect(bounds!.width).toBe(width)
+      expect(Math.abs(bounds!.y + bounds!.height - height)).toBeLessThanOrEqual(
+        1,
+      )
+    } else {
+      expect(bounds!.x).toBeGreaterThanOrEqual(16)
+      expect(bounds!.y).toBeGreaterThanOrEqual(16)
+      expect(
+        Math.abs(bounds!.y + bounds!.height / 2 - height / 2),
+      ).toBeLessThanOrEqual(1)
+    }
     expect(
       Math.abs(bounds!.x + bounds!.width / 2 - width / 2),
-    ).toBeLessThanOrEqual(1)
-    expect(
-      Math.abs(bounds!.y + bounds!.height / 2 - height / 2),
     ).toBeLessThanOrEqual(1)
     await expect(
       page.getByRole('button', { name: 'Quero resgatar' }),
