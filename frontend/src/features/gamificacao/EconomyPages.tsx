@@ -13,28 +13,47 @@ import { gameApi } from './api'
 import { useGameAction } from './hooks'
 import { ActivityForm } from './ActivityForm'
 import type { Payment, Challenge } from './types'
+import {
+  Panel,
+  ListItem,
+  StatusBadge,
+} from '@/shared/components/ui/ActivitySurface'
 
-function PaymentList({ payments }: { payments: Payment[] }) {
+const paymentNames: Record<string, string> = {
+  BONUS: 'Bônus de mérito',
+  RECOMPENSA: 'Recompensa de constância',
+  PREMIO: 'Premiação do semestre',
+}
+function PaymentList({
+  payments,
+  administrative = false,
+}: {
+  payments: Payment[]
+  administrative?: boolean
+}) {
   return (
     <>
       {payments.length === 0 && <p>Nenhuma recompensa registrada.</p>}
       {payments.map((p) => (
-        <article className="row" key={p.id}>
-          <div className="row-text">
-            <strong>
-              {p.kind} · {p.studentName}
-            </strong>
-            <p>
-              {dateTime(p.date)} · Semestre {p.semester}
+        <ListItem className="reward-row" key={p.id}>
+          <div className="activity-item-content">
+            <h3>
+              {paymentNames[p.kind] || p.kind}
+              {administrative && ` · ${p.studentName}`}
+            </h3>
+            <p className="activity-meta">
+              <time dateTime={p.date}>{dateTime(p.date)}</time>
+              <span>Semestre {p.semester}</span>
             </p>
-            <span
-              className={`badge ${p.status === 'PAGO' ? 'badge-success' : ''}`}
-            >
+            <StatusBadge tone={p.status === 'PAGO' ? 'success' : 'warning'}>
               {p.status === 'PAGO' ? 'Pago' : 'Aguardando saldo no Fundo'}
-            </span>
+            </StatusBadge>
           </div>
-          <strong>{number(p.amount)} moedas</strong>
-        </article>
+          <div className="reward-amount">
+            <strong>{number(p.amount)}</strong>
+            <span>moedas</span>
+          </div>
+        </ListItem>
       ))}
     </>
   )
@@ -46,23 +65,93 @@ export function RewardsPage() {
     queryFn: gameApi.rewards,
     refetchInterval: 30000,
   })
+  const [semester, setSemester] = useState('all')
+  const [status, setStatus] = useState('all')
+  const period =
+    query.data?.filter((p) => semester === 'all' || p.semester === semester) ||
+    []
+  const rows = period.filter((p) => status === 'all' || p.status === status)
+  const semesters = [...new Set(query.data?.map((p) => p.semester) || [])]
+    .sort()
+    .reverse()
+  const paid = period
+    .filter((p) => p.status === 'PAGO')
+    .reduce((sum, p) => sum + p.amount, 0)
+  const pending = period
+    .filter((p) => p.status === 'PENDENTE')
+    .reduce((sum, p) => sum + p.amount, 0)
   return (
-    <>
+    <div className="merit-page rewards-page">
       <PageHeading
         title="Minhas recompensas"
         description="Bônus, recompensas de constância e prêmios do semestre."
       />
+      <div className="reward-controls">
+        <label>
+          Período
+          <select
+            aria-label="Período"
+            value={semester}
+            onChange={(e) => setSemester(e.target.value)}
+          >
+            <option value="all">Todo o histórico</option>
+            {semesters.map((s) => (
+              <option key={s} value={s}>
+                {s}
+              </option>
+            ))}
+          </select>
+        </label>
+        <label>
+          Situação
+          <select
+            aria-label="Situação"
+            value={status}
+            onChange={(e) => setStatus(e.target.value)}
+          >
+            <option value="all">Todas</option>
+            <option value="PAGO">Pagas</option>
+            <option value="PENDENTE">Pendentes</option>
+          </select>
+        </label>
+      </div>
       <QueryState
         loading={query.isLoading}
         error={query.error}
         retry={query.refetch}
       />
       {query.data && (
-        <section className="card">
-          <PaymentList payments={query.data} />
-        </section>
+        <>
+          <Panel className="reward-summary" label="Resumo do período">
+            <div>
+              <span>Recebidas</span>
+              <strong>
+                {number(paid)} <small>moedas</small>
+              </strong>
+            </div>
+            <div>
+              <span>Pendentes</span>
+              <strong>
+                {number(pending)} <small>moedas</small>
+              </strong>
+            </div>
+            <p className="small muted">
+              {semester === 'all' ? 'Todo o histórico' : `Semestre ${semester}`}
+              . Pagamentos pendentes aguardam saldo no Fundo institucional.
+            </p>
+          </Panel>
+          <Panel>
+            <div className="section-heading">
+              <h2>Seus reconhecimentos</h2>
+              <span className="small muted">{rows.length} registros</span>
+            </div>
+            <div className="activity-list">
+              <PaymentList payments={rows} />
+            </div>
+          </Panel>
+        </>
       )}
-    </>
+    </div>
   )
 }
 const allocationSchema = z.object({
@@ -189,7 +278,7 @@ export function FundPage() {
           </div>
           <section className="card">
             <h2>Recompensas e pendências</h2>
-            <PaymentList payments={query.data.payments} />
+            <PaymentList payments={query.data.payments} administrative />
           </section>
           <section className="card">
             <h2>Movimentações do Fundo</h2>
