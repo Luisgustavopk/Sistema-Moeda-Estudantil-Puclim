@@ -282,6 +282,8 @@ O proxy do Vite não faz parte do build de produção. O encaminhamento da API n
 
 ## Transferências entre alunos
 
+Para apresentar o sistema com uma base pronta na API real, execute `python3 scripts/seed-demo.py` com o backend rodando. O [guia da demonstração](Artefatos/base-demonstracao.md) contém os logins, a senha e um roteiro com instituição, professores, alunos vinculados, transferências, vantagens, cupons, quizzes e missões. O script preserva os cadastros existentes e não duplica as movimentações ao ser repetido.
+
 No menu do professor, **Entre alunos** (`/professor/transferencias-alunos`) permite publicar os critérios de análise e vincular alunos ativos da mesma instituição. Um aluno pode ter mais de um professor vinculado. Os vínculos existentes com a instituição continuam válidos; não há vínculo automático com professores.
 
 No menu do aluno, **Transferências** (`/aluno/transferencias`) permite selecionar um professor em comum e outro aluno vinculado a ele, informar quantidade e motivo e aceitar os critérios. O pedido fica pendente, sem movimentar ou reservar moedas. O professor responsável aprova ou rejeita com parecer obrigatório. A aprovação revalida vínculos, contas ativas e saldo; uma falha mantém o pedido pendente e não gera movimentação parcial. Para remover um vínculo, o professor precisa analisar os pedidos pendentes daquele aluno primeiro.
