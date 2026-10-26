@@ -2,6 +2,61 @@
 @import 'tw-animate-css';
 @import './tokens.css';
 
+/* Tailwind variants follow the existing login breakpoints and theme attribute. */
+@custom-variant login-dark (&:where([data-theme='dark'] *));
+@custom-variant login-tablet (@media (width <= 1170px));
+@custom-variant login-mobile (@media (width <= 749px));
+@custom-variant login-narrow (@media (width <= 359px));
+@custom-variant login-pointer (@media (hover: hover) and (pointer: fine) and (prefers-reduced-motion: no-preference));
+
+@theme inline {
+  --animate-login-light: login-ambient-drift 18s ease-in-out infinite alternate;
+  --animate-login-circulation: login-ambient-drift 24s ease-in-out infinite
+    alternate-reverse;
+  --animate-login-flow: login-line-flow 18s linear infinite;
+  --animate-login-float: login-coin-breathe 7s ease-in-out infinite;
+  --animate-login-arrive: login-arrive 480ms var(--login-ease) 80ms backwards;
+
+  @keyframes login-ambient-drift {
+    from {
+      transform: translate3d(-1%, -1%, 0);
+    }
+    to {
+      transform: translate3d(2%, 2%, 0);
+    }
+  }
+
+  @keyframes login-line-flow {
+    from {
+      stroke-dashoffset: 0;
+    }
+    to {
+      stroke-dashoffset: -2200;
+    }
+  }
+
+  @keyframes login-coin-breathe {
+    0%,
+    100% {
+      transform: translateY(calc(-6px * var(--login-scale)));
+    }
+    50% {
+      transform: translateY(calc(6px * var(--login-scale)));
+    }
+  }
+
+  @keyframes login-arrive {
+    from {
+      opacity: 0.65;
+      transform: translateY(calc(12px * var(--login-scale)));
+    }
+    to {
+      opacity: 1;
+      transform: none;
+    }
+  }
+}
+
 * {
   box-sizing: border-box;
 }
@@ -1385,15 +1440,16 @@ tbody tr:last-child td {
 .auth-story .eyebrow {
   color: #e3c678;
 }
-.auth-story h1 {
+.auth-story-title {
   font-size: clamp(38px, 4.5vw, 65px);
+  font-weight: 800;
   line-height: 1.08;
   max-width: 450px;
-  letter-spacing: -2px;
+  letter-spacing: -0.03em;
   position: relative;
   z-index: 1;
 }
-.auth-story h1 em {
+.auth-story-title em {
   font-style: normal;
   color: #edce79;
 }

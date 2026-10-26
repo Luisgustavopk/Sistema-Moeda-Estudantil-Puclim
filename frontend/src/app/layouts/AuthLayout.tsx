@@ -1,19 +1,22 @@
-import { Outlet } from 'react-router'
+import { Outlet, useMatch } from 'react-router'
 import { Brand, Coin } from '@/shared/components/ui/Brand'
 import { ThemeToggle } from '@/shared/components/ui/ThemeToggle'
 import { DATA_MODE } from '@/shared/lib/http'
 export function AuthLayout() {
+  const isLogin = useMatch('/login')
+  if (isLogin) return <Outlet />
+
   return (
     <div className="auth-layout">
       <aside className="auth-story">
         <Brand light />
         <div>
           <p className="eyebrow">Seu esforço faz a diferença</p>
-          <h1>
+          <h2 className="auth-story-title">
             Pequenas atitudes.
             <br />
             <em>Grandes conquistas.</em>
-          </h1>
+          </h2>
           <p>
             Seu mérito tem valor. Transforme dedicação, participação e boas
             ideias em novas possibilidades.

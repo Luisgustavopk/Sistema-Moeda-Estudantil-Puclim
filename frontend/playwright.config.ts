@@ -27,6 +27,7 @@ export default defineConfig({
       name: 'api',
       testMatch: [
         'api.spec.ts',
+        'login-motion.spec.ts',
         'gamification.spec.ts',
         'design-round1.spec.ts',
         'design-round2.spec.ts',

@@ -1,4 +1,5 @@
 import { useId } from 'react'
+import { Crown } from 'lucide-react'
 import { cn } from '@/shared/lib/utils'
 
 export function Wave() {
@@ -22,10 +23,22 @@ export function Brand({ light = false }: { light?: boolean }) {
     </span>
   )
 }
-export function Coin({ size = 24 }: { size?: number }) {
+export function Coin({
+  size = 24,
+  face = 'logo',
+}: {
+  size?: number
+  face?: 'logo' | 'crown'
+}) {
   const gradient = useId()
   return (
-    <svg width={size} height={size} viewBox="0 0 40 40" aria-hidden="true">
+    <svg
+      width={size}
+      height={size}
+      viewBox="0 0 40 40"
+      aria-hidden="true"
+      data-coin-face={face}
+    >
       <defs>
         <radialGradient id={gradient} cx=".35" cy=".3" r=".9">
           <stop offset="0" stopColor="#F3D77A" />
@@ -42,11 +55,23 @@ export function Coin({ size = 24 }: { size?: number }) {
         stroke="#fff"
         strokeOpacity=".55"
         strokeWidth="1"
-        strokeDasharray="2 2"
+        strokeDasharray={face === 'logo' ? '2 2' : '0.5 1.5'}
       />
-      <g transform="translate(9.5 10.5) scale(.52)" color="#6B4E08">
-        <Wave />
-      </g>
+      {face === 'logo' ? (
+        <g transform="translate(9.5 10.5) scale(.52)" color="#6B4E08">
+          <Wave />
+        </g>
+      ) : (
+        <Crown
+          x={9}
+          y={9}
+          width={22}
+          height={22}
+          color="#6B4E08"
+          fill="#6B4E08"
+          strokeWidth={1.4}
+        />
+      )}
     </svg>
   )
 }
