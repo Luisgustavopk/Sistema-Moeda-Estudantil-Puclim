@@ -14,7 +14,7 @@
 	<name>Puclim</name>
 	<description>Sistema de Moeda Estudantil Puclim</description>
 	<properties>
-		<java.version>17</java.version>
+		<java.version>25</java.version>
         <puclim.build.directory>${project.basedir}/target</puclim.build.directory>
 	</properties>
 	<dependencies>

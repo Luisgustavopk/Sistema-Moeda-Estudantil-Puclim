@@ -18,7 +18,7 @@ Os [resultados da validação](Artefatos/gamificacao-validacao.md) registram os 
 
 | Tecnologia | Versão/base | Responsabilidade |
 | --- | --- | --- |
-| Java | 17 | Linguagem do backend; base LTS compatível com o Spring Boot escolhido |
+| Java | 25 | Linguagem e alvo LTS do backend, compatível com o Spring Boot escolhido |
 | Spring Boot | 4.1.1 | Inicialização, configuração e execução da aplicação |
 | Spring Web MVC | Gerenciada pelo Spring Boot | API REST |
 | Spring Data JPA + Hibernate | Gerenciada pelo Spring Boot | Repositórios e mapeamento objeto-relacional |
@@ -212,7 +212,7 @@ Essas regras são implementadas nos serviços, com locks, idempotência e constr
 
 ### Pré-requisitos
 
-- JDK 17 ou superior, com `JAVA_HOME` apontando para o JDK.
+- JDK 25 (LTS), com `JAVA_HOME` apontando para o JDK.
 - Node.js 24 LTS e npm.
 - MySQL 8.4 acessível localmente **ou** Docker com Docker Compose para usar o banco fornecido.
 - Acesso à internet na primeira instalação das dependências e do Maven Wrapper.

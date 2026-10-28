@@ -63,9 +63,6 @@ case "$action" in
   backend)
     # O script conecta ao container selecionado. Para um banco externo, use DB_URL com mvnw diretamente.
     export DB_URL="jdbc:$DB_ENGINE://127.0.0.1:$DB_PORT/$DB_NAME?connectionTimeZone=UTC"
-    if [[ -z "${JAVA_HOME:-}" && -d /usr/lib/jvm/java-17-openjdk-amd64 ]]; then
-      export JAVA_HOME=/usr/lib/jvm/java-17-openjdk-amd64
-    fi
     echo "Backend usando $DB_ENGINE em 127.0.0.1:$DB_PORT."
     cd backend
     exec bash ./mvnw spring-boot:run ;;
