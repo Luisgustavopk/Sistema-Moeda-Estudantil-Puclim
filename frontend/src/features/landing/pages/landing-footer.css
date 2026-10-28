@@ -1,0 +1,325 @@
+/* An editorial signature: the orbit carries the mark into the closing line.
+   All colors come from the landing's existing light/dark semantic tokens. */
+.puclim-landing .lp-footer {
+  --lp-footer-ground: color-mix(in srgb, var(--lp-soft) 45%, var(--lp-ground));
+  position: relative;
+  isolation: isolate;
+  overflow: clip;
+  padding-block: 40px 48px;
+  background: var(--lp-footer-ground);
+  border-top: 1px solid color-mix(in srgb, var(--lp-line) 28%, transparent);
+}
+
+.puclim-landing .lp-footer-index {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: start;
+  gap: 32px;
+}
+
+.puclim-landing .lp-footer-institution {
+  color: var(--lp-muted);
+  font-size: 14px;
+  line-height: 20px;
+}
+
+.puclim-landing .lp-footer-institution > span {
+  display: block;
+  margin-top: 4px;
+  color: var(--lp-ink);
+  font-size: 18px;
+  line-height: 28px;
+  font-weight: 600;
+}
+
+.puclim-landing .lp-footer-nav {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: start;
+  gap: 16px 48px;
+}
+
+.puclim-landing .lp-footer-link {
+  display: inline-flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+  min-height: 48px;
+  padding-block: 8px;
+  color: var(--lp-ink);
+  font-size: 16px;
+  line-height: 24px;
+  font-weight: 600;
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-decoration-color: color-mix(in srgb, var(--lp-line) 60%, transparent);
+  text-underline-offset: 6px;
+}
+
+.puclim-landing .lp-footer-to-top {
+  color: var(--lp-muted);
+  font-weight: 400;
+}
+
+.puclim-landing .lp-footer-link:focus-visible {
+  color: var(--lp-ink);
+  text-decoration-color: currentColor;
+}
+
+.puclim-landing .lp-footer-signature {
+  position: relative;
+  display: grid;
+  grid-template-columns: repeat(12, minmax(0, 1fr));
+  align-items: center;
+  padding-top: 64px;
+}
+
+.puclim-landing .lp-footer-wordmark {
+  grid-column: 1 / -1;
+  width: fit-content;
+  padding-block: 8px;
+}
+
+.puclim-landing .lp-footer-wordmark > a {
+  display: inline-flex;
+  max-width: 100%;
+  padding-right: 16px;
+  background: var(--lp-footer-ground);
+  color: var(--lp-ink);
+  border-radius: 4px;
+}
+
+.puclim-landing .lp-footer-wordmark .brand {
+  gap: 24px;
+  font-size: clamp(72px, 8cqw, 112px);
+  line-height: 1;
+  font-weight: 600;
+  letter-spacing: -0.04em;
+}
+
+.puclim-landing .lp-footer-wordmark .brand > svg {
+  width: 0.85em;
+  height: 0.72em;
+  color: var(--lp-gold-ink);
+}
+
+.puclim-landing .lp-footer-statement {
+  position: relative;
+  grid-column: 6 / -1;
+  justify-self: end;
+  margin-top: 48px;
+  color: var(--lp-ink);
+  font-size: 30px;
+  line-height: 36px;
+  font-weight: 600;
+  letter-spacing: -0.025em;
+}
+
+.puclim-landing .lp-footer-statement > span {
+  display: block;
+}
+
+.puclim-landing .lp-footer-statement > span:first-child {
+  margin-bottom: 4px;
+  color: var(--lp-muted);
+  font-weight: 400;
+}
+
+.puclim-landing .lp-footer-circular {
+  white-space: nowrap;
+  color: var(--lp-gold-ink);
+}
+
+.puclim-landing .lp-footer-circular > svg {
+  display: inline;
+  margin-left: 8px;
+  vertical-align: -3px;
+}
+
+/* A single circular plane projects the ellipse. Only the tracer rotates;
+   neither the linework nor text needs a per-frame layout/paint or JS update.
+   data-story integrates offscreen/tab/global pausing with useLandingMotion. */
+.puclim-landing .lp-footer-circulation {
+  position: absolute;
+  z-index: -1;
+  inset: 0;
+  pointer-events: none;
+}
+
+.puclim-landing .lp-footer-orbit-plane {
+  position: absolute;
+  width: 104%;
+  aspect-ratio: 1;
+  left: 50%;
+  top: 48%;
+  transform: translate(-50%, -50%) rotate(-10deg) scaleY(0.18);
+}
+
+.puclim-landing .lp-footer-orbit-line {
+  position: absolute;
+  inset: 0;
+  border: 1px solid var(--lp-orbit-line);
+  border-radius: 50%;
+  opacity: 0.28;
+}
+
+.puclim-landing .lp-footer-orbit-tracer {
+  position: absolute;
+  inset: 0;
+  transform: rotate(24deg);
+  animation: lp-footer-circulate 28s linear infinite;
+}
+
+.puclim-landing .lp-footer-orbit-tracer > span {
+  position: absolute;
+  top: 50%;
+  left: 100%;
+  width: 16px;
+  height: 24px;
+  margin: -12px -8px;
+  border-radius: 50%;
+  background: var(--lp-gold-ink);
+}
+
+@keyframes lp-footer-circulate {
+  from {
+    transform: rotate(24deg);
+  }
+  to {
+    transform: rotate(384deg);
+  }
+}
+
+/* One short arrival sequence, reusing the page's one-time observer/easing. */
+.puclim-landing .lp-footer-wordmark[data-reveal] {
+  transition-delay: 40ms;
+}
+
+.puclim-landing .lp-footer-statement[data-reveal] {
+  transition-delay: 80ms;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .puclim-landing .lp-footer-link > svg {
+    transition: transform 160ms var(--lp-ease);
+  }
+
+  .puclim-landing .lp-footer-link:hover {
+    color: var(--lp-gold-ink);
+    text-decoration-color: currentColor;
+  }
+
+  .puclim-landing .lp-footer-link:hover > svg {
+    transform: translate(2px, -2px);
+  }
+
+  .puclim-landing .lp-footer-wordmark rect {
+    transform-box: fill-box;
+    transform-origin: center;
+    transition: transform 200ms var(--lp-ease);
+  }
+
+  .puclim-landing .lp-footer-wordmark a:hover rect:nth-child(even) {
+    transform: scaleY(0.88);
+  }
+
+  .puclim-landing .lp-footer-wordmark a:hover rect:nth-child(odd) {
+    transform: scaleY(1.08);
+  }
+}
+
+/* Focus must be immediate, including when it arrives before scroll reveal. */
+.puclim-landing .lp-footer:has(:focus-visible) [data-reveal],
+.puclim-landing .lp-footer a:focus-visible :is(svg, rect) {
+  transition: none;
+  transition-delay: 0ms;
+  transform: none;
+}
+
+@container puclim (max-width: 999px) {
+  .puclim-landing .lp-footer-nav {
+    gap: 8px 32px;
+  }
+
+  .puclim-landing .lp-footer-link {
+    gap: 12px;
+    font-size: 14px;
+    line-height: 20px;
+  }
+
+  .puclim-landing .lp-footer-statement {
+    grid-column: 5 / -1;
+    margin-top: 40px;
+    font-size: 24px;
+    line-height: 32px;
+  }
+
+  .puclim-landing .lp-footer-circular > svg {
+    width: 20px;
+    height: 20px;
+    vertical-align: -2px;
+  }
+}
+
+@container puclim (max-width: 699px) {
+  .puclim-landing .lp-footer {
+    padding-block: 32px;
+  }
+
+  .puclim-landing .lp-footer-index {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 24px;
+  }
+
+  .puclim-landing .lp-footer-nav {
+    justify-content: space-between;
+    gap: 8px 24px;
+  }
+
+  .puclim-landing .lp-footer-signature {
+    grid-template-columns: minmax(0, 1fr);
+    padding-top: 40px;
+  }
+
+  .puclim-landing .lp-footer-wordmark {
+    grid-column: 1;
+  }
+
+  .puclim-landing .lp-footer-wordmark .brand {
+    gap: 16px;
+    font-size: clamp(60px, 14cqw, 80px);
+  }
+
+  .puclim-landing .lp-footer-orbit-plane {
+    width: 112%;
+    top: 30%;
+    transform: translate(-50%, -50%) rotate(-12deg) scaleY(0.25);
+  }
+
+  .puclim-landing .lp-footer-orbit-tracer {
+    animation-duration: 36s;
+  }
+
+  .puclim-landing .lp-footer-statement {
+    grid-column: 1;
+    justify-self: start;
+    margin-top: 40px;
+    font-size: 20px;
+    line-height: 28px;
+  }
+
+  .puclim-landing .lp-footer-statement > span:first-child {
+    margin-bottom: 8px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .puclim-landing .lp-footer .lp-footer-orbit-tracer {
+    animation: none;
+  }
+
+  .puclim-landing .lp-footer :is([data-reveal], a, svg, rect) {
+    transition: none;
+    transform: none;
+  }
+}

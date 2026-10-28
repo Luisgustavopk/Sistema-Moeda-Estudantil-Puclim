@@ -2,6 +2,7 @@ import { loginStyles } from '../pages/login-page.styles'
 import { useEffect, useRef, useState, type PointerEvent } from 'react'
 import { RotateCcw } from 'lucide-react'
 import { Coin } from '@/shared/components/ui/Brand'
+import { cn } from '@/shared/lib/utils'
 import { playCoinSound, stopCoinSound } from '../utils/coin-sound'
 
 type Rotation = { x: number; y: number }
@@ -27,7 +28,13 @@ type CoinDrag = {
   reduce: boolean
 }
 
-export function InteractiveCoin({ sound }: { sound: boolean }) {
+export function InteractiveCoin({
+  sound,
+  variant = 'login',
+}: {
+  sound: boolean
+  variant?: 'login' | 'hero'
+}) {
   const model = useRef<HTMLSpanElement>(null)
   const animation = useRef<Animation | null>(null)
   const reflections = useRef<Animation[]>([])
@@ -254,12 +261,21 @@ export function InteractiveCoin({ sound }: { sound: boolean }) {
   }
 
   return (
-    <div className={loginStyles.coinScene}>
+    <div
+      className={cn(
+        loginStyles.coinScene,
+        variant === 'hero' &&
+          'left-0! w-full! max-w-[440px]! [--coin-size:clamp(172px,24vw,340px)]! [--login-paper:#102d33] [--login-ink:#f7f0df] [--login-secondary:#b6c8c5] [--login-accent:#e8c877] [--login-line:#638080] [--login-coin-orbit:#c4aa69]',
+      )}
+    >
       <div className={loginStyles.coinStage}>
         <div className={loginStyles.coinOrbit} aria-hidden="true" />
         <button
           type="button"
-          className={loginStyles.coinButton}
+          className={cn(
+            loginStyles.coinButton,
+            variant === 'hero' && 'size-[calc(var(--coin-size)+40px)]! p-5!',
+          )}
           aria-label={
             sound
               ? 'Girar moeda e ouvir seu som'

@@ -75,6 +75,11 @@ const LoginPage = lazy(() =>
     default: module.LoginPage,
   })),
 )
+const LandingPage = lazy(() =>
+  import('@/features/landing/pages/LandingPage').then((module) => ({
+    default: module.LandingPage,
+  })),
+)
 const StudentRegistrationPage = lazy(() =>
   import('@/features/alunos/pages/StudentRegistrationPage').then((module) => ({
     default: module.StudentRegistrationPage,
@@ -165,7 +170,9 @@ export default function App() {
   return (
     <Suspense fallback={<Loading label="Preparando seu espaço..." />}>
       <Routes>
-        <Route path="/" element={<HomeRedirect />} />
+        <Route path="/" element={<HomeRedirect />}>
+          <Route index element={<LandingPage />} />
+        </Route>
         <Route element={<GuestGuard />}>
           <Route element={<AuthLayout />}>
             <Route path="/login" element={<LoginPage />} />

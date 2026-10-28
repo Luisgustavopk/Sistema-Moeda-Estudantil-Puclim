@@ -1,25 +1,7 @@
-// Tailwind v4 utilities for the login surface. Static strings are picked up at build time.
-// The login-* names are stable hooks for gestures and tests, kept independently of the styling utilities.
-// `!` is scoped to this surface where unlayered legacy shared styles would otherwise win.
+import { publicSurface } from '@/shared/components/public/public-surface.styles'
+
 export const loginStyles = {
-  experience: [
-    'login-experience',
-    '[--login-scale:1.3]! [--login-paper:#f4f1e8]! [--login-panel:#fffdf8]! [--login-ink:#123e48]! [--login-secondary:#496166]! [--login-accent:#0f4c5c]! [--login-on-accent:#fffbf2]! [--login-line:#75857d]! [--login-field:#efeee7]! [--login-gold:#b58a27]! [--login-orbit:#8a7041]! [--login-orbit-opacity:0.82]! [--login-orbit-flow:#0f4c5c]! [--login-orbit-flow-opacity:0.85]! [--login-coin-orbit:#52777a]! [--login-ease:var(--motion-ease,_cubic-bezier(0.23,_1,_0.32,_1))]! relative! isolate! flex! flex-col! min-h-dvh! overflow-clip! bg-(--login-paper)! text-[color:var(--login-ink)]! text-[length:calc(1rem_*_var(--login-scale))]! leading-[1.5]!',
-    'login-dark:[--login-paper:#102d33]! login-dark:[--login-panel:#193a40]! login-dark:[--login-ink:#f7f0df]! login-dark:[--login-secondary:#b6c8c5]! login-dark:[--login-accent:#e8c877]! login-dark:[--login-on-accent:#16353b]! login-dark:[--login-line:#638080]! login-dark:[--login-field:#123138]! login-dark:[--login-gold:#e8c877]! login-dark:[--login-orbit:#d2b777]! login-dark:[--login-orbit-opacity:0.3]! login-dark:[--login-orbit-flow:#edcf83]! login-dark:[--login-orbit-flow-opacity:0.6]! login-dark:[--login-coin-orbit:#c4aa69]!',
-    '[&_::selection]:text-[color:var(--login-on-accent)]! [&_::selection]:bg-(--login-accent)!',
-    '[&_:is(button,_a,_summary):focus-visible]:[outline:calc(2px_*_var(--login-scale))_solid_var(--login-accent)]! [&_:is(button,_a,_summary):focus-visible]:[outline-offset:calc(4px_*_var(--login-scale))]!',
-    '[&_svg]:shrink-0!',
-    '[&_:is(button,_a,_p,_summary)_>_.lucide]:w-[calc(var(--login-icon-size,_18px)_*_var(--login-scale))]! [&_:is(button,_a,_p,_summary)_>_.lucide]:h-[calc(var(--login-icon-size,_18px)_*_var(--login-scale))]!',
-    '[&[data-motion-paused]_*]:[animation-play-state:paused]!',
-    '[&[data-motion-paused]_*::before]:[animation-play-state:paused]!',
-    '[&[data-motion-paused]_*::after]:[animation-play-state:paused]!',
-    '[&_:focus-visible_>_svg]:[transition:none]!',
-    'login-tablet:[--login-scale:1.15]!',
-    'motion-reduce:[&_.login-motion-toggle]:hidden!',
-    'motion-reduce:[&_*]:[animation:none]! motion-reduce:[&_*]:[transition:none]! motion-reduce:[&_*]:[scroll-behavior:auto]!',
-    'motion-reduce:[&_*::before]:[animation:none]! motion-reduce:[&_*::before]:[transition:none]! motion-reduce:[&_*::before]:[scroll-behavior:auto]!',
-    'motion-reduce:[&_*::after]:[animation:none]! motion-reduce:[&_*::after]:[transition:none]! motion-reduce:[&_*::after]:[scroll-behavior:auto]!',
-  ].join(' '),
+  experience: ['login-experience', publicSurface].join(' '),
   ambient: [
     'login-ambient',
     'absolute inset-0 z-[-1] overflow-hidden pointer-events-none',

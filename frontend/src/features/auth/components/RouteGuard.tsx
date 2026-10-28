@@ -51,7 +51,7 @@ export function GuestGuard() {
   )
 }
 export function HomeRedirect() {
-  const { user, loading } = useAuth()
-  if (loading) return <Loading />
-  return <Navigate to={user ? homeFor(user) : '/login'} replace />
+  const { user } = useAuth()
+  // The public page remains available while the session resolves or the API is offline.
+  return user ? <Navigate to={homeFor(user)} replace /> : <Outlet />
 }
