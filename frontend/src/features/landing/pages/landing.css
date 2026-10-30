@@ -506,20 +506,20 @@
   overflow: hidden;
   background: var(--lp-soft);
 }
-.puclim-landing .lp-journey-progress i {
+.puclim-landing .lp-journey-progress > i {
   display: block;
   width: 33.333%;
   height: 100%;
   background: var(--lp-gold-ink);
   transition: transform 240ms var(--lp-ease);
 }
-.puclim-landing .lp-demo[data-stage='1'] .lp-journey-progress i {
+.puclim-landing .lp-demo[data-stage='1'] .lp-journey-progress > i {
   transform: translateX(100%);
 }
-.puclim-landing .lp-demo[data-stage='2'] .lp-journey-progress i {
+.puclim-landing .lp-demo[data-stage='2'] .lp-journey-progress > i {
   transform: translateX(200%);
 }
-.puclim-landing .lp-demo:has(:focus-visible) .lp-journey-progress i {
+.puclim-landing .lp-demo:has(:focus-visible) .lp-journey-progress > i {
   transition: none;
 }
 .puclim-landing .lp-demo-layout {

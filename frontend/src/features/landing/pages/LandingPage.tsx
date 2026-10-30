@@ -26,8 +26,7 @@ import { MeritHero } from './MeritHero'
 import { ProductShowcase } from './ProductShowcase'
 import { ProfileNetwork } from './ProfileNetwork'
 import { MeritExampleProvider } from './MeritExampleProvider'
-import { MeritSignal } from './MeritSignal'
-import { OrbitField } from './OrbitField'
+import { FinaleArtwork } from './FinaleArtwork'
 import { LandingFooter } from './LandingFooter'
 import { landingStyles as s } from './landing.styles'
 import './landing.css'
@@ -345,7 +344,6 @@ function LandingExperience() {
           className="lp-final-cta lp-section"
           aria-labelledby="comece-titulo"
         >
-          <OrbitField className="lp-final-orbits" />
           <div className={cn(s.frame, 'lp-final-layout')}>
             <div data-reveal>
               <h2 id="comece-titulo">
@@ -363,10 +361,7 @@ function LandingExperience() {
                 <ArrowRight size={16} aria-hidden="true" />
               </a>
             </div>
-            <div className="lp-final-emblem" data-story>
-              <MeritSignal />
-              <span>Aprender. Conquistar. Compartilhar.</span>
-            </div>
+            <FinaleArtwork />
           </div>
         </section>
       </main>

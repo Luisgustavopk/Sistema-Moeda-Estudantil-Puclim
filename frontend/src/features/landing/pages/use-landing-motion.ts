@@ -71,11 +71,12 @@ export function useLandingMotion() {
 
 export function useJourneyPlayback(paused: boolean) {
   const visual = useRef<HTMLDivElement>(null)
+  const progress = useRef<HTMLDivElement>(null)
   const elapsed = useRef(0)
   const liveStage = useRef(0)
   const generation = useRef(0)
   const [stage, setStage] = useState(0)
-  const [playing, setPlaying] = useState(false)
+  const [playing, setPlaying] = useState(true)
   const [inView, setInView] = useState(
     () => !('IntersectionObserver' in window),
   )
@@ -97,10 +98,20 @@ export function useJourneyPlayback(paused: boolean) {
         document.removeEventListener('visibilitychange', visibility)
       }
     }
+    // The journey can start while its topics are visible, even when the
+    // product preview is below the fold. Keep playing while either is in view.
+    const visible = new Set<Element>()
     const observer = new IntersectionObserver(
-      ([entry]) => setInView(entry.isIntersecting),
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) visible.add(entry.target)
+          else visible.delete(entry.target)
+        })
+        setInView(visible.size > 0)
+      },
       { threshold: 0.3 },
     )
+    if (progress.current) observer.observe(progress.current)
     if (visual.current) observer.observe(visual.current)
     return () => {
       observer.disconnect()
@@ -135,11 +146,13 @@ export function useJourneyPlayback(paused: boolean) {
 
   return {
     visual,
+    progress,
     stage,
     running,
     reduced,
     playing,
     toggle: () => setPlaying((current) => !current),
+    stop: () => setPlaying(false),
     select: (next: number) => {
       generation.current += 1
       elapsed.current = 0

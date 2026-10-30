@@ -37,6 +37,21 @@
 }
 
 .puclim-landing .lp-footer-seal {
+  --lp-footer-signal-highlight: color-mix(
+    in srgb,
+    var(--lp-gold) 68%,
+    var(--lp-paper)
+  );
+  --lp-footer-signal-body: color-mix(
+    in srgb,
+    var(--lp-gold) 82%,
+    var(--lp-gold-ink)
+  );
+  --lp-footer-signal-edge: color-mix(
+    in srgb,
+    var(--lp-gold-ink) 76%,
+    var(--lp-footer-ground)
+  );
   display: grid;
   place-items: center;
   width: clamp(48px, 3.25cqw, 64px);
@@ -48,39 +63,55 @@
 }
 
 .puclim-landing .lp-footer-seal rect {
+  fill: var(--lp-footer-signal-fill);
   transform-box: fill-box;
   transform-origin: center;
-  animation: lp-footer-seal-greet 900ms var(--lp-drift) both;
+  /* A quiet wave carries the brand's circulation motif, then lets it rest.
+     The existing story observer and pause control also govern this loop. */
+  animation: lp-footer-signal-wave 4.8s var(--lp-drift) infinite both;
 }
 
 .puclim-landing .lp-footer-seal > svg {
-  width: clamp(24px, 1.8cqw, 36px);
+  width: clamp(32px, 2.4cqw, 42px);
   height: auto;
   aspect-ratio: 5 / 4;
 }
 
-.puclim-landing .lp-footer-seal rect:nth-child(2) {
-  animation-delay: 60ms;
-}
-.puclim-landing .lp-footer-seal rect:nth-child(3) {
-  animation-delay: 120ms;
-}
-.puclim-landing .lp-footer-seal rect:nth-child(4) {
-  animation-delay: 180ms;
-}
-.puclim-landing .lp-footer-seal rect:nth-child(5) {
-  animation-delay: 240ms;
+.puclim-landing .lp-footer-signal-edge {
+  stop-color: var(--lp-footer-signal-edge);
 }
 
-@keyframes lp-footer-seal-greet {
+.puclim-landing .lp-footer-signal-body {
+  stop-color: var(--lp-footer-signal-body);
+}
+
+.puclim-landing .lp-footer-signal-highlight {
+  stop-color: var(--lp-footer-signal-highlight);
+}
+
+.puclim-landing .lp-footer-seal rect:nth-child(2) {
+  animation-delay: 160ms;
+}
+.puclim-landing .lp-footer-seal rect:nth-child(3) {
+  animation-delay: 320ms;
+}
+.puclim-landing .lp-footer-seal rect:nth-child(4) {
+  animation-delay: 480ms;
+}
+.puclim-landing .lp-footer-seal rect:nth-child(5) {
+  animation-delay: 640ms;
+}
+
+@keyframes lp-footer-signal-wave {
   0%,
+  36%,
   100% {
     transform: scaleY(1);
   }
-  40% {
-    transform: scaleY(0.82);
+  12% {
+    transform: scaleY(0.78);
   }
-  72% {
+  24% {
     transform: scaleY(1.04);
   }
 }

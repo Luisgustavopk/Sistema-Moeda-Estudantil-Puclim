@@ -69,27 +69,36 @@ test('perfis funcionam com teclado e mantêm seus destinos', async ({
   )
 })
 
-test('demonstração explica as três etapas e permite seleção e pausa', async ({
+test('jornada percorre as três etapas na tela e permite seleção e pausa', async ({
   page,
 }) => {
   await page.clock.install()
   await page.goto('/')
-  await page.locator('.lp-demo-canvas').scrollIntoViewIfNeeded()
   await page.clock.runFor(10000)
   await expect(page.locator('.lp-demo')).toHaveAttribute(
     'data-running',
     'false',
   )
   await expect(page.locator('.lp-demo')).toHaveAttribute('data-stage', '0')
-  await page.getByRole('button', { name: 'Reproduzir demonstração' }).click()
+  await page.locator('.lp-journey-progress').scrollIntoViewIfNeeded()
   await expect(page.locator('.lp-demo')).toHaveAttribute('data-running', 'true')
   await page.clock.runFor(4100)
   await expect(page.locator('.lp-demo')).toHaveAttribute('data-stage', '1')
+  await page.clock.runFor(4100)
+  await expect(page.locator('.lp-demo')).toHaveAttribute('data-stage', '2')
+  await page.clock.runFor(4100)
+  await expect(page.locator('.lp-demo')).toHaveAttribute('data-stage', '0')
   await page.getByRole('button', { name: 'Pausar demonstração' }).click()
   const stage = await page.locator('.lp-demo').getAttribute('data-stage')
   await page.clock.runFor(10000)
   await expect(page.locator('.lp-demo')).toHaveAttribute('data-stage', stage!)
   await page.getByRole('tab', { name: 'Aproveitar', exact: true }).click()
+  await expect(page.locator('.lp-demo')).toHaveAttribute(
+    'data-running',
+    'false',
+  )
+  await page.clock.runFor(10000)
+  await expect(page.locator('.lp-demo')).toHaveAttribute('data-stage', '2')
   await expect(page.locator('#etapa-conteudo')).toContainText(
     'O mérito encontra possibilidades.',
   )

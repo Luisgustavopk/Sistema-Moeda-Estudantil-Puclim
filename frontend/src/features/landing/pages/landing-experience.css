@@ -315,14 +315,32 @@
   display: grid;
   place-items: center;
 }
+/* Automatic storytelling gets a visible glide; manual selection keeps the
+   existing quick, interruptible transition and keyboard changes stay instant. */
+.puclim-landing
+  .lp-demo[data-running='true']:not(:has(:focus-visible))
+  .lp-journey-progress
+  > i {
+  transition: transform 600ms var(--lp-drift);
+}
 .puclim-landing .lp-journey-progress .lp-merit-signal {
   width: 40px;
   height: 34px;
   background: var(--lp-ground);
 }
 .puclim-landing .lp-journey-progress .lp-signal-bars > span {
+  overflow: hidden;
   box-shadow: none;
-  animation: none;
+}
+.puclim-landing .lp-journey-progress .lp-signal-bars i {
+  inset: 8% 20%;
+}
+.puclim-landing
+  .lp-demo:has(:focus-visible)
+  .lp-journey-progress
+  .lp-signal-bars
+  > span {
+  animation-play-state: paused;
 }
 .puclim-landing .lp-demo-layout {
   gap: 32px;

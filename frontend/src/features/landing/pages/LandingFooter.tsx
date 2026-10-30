@@ -1,3 +1,4 @@
+import { useId, type CSSProperties } from 'react'
 import { ArrowUpRight } from 'lucide-react'
 import { Link } from 'react-router'
 import { Brand, Wave } from '@/shared/components/ui/Brand'
@@ -31,6 +32,8 @@ const footerGroups = [
 ] as const
 
 export function LandingFooter() {
+  const signalGradient = useId()
+
   return (
     <footer className="lp-footer">
       <div className="lp-footer-atmosphere" data-story aria-hidden="true">
@@ -49,7 +52,26 @@ export function LandingFooter() {
         <div className="lp-footer-threshold" aria-hidden="true" data-story>
           <span className="lp-footer-rule" />
           <span className="lp-footer-seal">
-            <svg width="24" height="20" viewBox="0 0 40 32">
+            <svg
+              className="lp-footer-signal"
+              width="32"
+              height="26"
+              viewBox="0 0 40 32"
+              style={
+                {
+                  '--lp-footer-signal-fill': `url(#${signalGradient})`,
+                } as CSSProperties
+              }
+            >
+              <defs>
+                <linearGradient id={signalGradient} x1="0" y1="0" x2="1" y2="0">
+                  <stop offset="0" className="lp-footer-signal-edge" />
+                  <stop offset="0.18" className="lp-footer-signal-body" />
+                  <stop offset="0.38" className="lp-footer-signal-highlight" />
+                  <stop offset="0.65" className="lp-footer-signal-body" />
+                  <stop offset="1" className="lp-footer-signal-edge" />
+                </linearGradient>
+              </defs>
               <Wave />
             </svg>
           </span>

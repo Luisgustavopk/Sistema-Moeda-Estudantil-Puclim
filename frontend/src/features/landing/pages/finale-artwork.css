@@ -1,0 +1,422 @@
+/* The reference pins a sculpted gold medallion and a connected constellation.
+   Materials and trajectories are local to this closing illustration. */
+.puclim-landing .lp-final-emblem.lp-finale {
+  --finale-metal-light: color-mix(in srgb, var(--lp-gold) 60%, var(--lp-paper));
+  /* The bronze engraving uses the existing login coin's material. */
+  --finale-bronze: #76500c;
+  --finale-metal: var(--lp-gold);
+  --finale-metal-deep: color-mix(
+    in srgb,
+    var(--lp-gold) 30%,
+    var(--finale-bronze)
+  );
+  --finale-edge: color-mix(in srgb, var(--lp-gold-ink) 42%, transparent);
+  --finale-plate: color-mix(in srgb, var(--lp-surface) 88%, var(--lp-ground));
+  transform: none;
+  isolation: isolate;
+}
+
+.puclim-landing .lp-finale-scene {
+  position: absolute;
+  right: -32px;
+  top: 50%;
+  width: 520px;
+  height: 440px;
+  transform: translateY(-50%);
+}
+
+.puclim-landing .lp-finale-routes {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  fill: none;
+  pointer-events: none;
+}
+
+.puclim-landing .lp-finale-routes :is(path, circle, ellipse) {
+  vector-effect: non-scaling-stroke;
+}
+
+.puclim-landing .lp-finale-horizon {
+  stroke: var(--lp-gold-ink);
+  stroke-width: 1px; /* taste-skill-ignore: the supplied reference's orbital trajectory. */
+  opacity: 0.14;
+}
+
+.puclim-landing .lp-finale-connection {
+  stroke: var(--lp-gold-ink);
+  stroke-width: 1px; /* taste-skill-ignore: narrative connection between the three milestones. */
+  stroke-dasharray: 2 8;
+  opacity: 0.45;
+}
+
+.puclim-landing .lp-finale-route {
+  stroke: var(--lp-gold-ink);
+  stroke-width: 1px; /* taste-skill-ignore: the reference's continuous gold circulation path. */
+  opacity: 0.6;
+}
+
+.puclim-landing .lp-finale-route-secondary {
+  stroke-dasharray: 1 8;
+  opacity: 0.24;
+}
+
+.puclim-landing .lp-finale-light,
+.puclim-landing .lp-finale-junction {
+  fill: var(--lp-gold-ink);
+}
+
+.puclim-landing .lp-finale-junction {
+  stroke: var(--lp-ground);
+  stroke-width: 2px;
+}
+
+.puclim-landing .lp-finale-tracer,
+.puclim-landing .lp-finale-countertracer {
+  transform-origin: 0 0;
+  animation: lp-finale-turn 22s linear infinite;
+}
+
+.puclim-landing .lp-finale-countertracer {
+  animation-direction: reverse;
+}
+
+.puclim-landing .lp-finale-tracer-secondary,
+.puclim-landing .lp-finale-countertracer-secondary {
+  animation-duration: 32s;
+  animation-delay: -12s;
+}
+
+.puclim-landing .lp-finale-medallion {
+  position: absolute;
+  left: calc(49% - 88px);
+  top: calc(54% - 88px);
+  width: 176px;
+  height: 176px;
+  transition-delay: 70ms;
+}
+
+.puclim-landing .lp-finale-coin-hover,
+.puclim-landing .lp-finale-coin-drift {
+  width: 100%;
+  height: 100%;
+}
+
+.puclim-landing .lp-finale-coin-hover {
+  transition: transform 200ms var(--lp-ease);
+}
+
+.puclim-landing .lp-finale-coin-drift {
+  animation: lp-finale-breathe 8s var(--lp-drift) infinite;
+}
+
+.puclim-landing .lp-finale-coin {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  transform: perspective(600px) rotateX(14deg) rotateY(-22deg) rotateZ(-15deg);
+}
+
+.puclim-landing .lp-finale-coin::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: var(--finale-metal-deep);
+  transform: translate(6px, 8px);
+  /* prettier-ignore */
+  box-shadow: var(--lp-artifact-elevation); /* taste-skill-ignore: the floating medallion's physical depth. */
+}
+
+.puclim-landing .lp-finale-coin-face {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  border-radius: inherit;
+  border: 2px solid var(--finale-metal-light); /* taste-skill-ignore: the reference's milled coin rim. */
+  /* prettier-ignore */
+  background: linear-gradient(125deg, var(--finale-metal-light), var(--finale-metal) 48%, var(--finale-metal-deep)); /* taste-skill-ignore: brand gold rendered as a material, following the pinned reference. */
+}
+
+.puclim-landing .lp-finale-coin-face::before {
+  content: '';
+  position: absolute;
+  inset: 9px;
+  border: 1px solid color-mix(in srgb, var(--lp-paper) 65%, transparent); /* taste-skill-ignore: engraved inner rim of the brand object. */
+  border-radius: inherit;
+}
+
+.puclim-landing .lp-finale-coin-face > svg {
+  width: 44%;
+  height: auto;
+  color: var(--finale-bronze);
+}
+
+.puclim-landing .lp-finale-engraving-edge {
+  color: var(--finale-metal-light);
+}
+
+.puclim-landing .lp-finale-milestone {
+  position: absolute;
+  width: 208px;
+  color: var(--lp-ink);
+}
+
+.puclim-landing .lp-finale-plate {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 76px;
+  padding: 14px;
+  border: 1px solid var(--finale-edge); /* taste-skill-ignore: three diagram milestones match the supplied composition. */
+  border-radius: 16px;
+  background: var(--finale-plate);
+}
+
+.puclim-landing .lp-finale-plate > svg {
+  width: 26px;
+  color: var(--lp-gold-ink);
+}
+
+.puclim-landing .lp-finale-plate > span {
+  min-width: 0;
+}
+
+.puclim-landing .lp-finale-plate strong {
+  display: block;
+  font-size: 17px;
+  font-weight: 600;
+  line-height: 24px;
+}
+
+.puclim-landing .lp-finale-plate small {
+  display: block;
+  margin-top: 2px;
+  font-size: 13px;
+  line-height: 18px;
+  color: var(--lp-muted);
+}
+
+.puclim-landing .lp-finale-learn {
+  top: 12%;
+  left: 2%;
+}
+
+.puclim-landing .lp-finale-learn .lp-finale-plate {
+  transform: rotate(-7deg);
+}
+
+.puclim-landing .lp-finale-achieve {
+  top: 24%;
+  right: 2%;
+  transition-delay: 140ms;
+}
+
+.puclim-landing .lp-finale-achieve .lp-finale-plate {
+  transform: rotate(7deg);
+}
+
+.puclim-landing .lp-finale-share {
+  bottom: 5%;
+  right: 4%;
+  width: 212px;
+  transition-delay: 210ms;
+}
+
+.puclim-landing .lp-finale-share .lp-finale-plate {
+  transform: rotate(-6deg);
+}
+
+@keyframes lp-finale-turn {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes lp-finale-breathe {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-6px);
+  }
+}
+
+@media (hover: hover) and (pointer: fine) and (prefers-reduced-motion: no-preference) {
+  .puclim-landing .lp-finale:hover .lp-finale-coin-hover {
+    transform: translateY(-4px) rotate(3deg);
+  }
+}
+
+.puclim-landing:has(:focus-visible) .lp-finale-coin-hover {
+  transform: none;
+  transition: none;
+}
+
+@container puclim (max-width: 1399px) {
+  .puclim-landing .lp-finale-scene {
+    width: 460px;
+    height: 420px;
+  }
+  .puclim-landing .lp-finale-medallion {
+    left: calc(47% - 80px);
+    top: calc(54% - 80px);
+    width: 160px;
+    height: 160px;
+  }
+  .puclim-landing .lp-finale-milestone {
+    width: 190px;
+  }
+  .puclim-landing .lp-finale-share {
+    width: 204px;
+  }
+  .puclim-landing .lp-finale-plate {
+    gap: 10px;
+    padding: 12px;
+  }
+}
+
+@container puclim (max-width: 1199px) {
+  .puclim-landing .lp-finale-scene {
+    width: 360px;
+    height: 360px;
+  }
+  .puclim-landing .lp-finale-milestone {
+    width: 160px;
+  }
+  .puclim-landing .lp-finale-share {
+    width: 188px;
+  }
+  .puclim-landing .lp-finale-plate {
+    min-height: 68px;
+    gap: 8px;
+    padding: 12px;
+  }
+  .puclim-landing .lp-finale-plate > svg {
+    width: 22px;
+  }
+  .puclim-landing .lp-finale-plate strong {
+    font-size: 16px;
+  }
+  .puclim-landing .lp-finale-medallion {
+    left: calc(43% - 68px);
+    top: calc(55% - 68px);
+    width: 136px;
+    height: 136px;
+  }
+}
+
+@container puclim (max-width: 999px) {
+  .puclim-landing .lp-finale-scene {
+    right: -16px;
+    width: 220px;
+    height: 320px;
+  }
+  .puclim-landing .lp-finale-learn {
+    left: 0;
+    top: 0;
+  }
+  .puclim-landing .lp-finale-achieve {
+    left: 0;
+    right: auto;
+    top: 44%;
+    width: 176px;
+  }
+  .puclim-landing .lp-finale-share {
+    bottom: 0;
+    right: 0;
+    width: 198px;
+  }
+  .puclim-landing .lp-finale-medallion {
+    left: calc(78% - 44px);
+    top: calc(33% - 44px);
+    width: 88px;
+    height: 88px;
+  }
+  .puclim-landing .lp-finale-coin-face::before {
+    inset: 5px;
+  }
+}
+
+@container puclim (max-width: 699px) {
+  .puclim-landing .lp-finale-scene {
+    right: -24px;
+    width: calc(100cqw - 40px);
+    height: 168px;
+  }
+  .puclim-landing .lp-finale-learn {
+    top: 4px;
+    left: 0;
+    width: 112px;
+  }
+  .puclim-landing .lp-finale-achieve {
+    top: 4px;
+    left: auto;
+    right: 0;
+    width: 130px;
+  }
+  .puclim-landing .lp-finale-share {
+    bottom: 0;
+    right: 4px;
+    width: 148px;
+  }
+  .puclim-landing .lp-finale-plate {
+    min-height: 44px;
+    gap: 8px;
+    padding: 8px;
+    border-radius: 12px;
+  }
+  .puclim-landing .lp-finale-plate > svg {
+    width: 20px;
+    height: 20px;
+  }
+  .puclim-landing .lp-finale-plate strong {
+    font-size: 14px;
+    line-height: 24px;
+  }
+  .puclim-landing .lp-finale-plate small {
+    display: none;
+  }
+  .puclim-landing .lp-finale-medallion {
+    left: calc(47% - 46px);
+    top: calc(50% - 46px);
+    width: 92px;
+    height: 92px;
+  }
+  .puclim-landing
+    :is(.lp-finale-tracer-secondary, .lp-finale-countertracer-secondary) {
+    display: none;
+    animation: none;
+  }
+}
+
+@container puclim (max-width: 359px) {
+  .puclim-landing .lp-finale-scene {
+    width: calc(100cqw - 32px);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .puclim-landing
+    .lp-finale
+    :is(.lp-finale-tracer, .lp-finale-countertracer, .lp-finale-coin-drift) {
+    animation: none;
+  }
+  .puclim-landing .lp-finale [data-reveal] {
+    opacity: 1;
+    transform: none;
+    transition: none;
+  }
+  .puclim-landing .lp-finale-coin-hover {
+    transform: none;
+    transition: none;
+  }
+}

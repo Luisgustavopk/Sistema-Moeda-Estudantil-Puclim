@@ -45,8 +45,17 @@ export function JourneyDemo({ paused }: { paused: boolean }) {
   const { amount, reason: submittedReason, redeemed } = example
   const [error, setError] = useState('')
   const [status, setStatus] = useState('')
-  const { visual, stage, running, reduced, playing, toggle, select } =
-    useJourneyPlayback(paused)
+  const {
+    visual,
+    progress,
+    stage,
+    running,
+    reduced,
+    playing,
+    toggle,
+    stop,
+    select,
+  } = useJourneyPlayback(paused)
   const tabs = useRef<(HTMLButtonElement | null)[]>([])
 
   function simulate(event: React.FormEvent) {
@@ -87,7 +96,14 @@ export function JourneyDemo({ paused }: { paused: boolean }) {
             Experimente o caminho do mérito no Puclim.
           </p>
         </div>
-        <div className="lp-demo" data-running={running} data-stage={stage}>
+        <div
+          className="lp-demo"
+          data-running={running}
+          data-stage={stage}
+          onFocusCapture={(event) => {
+            if (playing && event.target.matches(':focus-visible')) stop()
+          }}
+        >
           <div
             className="lp-journey-tabs"
             role="tablist"
@@ -141,7 +157,11 @@ export function JourneyDemo({ paused }: { paused: boolean }) {
               </button>
             ))}
           </div>
-          <div className="lp-journey-progress" aria-hidden="true">
+          <div
+            ref={progress}
+            className="lp-journey-progress"
+            aria-hidden="true"
+          >
             <i>
               <MeritSignal />
             </i>
