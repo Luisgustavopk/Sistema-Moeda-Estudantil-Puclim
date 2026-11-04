@@ -39,6 +39,7 @@ export function CouponCard({ coupon }: { coupon: Coupon }) {
           Resgatado em {dateTime(coupon.date)}
         </span>
         <Button
+          className="coupon-copy"
           variant="ghost"
           onClick={async () => {
             try {
@@ -46,7 +47,7 @@ export function CouponCard({ coupon }: { coupon: Coupon }) {
               setCopied(true)
               toast('Código copiado!')
             } catch {
-              toast('Selecione o código e copie manualmente.')
+              toast('Selecione o código e copie manualmente.', 'info')
             }
           }}
         >

@@ -8,7 +8,7 @@ import { useAuth } from '@/features/auth/hooks/auth-context'
 import { DATA_MODE } from '@/shared/lib/http'
 import { Button } from '@/shared/components/ui/Button'
 import { Field } from '@/shared/components/ui/Field'
-import { QueryState } from '@/shared/components/ui/Feedback'
+import { QueryState, ErrorNotice } from '@/shared/components/ui/Feedback'
 import { gameApi } from './api'
 import { useGameAction } from './hooks'
 
@@ -41,6 +41,7 @@ export function DonateCoupon({ code }: { code: string }) {
         </Button>
       ) : (
         <form
+          className="coupon-donation"
           onSubmit={form.handleSubmit((data) =>
             review ? action.mutate(data.beneficiaryId) : setReview(true),
           )}
@@ -73,7 +74,7 @@ export function DonateCoupon({ code }: { code: string }) {
             <p>Nenhuma instituição beneficiária está disponível.</p>
           )}
           {review && (
-            <p>
+            <p className="notice notice-info donation-summary">
               Confirmar doação para{' '}
               {
                 query.data?.find(
@@ -84,8 +85,13 @@ export function DonateCoupon({ code }: { code: string }) {
               de moedas.
             </p>
           )}
-          <div className="toolbar">
-            <Button type="submit" loading={action.isPending}>
+          <ErrorNotice error={action.error} />
+          <div className="action-row">
+            <Button
+              type="submit"
+              loading={action.isPending}
+              disabled={!query.data?.length}
+            >
               {review ? 'Confirmar doação' : 'Revisar doação'}
             </Button>
             <Button
