@@ -131,7 +131,10 @@ function ProfileEditor({
       )
     },
     onError: (error) =>
-      toast(`${errorMessage(error)} Revise os dados e tente salvar novamente.`),
+      toast(
+        `${errorMessage(error)} Revise os dados e tente salvar novamente.`,
+        'error',
+      ),
   })
   const unlocked = profile.badges.filter((b) => b.unlockedAt)
   const set = <K extends keyof ProfileCustomization>(

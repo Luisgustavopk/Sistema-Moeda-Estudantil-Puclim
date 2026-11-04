@@ -26,6 +26,7 @@ import { useAction } from '@/shared/hooks/use-action'
 import { useToast } from '@/shared/hooks/toast-context'
 import type { ProfileUpdate } from '@/shared/types/domain'
 import { SoundPreference } from '@/shared/components/ui/ConfirmationFeedback'
+import { UnsavedPrompt } from '@/features/gamificacao/components/UnsavedPrompt'
 
 export function ProfilePage() {
   const { user } = useAuth()
@@ -34,6 +35,7 @@ export function ProfilePage() {
   const client = useQueryClient()
   const [deleting, setDeleting] = useState(false)
   const [confirmation, setConfirmation] = useState('')
+  const [passwordDirty, setPasswordDirty] = useState(false)
   const institutions = useQuery({
     queryKey: ['institutions'],
     queryFn: instituicoesApi.list,
@@ -65,6 +67,9 @@ export function ProfilePage() {
   )?.name
   return (
     <div className="merit-page account-settings">
+      <UnsavedPrompt
+        dirty={(form.formState.isDirty || passwordDirty) && !deleting}
+      />
       <PageHeading
         eyebrow="Seu espaço, do seu jeito"
         title="Minha conta"
@@ -283,7 +288,7 @@ export function ProfilePage() {
               </div>
               <ShieldCheck size={20} aria-hidden="true" />
             </div>
-            <PasswordForm />
+            <PasswordForm onDirtyChange={setPasswordDirty} />
           </section>
           {user.role !== 'PROFESSOR' && <SoundPreference />}
           {user.role !== 'PROFESSOR' && (
