@@ -139,8 +139,11 @@ export function TeachersPage() {
                 </p>
               </div>
             </div>
-            <div className="table-scroll">
-              <table>
+            <div className="table-scroll responsive-record-table">
+              <table role="table">
+                <caption className="sr-only">
+                  Prévia da importação de professores
+                </caption>
                 <thead>
                   <tr>
                     <th>Linha</th>
@@ -152,13 +155,13 @@ export function TeachersPage() {
                 <tbody>
                   {rows.map((row) => (
                     <tr key={row.line}>
-                      <td>{row.line}</td>
-                      <td>
+                      <td data-label="Linha">{row.line}</td>
+                      <td data-label="Professor">
                         {row.name || 'Sem nome'}
                         <p className="small muted">{row.email}</p>
                       </td>
-                      <td>{row.department}</td>
-                      <td>
+                      <td data-label="Departamento">{row.department}</td>
+                      <td data-label="Validação">
                         {row.error ? (
                           <span className="field-error">{row.error}</span>
                         ) : (
@@ -207,8 +210,11 @@ export function TeachersPage() {
                   seguro. A troca de senha será exigida no primeiro acesso. As
                   senhas abaixo não voltam a aparecer após sair desta página.
                 </p>
-                <div className="table-scroll">
-                  <table>
+                <div className="table-scroll responsive-record-table">
+                  <table role="table">
+                    <caption className="sr-only">
+                      Primeiros acessos dos professores importados
+                    </caption>
                     <thead>
                       <tr>
                         <th>Professor</th>
@@ -219,9 +225,9 @@ export function TeachersPage() {
                     <tbody>
                       {result.access.map((value) => (
                         <tr key={value.login}>
-                          <td>{value.name}</td>
-                          <td>{value.login}</td>
-                          <td>
+                          <td data-label="Professor">{value.name}</td>
+                          <td data-label="Login">{value.login}</td>
+                          <td data-label="Acesso inicial">
                             {value.temporaryPassword ? (
                               <code>{value.temporaryPassword}</code>
                             ) : (
@@ -236,8 +242,12 @@ export function TeachersPage() {
               </>
             )}
             {result.errors.length > 0 && (
-              <div className="table-scroll" style={{ marginTop: 20 }}>
-                <table>
+              <div
+                className="table-scroll responsive-record-table"
+                style={{ marginTop: 20 }}
+              >
+                <table role="table">
+                  <caption className="sr-only">Erros da importação</caption>
                   <thead>
                     <tr>
                       <th>Linha</th>
@@ -247,8 +257,10 @@ export function TeachersPage() {
                   <tbody>
                     {result.errors.map((error) => (
                       <tr key={error.line}>
-                        <td>{error.line}</td>
-                        <td className="field-error">{error.message}</td>
+                        <td data-label="Linha">{error.line}</td>
+                        <td data-label="Erro" className="field-error">
+                          {error.message}
+                        </td>
                       </tr>
                     ))}
                   </tbody>
