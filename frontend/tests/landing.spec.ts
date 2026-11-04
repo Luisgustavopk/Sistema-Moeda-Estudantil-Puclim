@@ -9,6 +9,43 @@ test.beforeEach(async ({ page }) => {
   )
 })
 
+test('landing, login e cadastros mantêm a mesma moldura e marca ao navegar', async ({
+  page,
+}) => {
+  await page.emulateMedia({ reducedMotion: 'reduce' })
+  for (const width of [320, 720, 768, 1440, 1920]) {
+    await page.setViewportSize({ width, height: 1000 })
+    let reference: { x: number; y: number; width: number; height: number }[] =
+      []
+    for (const path of [
+      '/',
+      '/login',
+      '/cadastro/aluno',
+      '/cadastro/empresa',
+    ]) {
+      await page.goto(path)
+      const header = page.locator('.lp-header, .login-topbar')
+      await expect(header).toBeVisible()
+      await page.evaluate(() => document.fonts.ready)
+      const boxes = [
+        (await header.boundingBox())!,
+        (await header.locator('.brand').boundingBox())!,
+      ]
+      if (path === '/') reference = boxes
+      else
+        boxes.forEach((box, index) => {
+          for (const key of ['x', 'y', 'width', 'height'] as const)
+            expect(Math.abs(box[key] - reference[index][key])).toBeLessThan(1)
+        })
+      expect(
+        await page.evaluate(
+          () => document.documentElement.scrollWidth <= innerWidth,
+        ),
+      ).toBe(true)
+    }
+  }
+})
+
 test('landing tem identidade própria e preserva os acessos', async ({
   page,
 }) => {

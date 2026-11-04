@@ -96,8 +96,7 @@
   scroll-margin-top: 32px;
 }
 .puclim-landing .lp-frame {
-  width: calc(100% - 112px);
-  max-width: 1280px;
+  width: var(--public-frame-width);
   margin-inline: auto;
 }
 .puclim-landing .lp-section {
@@ -168,16 +167,16 @@
 .puclim-landing .lp-header {
   position: relative;
   z-index: 3;
-  min-height: 104px;
+  min-height: var(--public-header-height);
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 24px;
 }
-.puclim-landing .lp-brand .brand {
-  font-size: 30px;
-  line-height: 36px;
-  gap: 12px;
+.puclim-landing .lp-brand {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
 }
 .puclim-landing .lp-desktop-nav {
   display: flex;
@@ -871,8 +870,6 @@
 }
 .puclim-landing .lp-product-section > .lp-frame {
   position: relative;
-  width: calc(100% - 112px);
-  max-width: 1216px;
 }
 .puclim-landing .lp-product-intro {
   display: flex;
@@ -1467,9 +1464,6 @@
 @container puclim (min-width: 1600px) {
 }
 @container puclim (max-width: 1199px) {
-  .puclim-landing .lp-frame {
-    width: calc(100% - 80px);
-  }
   .puclim-landing .lp-desktop-nav {
     gap: 20px;
   }
@@ -1501,9 +1495,6 @@
   .puclim-landing .lp-product-exhibit {
     grid-template-columns: 200px minmax(0, 1fr);
     gap: 32px;
-  }
-  .puclim-landing .lp-product-section > .lp-frame {
-    width: calc(100% - 80px);
   }
   .puclim-landing .lp-audience-layout {
     gap: 40px;
@@ -1598,9 +1589,6 @@
     width: calc(100% - 32px);
     border-radius: 24px;
   }
-  .puclim-landing .lp-product-section > .lp-frame {
-    width: calc(100% - 64px);
-  }
   .puclim-landing .lp-product-exhibit {
     grid-template-columns: 1fr;
     gap: 24px;
@@ -1679,20 +1667,8 @@
   }
 }
 @container puclim (max-width: 699px) {
-  .puclim-landing .lp-frame {
-    width: calc(100% - 40px);
-  }
   .puclim-landing .lp-header {
-    min-height: 88px;
     gap: 8px;
-  }
-  .puclim-landing .lp-brand .brand {
-    font-size: 25px;
-    gap: 8px;
-  }
-  .puclim-landing .lp-brand .brand svg {
-    width: 30px;
-    height: 26px;
   }
   .puclim-landing .lp-header-actions {
     gap: 0;
@@ -1893,9 +1869,6 @@
     width: calc(100% - 16px);
     border-radius: 20px;
   }
-  .puclim-landing .lp-product-section > .lp-frame {
-    width: calc(100% - 40px);
-  }
   .puclim-landing .lp-product-tabs {
     display: grid;
     grid-template-columns: 1fr 1fr;
@@ -2062,16 +2035,6 @@
 @container puclim (max-width: 359px) {
   .puclim-landing .lp-heading {
     font-size: 32px;
-  }
-  .puclim-landing .lp-frame {
-    width: calc(100% - 32px);
-  }
-  .puclim-landing .lp-brand .brand {
-    font-size: 22px;
-    gap: 6px;
-  }
-  .puclim-landing .lp-brand .brand svg {
-    width: 26px;
   }
   .puclim-landing .lp-hero-cta {
     flex-wrap: wrap;

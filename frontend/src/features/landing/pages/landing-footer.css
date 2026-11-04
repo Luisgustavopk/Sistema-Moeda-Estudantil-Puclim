@@ -3,25 +3,17 @@
 .puclim-landing .lp-footer {
   --lp-footer-ground: color-mix(in srgb, var(--lp-ground) 50%, var(--lp-stage));
   --lp-footer-rule: color-mix(in srgb, var(--lp-line) 24%, transparent);
+  --lp-footer-seal-size: clamp(48px, 3.25cqw, 64px);
   position: relative;
   isolation: isolate;
   overflow: clip;
   padding-top: 8px;
-  /* The reference explicitly calls for a faint ambient light field. */
-  /* prettier-ignore */
-  background:
-    radial-gradient(ellipse at 12% 10%, color-mix(in srgb, var(--lp-gold) 4%, transparent), transparent 56%), /* taste-skill-ignore: pinned reference's subtle gold light. */
-    radial-gradient(ellipse at 88% 85%, color-mix(in srgb, var(--lp-ink) 2%, transparent), transparent 60%), /* taste-skill-ignore: pinned reference's depth, using theme tokens. */
-    var(--lp-footer-ground);
-}
-
-.puclim-landing .lp-footer > .lp-frame {
-  width: 86.5%;
-  max-width: 1760px;
+  background: var(--lp-ground);
 }
 
 .puclim-landing .lp-footer-threshold {
   position: relative;
+  z-index: 1;
   left: 50%;
   width: 100cqw;
   transform: translateX(-50%);
@@ -54,8 +46,8 @@
   );
   display: grid;
   place-items: center;
-  width: clamp(48px, 3.25cqw, 64px);
-  height: clamp(48px, 3.25cqw, 64px);
+  width: var(--lp-footer-seal-size);
+  height: var(--lp-footer-seal-size);
   border: 1px solid color-mix(in srgb, var(--lp-gold-ink) 45%, transparent); /* taste-skill-ignore: requested circular seal. */
   border-radius: 50%;
   color: var(--lp-gold-ink);
@@ -117,15 +109,18 @@
 }
 
 .puclim-landing .lp-footer-main {
+  position: relative;
+  isolation: isolate;
   display: grid;
-  grid-template-columns: minmax(0, 26.3fr) minmax(0, 45.3fr) minmax(0, 28.4fr);
-  align-items: start;
+  grid-template-columns: minmax(0, 26fr) minmax(0, 48fr) minmax(0, 26fr);
+  align-items: stretch;
   gap: 0;
   padding-block: clamp(56px, 4.1cqw, 80px) clamp(48px, 4.9cqw, 96px);
 }
 
 .puclim-landing .lp-footer-identity {
-  padding-right: clamp(24px, 2.2cqw, 44px);
+  min-width: 0;
+  padding-right: 24px;
 }
 
 .puclim-landing .lp-footer-identity > a {
@@ -138,8 +133,8 @@
 }
 
 .puclim-landing .lp-footer-identity .brand {
-  gap: clamp(12px, 1.2cqw, 24px);
-  font-size: clamp(40px, 3.4cqw, 68px);
+  gap: 16px;
+  font-size: 48px;
   line-height: 1;
   font-weight: 600;
   letter-spacing: -0.035em;
@@ -154,7 +149,7 @@
 .puclim-landing .lp-footer-institution {
   margin-top: clamp(16px, 1.2cqw, 24px);
   color: var(--lp-muted);
-  font-size: clamp(14px, 0.9cqw, 18px);
+  font-size: 14px;
   line-height: 1.5;
 }
 
@@ -165,31 +160,31 @@
 .puclim-landing .lp-footer-description {
   margin-top: 16px;
   color: var(--lp-muted);
-  font-size: clamp(14px, 0.9cqw, 18px);
+  font-size: 14px;
   line-height: 1.6;
 }
 
 .puclim-landing .lp-footer-description > span {
-  display: block;
+  display: inline;
 }
 
 .puclim-landing .lp-footer-nav {
   display: grid;
-  grid-template-columns: minmax(0, 15.4fr) minmax(0, 14.5fr) minmax(0, 15.4fr);
+  min-width: 0;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
   align-items: stretch;
 }
 
 .puclim-landing .lp-footer-nav-group {
   min-width: 0;
-  min-height: clamp(156px, 10.8cqw, 214px);
-  padding-inline: clamp(20px, 2.2cqw, 44px) clamp(12px, 1.6cqw, 32px);
+  padding-inline: 24px 16px;
   border-inline-start: 1px solid var(--lp-footer-rule); /* taste-skill-ignore: requested navigation separators. */
 }
 
 .puclim-landing .lp-footer-nav-group h2 {
   margin-bottom: 16px;
   color: var(--lp-ink);
-  font-size: clamp(14px, 1cqw, 20px);
+  font-size: 16px;
   line-height: 1.5;
   font-weight: 600;
   letter-spacing: 0;
@@ -209,7 +204,7 @@
   min-height: 44px;
   padding-block: 8px;
   color: var(--lp-muted);
-  font-size: clamp(13px, 0.9cqw, 18px);
+  font-size: 14px;
   line-height: 1.5;
   text-decoration: none;
 }
@@ -238,11 +233,11 @@
 
 .puclim-landing .lp-footer-statement {
   position: relative;
-  min-height: clamp(156px, 10.8cqw, 214px);
-  padding: 44px 0 0 clamp(24px, 3cqw, 60px);
+  min-width: 0;
+  padding: 44px 0 0 24px;
   border-inline-start: 1px solid var(--lp-footer-rule); /* taste-skill-ignore: reference separates the institutional signature. */
   color: var(--lp-ink);
-  font-size: clamp(20px, 1.54cqw, 32px);
+  font-size: 20px;
   line-height: 1.45;
   font-weight: 600;
   letter-spacing: -0.025em;
@@ -252,7 +247,7 @@
   content: '';
   position: absolute;
   top: 16px;
-  left: clamp(24px, 3cqw, 60px);
+  left: 24px;
   width: clamp(24px, 1.5cqw, 32px);
   height: 2px;
   background: var(--lp-gold-ink);
@@ -314,8 +309,19 @@
 .puclim-landing .lp-footer-atmosphere {
   position: absolute;
   z-index: -1;
-  inset: 0;
+  top: calc(var(--lp-footer-seal-size) / -2);
+  bottom: 0;
+  left: 50%;
+  width: 100cqw;
+  transform: translateX(-50%);
+  overflow: clip;
   pointer-events: none;
+  /* Clip the complete decorative surface at the top rule and bottom band. */
+  /* prettier-ignore */
+  background:
+    radial-gradient(ellipse at 12% 10%, color-mix(in srgb, var(--lp-gold) 4%, transparent), transparent 56%), /* taste-skill-ignore: pinned reference's subtle gold light. */
+    radial-gradient(ellipse at 88% 85%, color-mix(in srgb, var(--lp-ink) 2%, transparent), transparent 60%), /* taste-skill-ignore: pinned reference's depth, using theme tokens. */
+    var(--lp-footer-ground);
 }
 
 .puclim-landing .lp-footer-orbit {
@@ -450,10 +456,7 @@
   transform: none;
 }
 
-@container puclim (max-width: 1199px) {
-  .puclim-landing .lp-footer > .lp-frame {
-    width: calc(100% - 80px);
-  }
+@container puclim (max-width: 1399px) {
   .puclim-landing .lp-footer-main {
     grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
     grid-template-areas: 'identity statement' 'navigation navigation';
@@ -472,7 +475,7 @@
     justify-self: end;
     width: 100%;
     max-width: none;
-    font-size: clamp(20px, 2.2cqw, 22px);
+    font-size: 20px;
     line-height: 1.5;
   }
   .puclim-landing .lp-footer-nav-group {
@@ -487,16 +490,7 @@
   }
 }
 
-@container puclim (min-width: 1200px) {
-  .puclim-landing .lp-footer-statement > span {
-    white-space: nowrap;
-  }
-}
-
 @container puclim (max-width: 699px) {
-  .puclim-landing .lp-footer > .lp-frame {
-    width: calc(100% - 40px);
-  }
   .puclim-landing .lp-footer-main {
     grid-template-columns: minmax(0, 1fr);
     grid-template-areas: 'identity' 'navigation' 'statement';
@@ -575,9 +569,6 @@
 }
 
 @container puclim (max-width: 359px) {
-  .puclim-landing .lp-footer > .lp-frame {
-    width: calc(100% - 32px);
-  }
   .puclim-landing .lp-footer-statement {
     font-size: 18px;
     line-height: 28px;

@@ -36,18 +36,6 @@ export function LandingFooter() {
 
   return (
     <footer className="lp-footer">
-      <div className="lp-footer-atmosphere" data-story aria-hidden="true">
-        <div className="lp-footer-orbit lp-footer-orbit-first">
-          <div className="lp-footer-orbit-line" />
-          <div className="lp-footer-orbit-rotor">
-            <span className="lp-footer-orbit-bead" />
-          </div>
-          <div className="lp-footer-orbit-rotor lp-footer-orbit-counterpart">
-            <span className="lp-footer-orbit-bead" />
-          </div>
-        </div>
-      </div>
-
       <div className="lp-frame">
         <div className="lp-footer-threshold" aria-hidden="true" data-story>
           <span className="lp-footer-rule" />
@@ -79,6 +67,18 @@ export function LandingFooter() {
         </div>
 
         <div className="lp-footer-main">
+          <div className="lp-footer-atmosphere" data-story aria-hidden="true">
+            <div className="lp-footer-orbit lp-footer-orbit-first">
+              <div className="lp-footer-orbit-line" />
+              <div className="lp-footer-orbit-rotor">
+                <span className="lp-footer-orbit-bead" />
+              </div>
+              <div className="lp-footer-orbit-rotor lp-footer-orbit-counterpart">
+                <span className="lp-footer-orbit-bead" />
+              </div>
+            </div>
+          </div>
+
           <div className="lp-footer-identity" data-reveal>
             <Link to="/" aria-label="puclim, início">
               <Brand />

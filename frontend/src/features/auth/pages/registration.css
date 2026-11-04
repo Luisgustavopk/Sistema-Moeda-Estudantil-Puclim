@@ -1,6 +1,6 @@
 /* Login and registration share their frame and material; the longer form has its own measure. */
 .registration-experience .registration-main {
-  width: min(calc(100% - 64px), calc(720px * var(--login-scale)));
+  width: min(var(--public-frame-width), calc(720px * var(--login-scale)));
   margin: auto;
   padding-block: 24px 48px;
 }
@@ -154,7 +154,6 @@
 }
 @media (max-width: 749px) {
   .registration-experience .registration-main {
-    width: calc(100% - 32px);
     padding-block: 16px 32px;
   }
   .registration-experience .auth-panel {

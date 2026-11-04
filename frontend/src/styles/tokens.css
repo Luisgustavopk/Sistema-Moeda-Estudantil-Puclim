@@ -45,6 +45,15 @@
   --space-xl: 2rem;
   --content-max: 108rem;
   --page-gutter: clamp(1.5rem, 4vw, 6rem);
+  /* Shared frame for landing, login and registration; forms keep their own measure. */
+  --public-content-max: 90rem;
+  --public-gutter: 3rem;
+  --public-frame-width: min(
+    calc(100% - 2 * var(--public-gutter)),
+    var(--public-content-max)
+  );
+  --public-header-height: 6.5rem;
+  --public-auth-scale: 1.15;
   --shadow:
     0 3px 10px rgba(18, 39, 41, 0.07), inset 0 1px 0 rgba(255, 255, 255, 0.65);
   --control-shadow: 0 1px 3px rgba(18, 39, 41, 0.08);
@@ -77,4 +86,21 @@
     0 3px 10px rgba(0, 0, 0, 0.12), inset 0 1px 0 rgba(255, 255, 255, 0.025);
   --control-shadow: 0 1px 3px rgba(0, 0, 0, 0.15);
   --inset: inset 0 1px 2px rgba(0, 0, 0, 0.16);
+}
+
+@media (max-width: 1199px) {
+  :root {
+    --public-gutter: 2rem;
+  }
+}
+@media (max-width: 749px) {
+  :root {
+    --public-gutter: 1.25rem;
+    --public-header-height: 5.5rem;
+  }
+}
+@media (max-width: 359px) {
+  :root {
+    --public-gutter: 1rem;
+  }
 }

@@ -13,6 +13,7 @@ import {
 } from 'lucide-react'
 import { Brand, Wave } from '@/shared/components/ui/Brand'
 import { ThemeToggle } from '@/shared/components/ui/ThemeToggle'
+import { publicHeader } from '@/shared/components/public/public-surface.styles'
 import { cn } from '@/shared/lib/utils'
 import {
   setSoundEnabled,
@@ -102,7 +103,10 @@ function LandingExperience() {
       <a href="#conteudo" className="lp-skip">
         Ir para o conteúdo
       </a>
-      <header id="inicio" className={cn(s.frame, 'lp-header lp-hero-appear')}>
+      <header
+        id="inicio"
+        className={cn(s.frame, publicHeader, 'lp-header lp-hero-appear')}
+      >
         <Link to="/" aria-label="puclim, início" className="lp-brand">
           <Brand />
         </Link>

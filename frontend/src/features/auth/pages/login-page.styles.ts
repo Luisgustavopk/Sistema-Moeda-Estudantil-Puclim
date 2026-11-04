@@ -1,4 +1,7 @@
-import { publicSurface } from '@/shared/components/public/public-surface.styles'
+import {
+  publicHeader,
+  publicSurface,
+} from '@/shared/components/public/public-surface.styles'
 
 export const loginStyles = {
   experience: ['login-experience', publicSurface].join(' '),
@@ -20,28 +23,22 @@ export const loginStyles = {
   ].join(' '),
   topbar: [
     'login-topbar',
-    'relative! w-[min(_100%_-_calc(96px_*_var(--login-scale)),_calc(1440px_*_var(--login-scale))_)]! mx-auto! flex! items-center! justify-between! gap-[calc(24px_*_var(--login-scale))]!',
-    'min-h-[calc(112px_*_var(--login-scale))]!',
-    '[&_.brand]:text-[color:var(--login-ink)]! [&_.brand]:text-[length:calc(30px_*_var(--login-scale))]! [&_.brand]:gap-[calc(12px_*_var(--login-scale))]!',
-    '[&_.brand_>_svg]:w-[calc(38px_*_var(--login-scale))]! [&_.brand_>_svg]:h-[calc(30px_*_var(--login-scale))]!',
-    'login-mobile:w-[calc(100%_-_calc(40px_*_var(--login-scale)))]! login-mobile:gap-[calc(12px_*_var(--login-scale))]!',
-    'login-mobile:min-h-[calc(88px_*_var(--login-scale))]!',
-    'login-mobile:[&_.brand]:text-[length:calc(26px_*_var(--login-scale))]! login-mobile:[&_.brand]:gap-[calc(8px_*_var(--login-scale))]!',
-    'login-narrow:w-[calc(100%_-_32px)]! login-narrow:gap-[8px]!',
-    'login-narrow:[&_.brand]:text-[length:24px]! login-narrow:[&_.brand]:gap-[8px]!',
-    'login-narrow:[&_.brand_>_svg]:w-[32px]! login-narrow:[&_.brand_>_svg]:h-[26px]!',
+    publicHeader,
+    '[--login-scale:1]! relative! flex! items-center! justify-between! gap-[24px]!',
+    '[&_.brand]:text-[color:var(--login-ink)]!',
+    'login-mobile:gap-[12px]!',
+    'login-narrow:gap-[8px]!',
   ].join(' '),
   footer: [
     'login-footer',
-    'relative w-[min(_100%_-_calc(96px_*_var(--login-scale)),_calc(1440px_*_var(--login-scale))_)] mx-auto flex items-center justify-between gap-[calc(24px_*_var(--login-scale))]',
-    'min-h-[calc(72px_*_var(--login-scale))] text-[color:var(--login-secondary)] text-[length:calc(0.75rem_*_var(--login-scale))]',
-    'login-mobile:w-[calc(100%_-_calc(40px_*_var(--login-scale)))]',
-    'login-mobile:flex-wrap login-mobile:pb-[calc(24px_*_var(--login-scale))] login-mobile:min-h-auto login-mobile:text-[length:calc(0.75rem_*_var(--login-scale))] login-mobile:gap-[calc(8px_*_var(--login-scale))]',
+    '[--login-scale:1] relative w-(--public-frame-width) mx-auto flex items-center justify-between gap-[24px]',
+    'min-h-[72px] text-[color:var(--login-secondary)] text-sm',
+    'login-mobile:flex-wrap login-mobile:pb-[24px] login-mobile:min-h-auto login-mobile:gap-[8px]',
     'login-mobile:[&_>_span:last-child]:mr-auto',
   ].join(' '),
   productName: [
     'login-product-name',
-    'mr-auto pl-[calc(24px_*_var(--login-scale))] text-[color:var(--login-secondary)] text-[length:calc(0.8125rem_*_var(--login-scale))]',
+    'mr-auto pl-[24px] text-[color:var(--login-secondary)] text-sm',
     'login-tablet:hidden',
   ].join(' '),
   preferences: [
@@ -57,9 +54,9 @@ export const loginStyles = {
   ].join(' '),
   content: [
     'login-content',
-    'relative grid grid-cols-[minmax(0,_calc(480px_*_var(--login-scale)))_calc(_220px_*_var(--login-scale)_)] items-center justify-center gap-[calc(64px_*_var(--login-scale))] w-[min(_100%_-_calc(64px_*_var(--login-scale)),_calc(1040px_*_var(--login-scale))_)] m-auto py-[calc(32px_*_var(--login-scale))_calc(40px_*_var(--login-scale))]',
+    'relative grid grid-cols-[minmax(0,_calc(480px_*_var(--login-scale)))_calc(_220px_*_var(--login-scale)_)] items-center justify-center gap-[calc(64px_*_var(--login-scale))] w-(--public-frame-width) m-auto py-[calc(32px_*_var(--login-scale))_calc(40px_*_var(--login-scale))]',
     'login-tablet:grid-cols-[minmax(0,_calc(480px_*_var(--login-scale)))_calc(_168px_*_var(--login-scale)_)] login-tablet:gap-[calc(40px_*_var(--login-scale))]',
-    'login-mobile:w-[calc(100%_-_calc(32px_*_var(--login-scale)))] login-mobile:grid-cols-1 login-mobile:gap-[calc(24px_*_var(--login-scale))] login-mobile:py-[calc(8px_*_var(--login-scale))_calc(32px_*_var(--login-scale))]',
+    'login-mobile:grid-cols-1 login-mobile:gap-[calc(24px_*_var(--login-scale))] login-mobile:py-[calc(8px_*_var(--login-scale))_calc(32px_*_var(--login-scale))]',
   ].join(' '),
   intro: [
     'login-intro',
