@@ -13,7 +13,6 @@ export function FirstAccessPage() {
     return <Navigate to={homeFor(user)} replace />
   return (
     <div className="auth-panel">
-      <p className="eyebrow">Um espaço só seu</p>
       <h1>Boas-vindas, {user?.name.split(' ')[0]}.</h1>
       <p>
         Antes de começar, substitua sua senha temporária por uma senha pessoal.
@@ -28,7 +27,7 @@ export function FirstAccessPage() {
         <Button
           variant="ghost"
           onClick={() => {
-            void logout().catch((error) => toast(errorMessage(error)))
+            void logout().catch((error) => toast(errorMessage(error), 'error'))
           }}
         >
           Sair da conta

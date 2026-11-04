@@ -8,8 +8,7 @@ export const loginStyles = {
   ].join(' '),
   lightField: [
     'login-light-field',
-    'absolute [inset:-20%] [background:radial-gradient(ellipse_at_78%_20%,_#cdb57614,_transparent_45%),_radial-gradient(ellipse_at_10%_75%,_#0f4c5c12,_transparent_50%)]',
-    'login-dark:[background:radial-gradient(ellipse_at_78%_20%,_#91b6a720,_transparent_45%),_radial-gradient(ellipse_at_10%_75%,_#d1a21c0a,_transparent_50%)]',
+    'absolute [inset:-20%] [background:var(--ambient-field)]',
     'motion-safe:animate-login-light',
   ].join(' '),
   circulation: [
@@ -119,14 +118,13 @@ export const loginStyles = {
     'block w-[var(--coin-size)] h-[var(--coin-size)] [transform-style:preserve-3d]',
     'absolute inset-0 rounded-[50%]',
     '[backface-visibility:hidden] [filter:drop-shadow(_calc(4px_*_var(--login-scale))_calc(12px_*_var(--login-scale))_calc(10px_*_var(--login-scale))_#221d1240_)]',
-    "[&::before]:[content:''] [&::before]:absolute [&::before]:[inset:calc(1px_*_var(--login-scale))] [&::before]:rounded-[50%] [&::before]:shadow-[inset_0_calc(2px_*_var(--login-scale))_calc(2px_*_var(--login-scale))_#fff5bbaa,_inset_0_calc(-3px_*_var(--login-scale))_calc(4px_*_var(--login-scale))_#69400b80] [&::before]:pointer-events-none",
     '[&_>_svg]:block [&_>_svg]:w-full [&_>_svg]:h-full',
   ].join(' '),
   coinEdge: [
     'login-coin-edge',
     'block w-[var(--coin-size)] h-[var(--coin-size)] [transform-style:preserve-3d]',
     'absolute inset-0 rounded-[50%]',
-    '[background:linear-gradient(_125deg,_#fff0a6,_#ba8519_35%,_#76500c_65%,_#edc75c_)] [border:calc(1px_*_var(--login-scale))_solid_#e5bd50] shadow-[inset_0_calc(1px_*_var(--login-scale))_calc(1px_*_var(--login-scale))_#fff3b6,_inset_0_calc(-1px_*_var(--login-scale))_calc(2px_*_var(--login-scale))_#684008]',
+    '[background:linear-gradient(_125deg,_#e5cc84,_#a97c29_35%,_#65451c_65%,_#b39753_)]',
   ].join(' '),
   coinFinish: [
     'login-coin-finish',

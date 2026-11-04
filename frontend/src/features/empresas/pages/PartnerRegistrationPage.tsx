@@ -61,7 +61,7 @@ export function PartnerRegistrationPage() {
               Instituição de ensino · vincula alunos e professores
             </option>
             <option value="BENEFICIARIA">
-              Instituição beneficiária · participa das futuras doações
+              Instituição beneficiária · recebe doações
             </option>
           </FormSelect>
         </Field>
