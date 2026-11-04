@@ -3,7 +3,9 @@ import { useRef } from 'react'
 import { z } from 'zod'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { Field } from '@/shared/components/ui/Field'
+import { DateInput } from '@/shared/components/ui/DateInput'
 import { Button } from '@/shared/components/ui/Button'
+import { ErrorNotice } from '@/shared/components/ui/Feedback'
 import { useGameAction } from './hooks'
 import { gameApi } from './api'
 import type { Challenge } from './types'
@@ -67,7 +69,7 @@ export function ActivityForm({
   )
   return (
     <form
-      className="card"
+      className="card form-stack activity-editor"
       onSubmit={form.handleSubmit((values) =>
         action.mutate(values, { onSuccess: done }),
       )}
@@ -116,8 +118,9 @@ export function ActivityForm({
         label="Prazo de encerramento"
         error={form.formState.errors.deadline?.message}
       >
-        <input
+        <DateInput
           id="activity-deadline"
+          label="Prazo de encerramento"
           type="datetime-local"
           {...form.register('deadline')}
         />
@@ -141,6 +144,7 @@ export function ActivityForm({
           disponível e reservado para esta missão.
         </p>
       )}
+      <ErrorNotice error={action.error} />
       <div className="toolbar">
         <Button type="submit" loading={action.isPending}>
           {sponsored ? 'Salvar proposta' : 'Publicar missão'}

@@ -18,6 +18,6 @@ export function useGameAction<I, R>(
       toast(message)
       await Promise.all([client.invalidateQueries(), refresh()])
     },
-    onError: (error) => toast(errorMessage(error)),
+    onError: (error) => toast(errorMessage(error), 'error'),
   })
 }
