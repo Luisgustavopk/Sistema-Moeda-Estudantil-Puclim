@@ -35,35 +35,96 @@
   color: var(--login-accent);
 }
 .registration-experience .registration-tabs {
-  display: flex;
+  position: relative;
+  isolation: isolate;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 8px;
   margin: 24px 0;
-  padding: 6px;
+  padding: 4px;
   background: var(--login-field);
   border: 1px solid var(--login-line);
-  border-radius: 14px;
+  border-radius: 16px;
+}
+.registration-experience .registration-tabs::before {
+  content: '';
+  position: absolute;
+  z-index: -1;
+  inset: 4px auto 4px 4px;
+  width: calc((100% - 16px) / 2);
+  border-radius: 12px;
+  background: var(--login-panel);
+  outline: 1px solid color-mix(in srgb, var(--login-accent) 65%, transparent);
+  outline-offset: -1px;
+  transform: translateX(0);
+}
+.registration-experience .registration-tabs[data-organization]::before {
+  transform: translateX(calc(100% + 8px));
 }
 .registration-experience .registration-tabs a {
-  flex: 1;
-  text-align: center;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-width: 0;
+  min-height: 72px;
+  padding: 12px 16px;
+  text-align: left;
+  text-decoration: none;
   font-weight: 600;
-  display: grid;
-  place-items: center;
-  min-height: 48px;
-  padding: 10px 16px;
   border: 0;
-  border-radius: 8px;
+  border-radius: 12px;
+  background: transparent;
   color: var(--login-secondary);
   font-size: calc(0.8125rem * var(--login-scale));
   line-height: 1.4;
+  box-shadow: none;
 }
-.registration-experience .registration-tabs a:hover {
-  color: var(--login-ink);
+.registration-experience .registration-tabs a > svg {
+  width: 22px !important;
+  height: 22px !important;
 }
 .registration-experience .registration-tabs a.active {
   color: var(--login-ink);
-  background: var(--login-panel);
-  box-shadow: 0 2px 6px #00000012;
+}
+.registration-experience .registration-tabs a.active > svg {
+  color: var(--login-accent);
+}
+.registration-experience .registration-option-copy {
+  display: grid;
+  gap: 4px;
+  min-width: 0;
+}
+.registration-experience .registration-option-description {
+  color: var(--login-secondary);
+  font-size: 0.75rem;
+  font-weight: 400;
+}
+@media (hover: hover) and (pointer: fine) {
+  .registration-experience .registration-tabs a:hover {
+    color: var(--login-ink);
+  }
+}
+@media (prefers-reduced-motion: no-preference) {
+  .registration-experience .registration-tabs::before {
+    transition: transform 220ms var(--login-ease);
+  }
+}
+@media (hover: hover) and (pointer: fine) and (prefers-reduced-motion: no-preference) {
+  .registration-experience .registration-tabs a {
+    transition: transform 140ms var(--login-ease);
+  }
+  .registration-experience .registration-tabs a:active:not(:focus-visible) {
+    transform: scale(0.98);
+  }
+}
+.registration-experience .registration-tabs:has(:focus-visible)::before,
+.registration-experience .registration-tabs a:focus-visible,
+.registration-experience[data-motion-paused] .registration-tabs::before,
+.registration-experience[data-motion-paused] .registration-tabs a {
+  transition: none;
+}
+.registration-experience .registration-tabs a:focus-visible {
+  transform: none;
 }
 .registration-experience .auth-panel form {
   margin-top: 28px;
@@ -170,8 +231,17 @@
     gap: 22px;
   }
   .registration-experience .registration-tabs a {
-    padding-inline: 8px;
+    gap: 8px;
+    min-height: 64px;
+    padding-inline: 12px;
     font-size: 0.875rem;
+  }
+  .registration-experience .registration-option-description {
+    display: none;
+  }
+  .registration-experience .modal .form-actions {
+    display: grid;
+    grid-template-columns: 1fr;
   }
   .registration-experience
     :is(input:not([type='checkbox']), textarea, .styled-select) {
@@ -185,5 +255,14 @@
   .registration-experience .button[type='submit'] {
     font-size: 1rem;
     min-height: 56px;
+  }
+}
+@media (max-width: 479px) {
+  .registration-experience .registration-tabs a {
+    flex-direction: column;
+    justify-content: center;
+    min-height: 88px;
+    padding: 12px 8px;
+    text-align: center;
   }
 }

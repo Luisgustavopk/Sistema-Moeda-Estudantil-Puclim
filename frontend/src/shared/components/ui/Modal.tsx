@@ -1,13 +1,24 @@
-import { useEffect, useId, useRef, useState, type ReactNode } from 'react'
+import {
+  useEffect,
+  useId,
+  useRef,
+  useState,
+  type ReactNode,
+  type RefObject,
+} from 'react'
 import { X } from 'lucide-react'
 export function Modal({
   title,
+  descriptionId,
+  initialFocusRef,
   children,
   onClose,
   busy = false,
   size = 'normal',
 }: {
   title: string
+  descriptionId?: string
+  initialFocusRef?: RefObject<HTMLElement | null>
   children: ReactNode
   onClose: () => void
   busy?: boolean
@@ -35,18 +46,20 @@ export function Modal({
     const previousOverflow = document.body.style.overflow
     document.body.style.overflow = 'hidden'
     dialog?.showModal()
+    initialFocusRef?.current?.focus({ preventScroll: true })
     return () => {
       dialog?.close()
       clearTimeout(closeTimer.current)
       document.body.style.overflow = previousOverflow
       previousFocus?.focus({ preventScroll: true })
     }
-  }, [])
+  }, [initialFocusRef])
   return (
     <dialog
       ref={ref}
       className={`modal ${size === 'wide' ? 'modal-wide' : ''} ${closing ? 'is-closing' : ''}`}
       aria-labelledby={titleId}
+      aria-describedby={descriptionId}
       onCancel={(event) => {
         event.preventDefault()
         close()

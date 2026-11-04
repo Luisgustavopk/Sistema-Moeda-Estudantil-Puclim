@@ -6,7 +6,7 @@ import type { z } from 'zod'
 import { useNavigate } from 'react-router'
 import { partnerSchema } from '../schemas/empresa.schema'
 import { empresasApi } from '../api/empresas.api'
-import { RegistrationHeader } from '@/features/auth/components/RegistrationHeader'
+import { RegistrationLeavePrompt } from '@/features/auth/components/RegistrationHeader'
 import { useAuth } from '@/features/auth/hooks/auth-context'
 import { useAction } from '@/shared/hooks/use-action'
 import { useToast } from '@/shared/hooks/toast-context'
@@ -20,20 +20,31 @@ export function PartnerRegistrationPage() {
   const toast = useToast()
   const form = useForm<Values>({
     resolver: zodResolver(partnerSchema),
-    defaultValues: { partnerKind: 'EMPRESA', description: '' },
-  })
-  const action = useAction(
-    async ({ confirmation: _confirmation, ...values }: Values) => {
-      await empresasApi.register(values)
-      return auth.login(values.login, values.password)
+    defaultValues: {
+      partnerKind: 'EMPRESA',
+      name: '',
+      cnpj: '',
+      phone: '',
+      email: '',
+      login: '',
+      description: '',
+      password: '',
+      confirmation: '',
     },
-  )
+  })
+  const action = useAction(async ({ confirmation, ...values }: Values) => {
+    await empresasApi.register(values)
+    // Todos os campos passam a refletir o cadastro salvo antes de autenticar.
+    form.reset({ ...values, confirmation })
+    return auth.login(values.login, values.password)
+  })
   const errors = form.formState.errors
   return (
-    <div className="auth-panel register-panel">
-      <RegistrationHeader />
+    <>
+      <RegistrationLeavePrompt dirty={form.formState.isDirty} />
       <form
         className="form-grid"
+        aria-labelledby="registration-title"
         noValidate
         onSubmit={form.handleSubmit(async (values) => {
           try {
@@ -171,6 +182,6 @@ export function PartnerRegistrationPage() {
           Cadastrar minha organização <ArrowRight size={18} />
         </Button>
       </form>
-    </div>
+    </>
   )
 }

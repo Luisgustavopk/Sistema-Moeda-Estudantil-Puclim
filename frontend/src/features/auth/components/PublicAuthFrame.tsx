@@ -1,5 +1,6 @@
 import { useState, useSyncExternalStore, type ReactNode } from 'react'
 import { Pause, Play, Volume2, VolumeX } from 'lucide-react'
+import { Link, useMatch } from 'react-router'
 import { Brand } from '@/shared/components/ui/Brand'
 import { ThemeToggle } from '@/shared/components/ui/ThemeToggle'
 import { DATA_MODE } from '@/shared/lib/http'
@@ -21,6 +22,7 @@ export function PublicAuthFrame({
   skipHref?: string
   skipLabel?: string
 }) {
+  const isLogin = useMatch('/login')
   const sound = useSyncExternalStore(subscribeSound, soundEnabled)
   const [paused, setPaused] = useState(false)
   return (
@@ -86,7 +88,15 @@ export function PublicAuthFrame({
         </svg>
       </div>
       <header className={loginStyles.topbar}>
-        <Brand />
+        <Link
+          to={isLogin ? '/' : '/login'}
+          aria-label={
+            isLogin ? 'Puclim, voltar ao início' : 'Puclim, voltar para entrar'
+          }
+          className="inline-flex! min-h-11! items-center! rounded-sm!"
+        >
+          <Brand />
+        </Link>
         <span className={loginStyles.productName}>
           Sistema de moeda estudantil
         </span>

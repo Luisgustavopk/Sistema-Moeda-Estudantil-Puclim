@@ -1170,6 +1170,7 @@
   font-weight: 600;
 }
 .puclim-landing .lp-audience-content > p {
+  max-width: 65ch;
   margin-top: 16px;
   color: var(--lp-muted);
   font-size: 16px;
@@ -1252,6 +1253,7 @@
   transform: rotate(45deg);
 }
 .puclim-landing .lp-question-list details > p {
+  max-width: 65ch;
   padding-block: 4px 20px;
   color: var(--lp-muted);
   font-size: 16px;

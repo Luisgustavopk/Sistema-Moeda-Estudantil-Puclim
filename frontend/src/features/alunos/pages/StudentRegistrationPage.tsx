@@ -8,7 +8,7 @@ import { useNavigate } from 'react-router'
 import { studentSchema } from '../schemas/aluno.schema'
 import { alunosApi } from '../api/alunos.api'
 import { instituicoesApi } from '@/features/instituicoes/api/instituicoes.api'
-import { RegistrationHeader } from '@/features/auth/components/RegistrationHeader'
+import { RegistrationLeavePrompt } from '@/features/auth/components/RegistrationHeader'
 import { useAuth } from '@/features/auth/hooks/auth-context'
 import { useAction } from '@/shared/hooks/use-action'
 import { useToast } from '@/shared/hooks/toast-context'
@@ -27,20 +27,32 @@ export function StudentRegistrationPage() {
   })
   const form = useForm<Values>({
     resolver: zodResolver(studentSchema),
-    defaultValues: { institutionId: '' },
-  })
-  const action = useAction(
-    async ({ confirmation: _confirmation, ...values }: Values) => {
-      await alunosApi.register(values)
-      return auth.login(values.login, values.password)
+    defaultValues: {
+      name: '',
+      email: '',
+      login: '',
+      cpf: '',
+      rg: '',
+      address: '',
+      institutionId: '',
+      course: '',
+      password: '',
+      confirmation: '',
     },
-  )
+  })
+  const action = useAction(async ({ confirmation, ...values }: Values) => {
+    await alunosApi.register(values)
+    // Todos os campos passam a refletir o cadastro salvo antes de autenticar.
+    form.reset({ ...values, confirmation })
+    return auth.login(values.login, values.password)
+  })
   const errors = form.formState.errors
   return (
-    <div className="auth-panel register-panel">
-      <RegistrationHeader />
+    <>
+      <RegistrationLeavePrompt dirty={form.formState.isDirty} />
       <form
         className="form-grid"
+        aria-labelledby="registration-title"
         noValidate
         onSubmit={form.handleSubmit(async (values) => {
           try {
@@ -193,6 +205,6 @@ export function StudentRegistrationPage() {
           Criar minha conta <ArrowRight size={18} />
         </Button>
       </form>
-    </div>
+    </>
   )
 }
