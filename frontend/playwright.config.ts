@@ -33,6 +33,7 @@ export default defineConfig({
         'design-round1.spec.ts',
         'design-round2.spec.ts',
         'refinements.spec.ts',
+        'interface-improvements.spec.ts',
       ],
       use: { baseURL: `http://127.0.0.1:${apiPort}` },
     },
