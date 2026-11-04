@@ -377,6 +377,8 @@ class GamificationIntegrationTest extends AbstractDatabaseTest {
         for (String table : List.of("ledger_entries", "notifications", "inbox_notifications"))
             assertEquals(0, jdbc.queryForObject("SELECT COUNT(*) FROM " + table + " WHERE account_id=?", Long.class,
                     f.student().id()));
+        assertEquals(0, jdbc.queryForObject("SELECT COUNT(*) FROM notifications WHERE account_id=?", Long.class,
+                f.teacher().id()));
         assertEquals(0, jdbc.queryForObject("SELECT COUNT(*) FROM badge_awards WHERE student_id=?", Long.class,
                 f.student().id()));
     }

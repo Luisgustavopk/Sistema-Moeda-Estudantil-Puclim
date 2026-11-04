@@ -1,0 +1,15 @@
+Olá, {{teacherName}}!
+
+Seu envio de moedas foi concluído com sucesso.
+
+Aluno destinatário: {{studentName}}
+Quantidade: {{amount}} moedas
+Data: {{date}}
+Identificador da operação: {{operationId}}
+
+Motivo do reconhecimento:
+{{reason}}
+
+Você pode consultar esta movimentação em Meu extrato no Puclim.
+
+Equipe Puclim

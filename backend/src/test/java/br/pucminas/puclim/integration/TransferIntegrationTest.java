@@ -12,6 +12,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import br.pucminas.puclim.repository.AccountRepository;
 import br.pucminas.puclim.repository.LedgerEntryRepository;
+import br.pucminas.puclim.repository.NotificationRepository;
 import br.pucminas.puclim.support.AbstractDatabaseTest;
 import br.pucminas.puclim.support.ConcurrentTestActions;
 
@@ -22,6 +23,8 @@ class TransferIntegrationTest extends AbstractDatabaseTest {
     AccountRepository accounts;
     @Autowired
     LedgerEntryRepository ledger;
+    @Autowired
+    NotificationRepository notifications;
 
     @Test
     void transferValidatesAmountReasonAndBalanceAndReplaysOnlyIdenticalRequests() throws Exception {
@@ -34,6 +37,8 @@ class TransferIntegrationTest extends AbstractDatabaseTest {
         }
         teacher.result(teacher.call("POST", "/transferencias", Map.of("studentId", fixture.student().id(),
                 "amount", 10, "reason", " "), UUID.randomUUID().toString()), 400);
+        assertTrue(notifications.findByAccountIdOrderByDateDesc(fixture.teacher().id()).isEmpty());
+        assertTrue(notifications.findByAccountIdOrderByDateDesc(fixture.student().id()).isEmpty());
         String key = UUID.randomUUID().toString();
         var payload = Map.of("studentId", fixture.student().id(), "amount", 200, "reason", "Excelente participacao");
         var first = teacher.result(teacher.call("POST", "/transferencias", payload, key), 200);
@@ -46,6 +51,8 @@ class TransferIntegrationTest extends AbstractDatabaseTest {
         assertTrue(fixture.student().client().ok("GET", "/conta/extrato", null).toString()
                 .contains("Excelente participacao"));
         assertTrue(teacher.ok("GET", "/conta/extrato", null).toString().contains(fixture.student().name()));
+        assertEquals(1, notifications.findByAccountIdOrderByDateDesc(fixture.teacher().id()).size());
+        assertEquals(1, notifications.findByAccountIdOrderByDateDesc(fixture.student().id()).size());
     }
 
     @Test
@@ -65,6 +72,8 @@ class TransferIntegrationTest extends AbstractDatabaseTest {
                 accounts.findById(fixture.teacher().id()).orElseThrow().balance);
         assertEquals(ledger.sum(fixture.student().id()),
                 accounts.findById(fixture.student().id()).orElseThrow().balance);
+        assertEquals(1, notifications.findByAccountIdOrderByDateDesc(fixture.teacher().id()).size());
+        assertEquals(1, notifications.findByAccountIdOrderByDateDesc(fixture.student().id()).size());
     }
 
 }

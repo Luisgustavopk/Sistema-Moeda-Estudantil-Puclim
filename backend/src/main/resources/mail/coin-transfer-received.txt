@@ -1,0 +1,15 @@
+Olá, {{studentName}}!
+
+Você recebeu um reconhecimento no Puclim!
+
+Professor remetente: {{teacherName}}
+Quantidade: {{amount}} moedas
+Data: {{date}}
+Identificador da operação: {{operationId}}
+
+Motivo do reconhecimento:
+{{reason}}
+
+As moedas já estão disponíveis na sua conta. Você pode consultar esta movimentação em Meu extrato no Puclim.
+
+Equipe Puclim

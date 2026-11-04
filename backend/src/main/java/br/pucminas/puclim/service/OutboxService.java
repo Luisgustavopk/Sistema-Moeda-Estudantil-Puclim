@@ -14,6 +14,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import br.pucminas.puclim.entity.Account;
 import br.pucminas.puclim.entity.Notification;
+import br.pucminas.puclim.mail.EmailContent;
 import br.pucminas.puclim.repository.NotificationRepository;
 
 @Service
@@ -26,6 +27,11 @@ public class OutboxService {
         notifications = n;
         sender = s;
         from = f;
+    }
+
+    @Transactional
+    public void enqueue(Account account, EmailContent content) {
+        enqueue(account, content.subject(), content.body());
     }
 
     @Transactional

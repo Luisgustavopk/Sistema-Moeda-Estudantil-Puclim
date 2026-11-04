@@ -8,6 +8,7 @@ import br.pucminas.puclim.entity.*;
 import br.pucminas.puclim.repository.*;
 import br.pucminas.puclim.mapper.DomainMapper;
 import br.pucminas.puclim.exception.ApiException;
+import br.pucminas.puclim.mail.CoinTransferEmailTemplates;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import java.util.*;
@@ -29,11 +30,13 @@ public class FinancialService {
     private final SemesterCreditRepository credits;
     private final OperationRepository operations;
     private final OutboxService outbox;
+    private final CoinTransferEmailTemplates transferEmails;
     private final org.springframework.context.ApplicationEventPublisher events;
 
     public FinancialService(AccountService i, StudentRepository s, TeacherRepository t, AdvantageRepository v,
             CouponRepository c, LedgerEntryRepository l, SemesterCreditRepository sc, OperationRepository o,
-            OutboxService n, org.springframework.context.ApplicationEventPublisher events) {
+            OutboxService n, CoinTransferEmailTemplates transferEmails,
+            org.springframework.context.ApplicationEventPublisher events) {
         identity = i;
         students = s;
         teachers = t;
@@ -43,6 +46,7 @@ public class FinancialService {
         credits = sc;
         operations = o;
         outbox = n;
+        this.transferEmails = transferEmails;
         this.events = events;
     }
 
@@ -131,8 +135,10 @@ public class FinancialService {
                 input.reason().trim(), operationId);
         entry(target, "RECEBIMENTO", input.amount(), "Reconhecimento recebido", source.name, input.reason().trim(),
                 operationId);
-        outbox.enqueue(target, "Você recebeu moedas no Puclim",
-                source.name + " enviou " + input.amount() + " moedas.\nMotivo: " + input.reason().trim());
+        var emailData = new CoinTransferEmailTemplates.Transfer(source.name, target.name, input.amount(),
+                sent.reason, sent.date, operationId);
+        outbox.enqueue(source, transferEmails.sent(emailData));
+        outbox.enqueue(target, transferEmails.received(emailData));
         remember(source, key, fp, "TRANSFER", sent.id);
         events.publishEvent(new GamificationEvents.CoinsReceived(student.id, operationId, input.amount(), true));
         return DomainMapper.transaction(sent);

@@ -52,4 +52,5 @@ puclim:
     zone: ${SEMESTER_ZONE:America/Sao_Paulo}
   mail:
     from: ${MAIL_FROM:puclim@localhost}
+    zone: ${MAIL_ZONE:America/Sao_Paulo}
     retry-delay-ms: ${MAIL_RETRY_DELAY_MS:30000}

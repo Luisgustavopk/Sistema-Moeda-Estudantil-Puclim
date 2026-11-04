@@ -9,7 +9,7 @@ java/br/pucminas/puclim/
 ├── integration/   # HTTP real, autorização, fluxos e concorrência
 ├── persistence/   # Repositórios, constraints, relacionamentos e atomicidade no banco
 ├── support/       # Configuração, cliente HTTP, fixtures, SMTP e execução simultânea
-└── unit/          # CPF e CNPJ sem banco ou servidor
+└── unit/          # Documentos, regras de domínio e templates sem banco ou servidor
 ```
 
 | Módulo | Arquivo | Cenários |
@@ -22,7 +22,7 @@ java/br/pucminas/puclim/
 | Transferências entre alunos | [PeerTransferIntegrationTest](java/br/pucminas/puclim/integration/PeerTransferIntegrationTest.java) | Vínculos, critérios e versões, aprovação/rejeição, privacidade, autorização, inativação, saldo na aprovação, replay e concorrência |
 | Vantagens | [AdvantageIntegrationTest](java/br/pucminas/puclim/integration/AdvantageIntegrationTest.java) | Upload, propriedade, edição, catálogo e desativação |
 | Cupons | [CouponIntegrationTest](java/br/pucminas/puclim/integration/CouponIntegrationTest.java) | Resgate concorrente, replay, códigos únicos, autorização e utilização única |
-| Notificações | [NotificationIntegrationTest](java/br/pucminas/puclim/integration/NotificationIntegrationTest.java) | Falha SMTP sem rollback, retry e recebimento real dos dois e-mails com o mesmo código |
+| Notificações | [NotificationIntegrationTest](java/br/pucminas/puclim/integration/NotificationIntegrationTest.java) | Confirmações de moedas para professor/aluno, destinatários e conteúdo MIME, entrega independente, retry sem rollback e e-mails de resgate com o mesmo código |
 | Contas persistidas | [AccountPersistenceTest](java/br/pucminas/puclim/persistence/AccountPersistenceTest.java) | Hash, vínculos, unicidades, saldo não negativo e chaves estrangeiras |
 | Extrato persistido | [LedgerPersistenceTest](java/br/pucminas/puclim/persistence/LedgerPersistenceTest.java) | Lançamentos pareados, motivo, soma do saldo e retenção após desativação |
 | Cotas persistidas | [SemesterCreditPersistenceTest](java/br/pucminas/puclim/persistence/SemesterCreditPersistenceTest.java) | Crédito inicial, duplicidade, concorrência e acúmulo |
@@ -30,10 +30,13 @@ java/br/pucminas/puclim/
 | Outbox persistida | [OutboxPersistenceTest](java/br/pucminas/puclim/persistence/OutboxPersistenceTest.java) | Destinatários/código compartilhado, contato atualizado e rollback conjunto |
 | CPF | [CpfValidationTest](java/br/pucminas/puclim/unit/CpfValidationTest.java) | Normalização e rejeição de documentos inválidos |
 | CNPJ | [CnpjValidationTest](java/br/pucminas/puclim/unit/CnpjValidationTest.java) | Normalização e dígitos verificadores |
+| Templates de e-mail | [CoinTransferEmailTemplatesTest](java/br/pucminas/puclim/unit/CoinTransferEmailTemplatesTest.java) | Conteúdo por destinatário, Unicode, substituição literal, variáveis obrigatórias e fuso configurável |
 | Gamificação integrada | [GamificationIntegrationTest](java/br/pucminas/puclim/integration/GamificationIntegrationTest.java) | 19 cenários de perfis, ranking, quizzes, streak, missões, reservas, bônus, Fundo, doações, premiação, notificações, propostas e rollback por eventos |
 | Política de gamificação | [GamificationPolicyTest](java/br/pucminas/puclim/unit/GamificationPolicyTest.java) | Limites de níveis, bônus, teto, arredondamento e semestres |
 
 `AbstractDatabaseTest` compartilha o contexto Spring Boot, HTTP em porta aleatória e configuração de banco. `ApiTestClient` gerencia cookies, CSRF, JSON e multipart. `TestDataFactory` cria fixtures independentes; `TestPayloads` e `TestDocuments` geram suas entradas. `ConcurrentTestActions` usa uma barreira de início e timeout para duas operações reais. `SmtpTestServer` recebe mensagens por conexão SMTP; o teste sempre restaura o JavaMailSender após alterar a porta. `TestSessionRegistry` controla o timeout de uma sessão específica, sem uma flag global para a próxima sessão.
+
+A organização dos templates, a configuração de horário e o caminho para novos tipos de e-mail estão em [E-mails de confirmação de moedas](../../../docs/email-notifications.md).
 
 ## Executar
 
@@ -43,7 +46,7 @@ Dentro de `backend/`, sem banco, execute:
 sh ./mvnw verify
 ```
 
-Os sete testes unitários são executados. As 50 verificações de integração/persistência ficam explicitamente ignoradas quando `TEST_DB_URL` não está definida. Cada classe de banco possui sua condição explícita, além de herdar a configuração do contexto.
+Os testes unitários são executados. As verificações de integração/persistência ficam explicitamente ignoradas quando `TEST_DB_URL` não está definida. Cada classe de banco possui sua condição explícita, além de herdar a configuração do contexto.
 
 Para banco real, use uma instância dedicada de MySQL/MariaDB com banco e usuário já criados:
 
