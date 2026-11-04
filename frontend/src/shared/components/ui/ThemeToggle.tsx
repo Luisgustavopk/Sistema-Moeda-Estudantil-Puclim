@@ -9,11 +9,15 @@ function subscribe(listener: () => void) {
   }
 }
 const snapshot = () => localStorage.getItem('puclim.theme') === 'dark'
-export function ThemeToggle({ labelled = false }: { labelled?: boolean }) {
+export function ThemeSync() {
   const dark = useSyncExternalStore(subscribe, snapshot)
   useEffect(() => {
     document.documentElement.dataset.theme = dark ? 'dark' : 'light'
   }, [dark])
+  return null
+}
+export function ThemeToggle({ labelled = false }: { labelled?: boolean }) {
+  const dark = useSyncExternalStore(subscribe, snapshot)
   return (
     <button
       type="button"
@@ -21,8 +25,15 @@ export function ThemeToggle({ labelled = false }: { labelled?: boolean }) {
       aria-label={dark ? 'Ativar modo claro' : 'Ativar modo escuro'}
       aria-pressed={dark}
       onClick={() => {
+        const root = document.documentElement
+        root.classList.add('theme-switching')
         localStorage.setItem('puclim.theme', dark ? 'light' : 'dark')
+        root.dataset.theme = dark ? 'light' : 'dark'
+        void root.offsetHeight
         window.dispatchEvent(new Event('puclim:theme'))
+        requestAnimationFrame(() =>
+          requestAnimationFrame(() => root.classList.remove('theme-switching')),
+        )
       }}
     >
       {dark ? <Sun size={20} /> : <Moon size={20} />}

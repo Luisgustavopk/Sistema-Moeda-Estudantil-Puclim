@@ -15,7 +15,7 @@ import {
   Wallet,
   X,
 } from 'lucide-react'
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { Link, NavLink, Outlet, useLocation } from 'react-router'
 import { useAuth } from '@/features/auth/hooks/auth-context'
 import { homeFor } from '@/features/auth/utils/routing'
@@ -27,6 +27,7 @@ import { useToast } from '@/shared/hooks/toast-context'
 import { errorMessage } from '@/shared/lib/errors'
 import { AchievementFeed } from '@/features/gamificacao/Inbox'
 import { ConfirmationFeedback } from '@/shared/components/ui/ConfirmationFeedback'
+import { ResponsiveSidebar } from '@/shared/components/ui/ResponsiveSidebar'
 
 export function AppLayout() {
   const { user, logout } = useAuth()
@@ -34,20 +35,20 @@ export function AppLayout() {
   const toast = useToast()
   const [open, setOpen] = useState(false)
   const [leaving, setLeaving] = useState(false)
+  const menuTrigger = useRef<HTMLButtonElement>(null)
   useEffect(() => {
     window.scrollTo(0, 0)
   }, [location.pathname])
   useEffect(() => {
-    const close = (event: KeyboardEvent) => {
-      if (event.key === 'Escape') setOpen(false)
+    const media = matchMedia('(min-width: 768px)')
+    const close = () => {
+      if (media.matches) setOpen(false)
     }
-    document.addEventListener('keydown', close)
-    document.body.style.overflow = open ? 'hidden' : ''
+    media.addEventListener('change', close)
     return () => {
-      document.removeEventListener('keydown', close)
-      document.body.style.overflow = ''
+      media.removeEventListener('change', close)
     }
-  }, [open])
+  }, [])
   if (!user) return null
   const items =
     user.role === 'ALUNO'
@@ -162,26 +163,16 @@ export function AppLayout() {
       <a className="skip-link" href="#conteudo">
         Pular para o conteúdo
       </a>
-      {open && (
-        <button
-          className="sidebar-scrim"
-          aria-label="Fechar menu"
-          onClick={() => setOpen(false)}
-        />
-      )}
-      <aside
-        id="menu-lateral"
-        className={`sidebar ${open ? 'open' : ''}`}
-        aria-label="Menu principal"
-        onClick={(event) => {
-          if ((event.target as HTMLElement).closest('a')) setOpen(false)
-        }}
+      <ResponsiveSidebar
+        open={open}
+        returnFocus={menuTrigger}
+        onClose={() => setOpen(false)}
       >
         <Link to={homeFor(user)} aria-label="Puclim, página inicial">
           <Brand />
         </Link>
         <div>
-          <nav>
+          <nav aria-label="Navegação principal">
             {items.map(({ path, label, icon: Icon }) => (
               <NavLink
                 key={path}
@@ -189,7 +180,7 @@ export function AppLayout() {
                 aria-label={label}
                 end={path === homeFor(user)}
                 className={({ isActive }) =>
-                  `nav-link ${isActive ? 'active' : ''}`
+                  `nav-link ${['/aluno/conquistas', '/professor/perguntas'].includes(path) ? 'nav-group-start' : ''} ${isActive ? 'active' : ''}`
                 }
               >
                 <Icon size={19} />
@@ -203,7 +194,7 @@ export function AppLayout() {
               to="/notificacoes"
               aria-label="Notificações"
               className={({ isActive }) =>
-                `nav-link ${isActive ? 'active' : ''}`
+                `nav-link nav-group-start ${isActive ? 'active' : ''}`
               }
             >
               <Bell size={19} />
@@ -228,11 +219,6 @@ export function AppLayout() {
           </nav>
         </div>
         <div className="sidebar-footer">
-          <div className="sidebar-message">
-            <Sparkles size={22} aria-hidden="true" />
-            <strong>O mérito começa com você.</strong>
-            <p>Cada boa atitude pode abrir uma nova possibilidade.</p>
-          </div>
           <div className="sidebar-user">
             <Link
               to="/perfil"
@@ -254,7 +240,7 @@ export function AppLayout() {
                 try {
                   await logout()
                 } catch (error) {
-                  toast(errorMessage(error))
+                  toast(errorMessage(error), 'error')
                   setLeaving(false)
                 }
               }}
@@ -263,12 +249,13 @@ export function AppLayout() {
             </button>
           </div>
         </div>
-      </aside>
+      </ResponsiveSidebar>
       <div className="workspace">
         <header className="topbar">
           <div className="topbar-inner">
             <button
               className="icon-button mobile-menu"
+              ref={menuTrigger}
               aria-label={open ? 'Fechar menu' : 'Abrir menu'}
               aria-expanded={open}
               aria-controls="menu-lateral"

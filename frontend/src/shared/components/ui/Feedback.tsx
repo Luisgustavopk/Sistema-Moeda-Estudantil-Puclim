@@ -2,6 +2,57 @@ import { AlertCircle, ArrowRight, Inbox, LoaderCircle } from 'lucide-react'
 import { Button } from './Button'
 import { errorMessage } from '@/shared/lib/errors'
 import type { ReactNode } from 'react'
+import { number } from '@/shared/utils/format'
+export function QueryValue({
+  value,
+  query,
+  prefix = '',
+}: {
+  value: number | undefined
+  prefix?: string
+  query: {
+    isPending: boolean
+    isFetching: boolean
+    isError: boolean
+    refetch: () => unknown
+  }
+}) {
+  return (
+    <div className="query-value" aria-busy={query.isFetching}>
+      {value !== undefined ? (
+        <div className="stat-value">
+          {prefix}
+          {number(value)}
+        </div>
+      ) : (
+        <span className="small muted">
+          {query.isPending ? 'Carregando…' : 'Indisponível'}
+        </span>
+      )}
+      <div className="small muted" role="status">
+        {query.isError ? (
+          <>
+            <span>
+              {value !== undefined
+                ? 'Último valor confirmado. Falha ao atualizar.'
+                : 'Não foi possível consultar.'}
+            </span>{' '}
+            <button
+              className="message-toggle"
+              onClick={() => {
+                void query.refetch()
+              }}
+            >
+              Atualizar indicador
+            </button>
+          </>
+        ) : query.isFetching && value !== undefined ? (
+          'Atualizando…'
+        ) : null}
+      </div>
+    </div>
+  )
+}
 export function ErrorNotice({ error }: { error: unknown }) {
   return error ? (
     <div className="notice notice-error" role="alert">

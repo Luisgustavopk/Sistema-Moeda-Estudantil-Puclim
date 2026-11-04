@@ -1,19 +1,46 @@
-import { useId, useState, type ReactNode } from 'react'
+import { useEffect, useId, useRef, useState, type ReactNode } from 'react'
 
 export type StatusTone = 'neutral' | 'info' | 'warning' | 'success'
 
 export function ExpandableMessage({ text }: { text: string }) {
   const [expanded, setExpanded] = useState(false)
+  const [truncated, setTruncated] = useState(false)
+  const ref = useRef<HTMLParagraphElement>(null)
   const id = useId()
+  useEffect(() => {
+    const node = ref.current
+    if (!node) return
+    let active = true
+    // scrollHeight includes clamped lines; comparing with the line height also
+    // works while expanded, so the collapse button never disappears on open.
+    const measure = () =>
+      setTruncated(
+        node.scrollHeight >
+          parseFloat(getComputedStyle(node).lineHeight) * 2 + 1,
+      )
+    const observer = new ResizeObserver(measure)
+    observer.observe(node)
+    document.fonts.addEventListener('loadingdone', measure)
+    void document.fonts.ready.then(() => {
+      if (active) measure()
+    })
+    measure()
+    return () => {
+      active = false
+      observer.disconnect()
+      document.fonts.removeEventListener('loadingdone', measure)
+    }
+  }, [text])
   return (
     <div className="expandable-message">
       <p
+        ref={ref}
         id={id}
         className={`activity-copy ${expanded ? '' : 'message-excerpt'}`}
       >
         {text}
       </p>
-      {(text.length > 180 || text.includes('\n')) && (
+      {truncated && (
         <button
           className="message-toggle"
           aria-expanded={expanded}
