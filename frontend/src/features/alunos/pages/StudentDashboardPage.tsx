@@ -1,4 +1,4 @@
-import { ArrowRight, Gift, Ticket, Wallet } from 'lucide-react'
+import { ArrowRight, Gift } from 'lucide-react'
 import { useState } from 'react'
 import { Link } from 'react-router'
 import { useQuery } from '@tanstack/react-query'
@@ -12,7 +12,7 @@ import { AdvantagePhoto } from '@/features/vantagens/components/AdvantageCard'
 import { RedeemDialog } from '@/features/vantagens/components/RedeemDialog'
 import { Coin } from '@/shared/components/ui/Brand'
 import { PageHeading } from '@/shared/components/ui/PageHeading'
-import { QueryState } from '@/shared/components/ui/Feedback'
+import { QueryState, QueryValue } from '@/shared/components/ui/Feedback'
 import type { Advantage } from '@/shared/types/domain'
 import { number } from '@/shared/utils/format'
 import { DashboardProgress } from '@/features/gamificacao/ProfileRanking'
@@ -32,42 +32,61 @@ export function StudentDashboardPage() {
     queryKey: ['coupons', user?.id],
     queryFn: cuponsApi.list,
   })
-  const received =
-    transactions.data
-      ?.filter((value) => value.amount > 0)
-      .reduce((total, value) => total + value.amount, 0) || 0
-  const activeCoupons =
-    coupons.data?.filter((value) => value.status === 'VALIDO').length || 0
+  const received = transactions.data
+    ?.filter((value) => value.amount > 0)
+    .reduce((total, value) => total + value.amount, 0)
+  const activeCoupons = coupons.data?.filter(
+    (value) => value.status === 'VALIDO',
+  ).length
   return (
     <>
       <PageHeading
         title={`Olá, ${user?.name.split(' ')[0]}!`}
-        description="Seu reconhecimento deste semestre em um só lugar."
+        description="Seu saldo e histórico de reconhecimento em um só lugar."
       />
+      <div className="student-overview">
+        <section className="student-wallet" aria-label="Seu saldo e atalhos">
+          <BalanceCard balance={user?.balance || 0} />
+          <div className="balance-actions">
+            <Link className="text-link" to="/aluno/extrato">
+              Ver extrato <ArrowRight size={15} />
+            </Link>
+            <Link className="text-link" to="/aluno/catalogo">
+              Explorar vantagens <ArrowRight size={15} />
+            </Link>
+          </div>
+        </section>
+        <div className="student-journey">
+          <DashboardProgress />
+        </div>
+      </div>
+      <div className="stat-grid">
+        <section className="card stat-card">
+          <div>
+            <p>Pucoins recebidos</p>
+            <QueryValue value={received} query={transactions} />
+            <small className="muted small">Total histórico</small>
+          </div>
+        </section>
+        <section className="card stat-card">
+          <div>
+            <p>
+              <Link to="/aluno/cupons" className="summary-link">
+                Cupons disponíveis <ArrowRight size={13} aria-hidden="true" />
+              </Link>
+            </p>
+            <QueryValue value={activeCoupons} query={coupons} />
+          </div>
+        </section>
+        <section className="card stat-card">
+          <div>
+            <p>Vantagens no catálogo</p>
+            <QueryValue value={offers.data?.length} query={offers} />
+          </div>
+        </section>
+      </div>
       <div className="dashboard-grid">
         <div className="dashboard-column">
-          <BalanceCard balance={user?.balance || 0} />
-          <DashboardProgress />
-          <div className="stat-grid">
-            <section className="card stat-card">
-              <div>
-                <p>Pucoins recebidos</p>
-                <div className="stat-value">{number(received)}</div>
-              </div>
-            </section>
-            <section className="card stat-card">
-              <div>
-                <p>Cupons disponíveis</p>
-                <div className="stat-value">{activeCoupons}</div>
-              </div>
-            </section>
-            <section className="card stat-card">
-              <div>
-                <p>Vantagens no catálogo</p>
-                <div className="stat-value">{offers.data?.length || 0}</div>
-              </div>
-            </section>
-          </div>
           <section className="card">
             <div className="section-heading">
               <h2>Atividade recente</h2>
@@ -99,6 +118,11 @@ export function StudentDashboardPage() {
               error={offers.error}
               retry={offers.refetch}
             />
+            {offers.data?.length === 0 && (
+              <p className="small muted">
+                Nenhuma vantagem disponível no catálogo.
+              </p>
+            )}
             {offers.data?.slice(0, 2).map((offer) => (
               <button
                 key={offer.id}
@@ -132,36 +156,6 @@ export function StudentDashboardPage() {
             >
               Explorar vantagens <ArrowRight size={15} />
             </Link>
-          </section>
-          <section className="card">
-            <h2 style={{ marginBottom: 12 }}>Seu próximo passo</h2>
-            <div className="quick-links">
-              <Link className="quick-link" to="/aluno/cupons">
-                <Ticket size={20} />
-                <div>
-                  <strong>Meus cupons</strong>
-                  <small>
-                    {activeCoupons
-                      ? `${activeCoupons} disponíveis para aproveitar`
-                      : 'Suas vantagens resgatadas ficam aqui'}
-                  </small>
-                </div>
-                <ArrowRight size={17} />
-              </Link>
-              <Link className="quick-link" to="/aluno/extrato">
-                <Wallet size={20} />
-                <div>
-                  <strong>Acompanhar meu saldo</strong>
-                  <small>Veja tudo que entrou e saiu</small>
-                </div>
-                <ArrowRight size={17} />
-              </Link>
-            </div>
-            <QueryState
-              loading={false}
-              error={coupons.error}
-              retry={coupons.refetch}
-            />
           </section>
         </div>
       </div>
