@@ -279,6 +279,20 @@ test('importação rejeita duplicidades e exige nova senha no primeiro acesso', 
   await expect(
     page.getByText('CPF, e-mail ou login repetido neste arquivo.'),
   ).toBeVisible()
+  for (const width of [320, 390, 1440]) {
+    await page.setViewportSize({ width, height: 900 })
+    if (width < 768)
+      expect(
+        await page
+          .locator('.responsive-record-table')
+          .first()
+          .evaluate((node) => node.scrollWidth <= node.clientWidth + 1),
+      ).toBe(true)
+    await expect(
+      page.getByText('CPF, e-mail ou login repetido neste arquivo.'),
+    ).toBeVisible()
+  }
+  await page.setViewportSize({ width: 390, height: 844 })
   await page
     .getByRole('button', { name: 'Importar 2 professores válidos' })
     .click()
@@ -286,6 +300,13 @@ test('importação rejeita duplicidades e exige nova senha no primeiro acesso', 
     page.getByText('1 professores importados. 2 linhas não foram importadas.'),
   ).toBeVisible()
   const password = await page.locator('code').innerText()
+  expect(
+    await page
+      .locator('.responsive-record-table')
+      .first()
+      .evaluate((node) => node.scrollWidth <= node.clientWidth + 1),
+  ).toBe(true)
+  await page.setViewportSize({ width: 1440, height: 1000 })
   await logout(page)
   await login(page, 'ana', password)
   await expect(page).toHaveURL(/\/primeiro-acesso$/)
@@ -518,7 +539,9 @@ test('layout mobile, navegação, foco do diálogo e ausência de overflow', asy
     coupon!.width,
     'um cupom isolado não deve se esticar pela tela',
   ).toBeLessThan(850)
-  await expect(page.getByText('O mérito começa com você.')).toBeVisible()
+  await expect(
+    page.getByRole('link', { name: 'Abrir minha conta' }),
+  ).toBeVisible()
   await page.getByRole('link', { name: 'Notificações', exact: true }).click()
   await expect(
     page.getByRole('heading', { name: 'Suas notificações' }),

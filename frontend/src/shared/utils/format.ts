@@ -1,5 +1,5 @@
 export const number = (value: number) =>
-  new Intl.NumberFormat('pt-BR').format(value)
+  new Intl.NumberFormat('pt-BR').format(value === 0 ? 0 : value)
 export const dateTime = (value: string) =>
   new Intl.DateTimeFormat('pt-BR', {
     dateStyle: 'short',

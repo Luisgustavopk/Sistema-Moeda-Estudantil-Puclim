@@ -1,13 +1,20 @@
 import { Select } from '@/shared/components/ui/Select'
 import { Download, Search, Wallet } from 'lucide-react'
 import { useState } from 'react'
+import { DateInput } from '@/shared/components/ui/DateInput'
 import { useQuery } from '@tanstack/react-query'
 import { useAuth } from '@/features/auth/hooks/auth-context'
 import { moedasApi } from '../api/moedas.api'
 import { TransactionList } from '../components/TransactionList'
 import { PageHeading } from '@/shared/components/ui/PageHeading'
 import { Button } from '@/shared/components/ui/Button'
-import { QueryState, EmptyState } from '@/shared/components/ui/Feedback'
+import {
+  QueryState,
+  QueryValue,
+  EmptyState,
+} from '@/shared/components/ui/Feedback'
+import { Pagination } from '@/shared/components/ui/Pagination'
+import { usePagination } from '@/shared/hooks/use-pagination'
 import { number, downloadText, dateTime } from '@/shared/utils/format'
 const csv = (value: string) =>
   `"${(/^[=+\-@]/.test(value) ? `'${value}` : value).replace(/"/g, '""')}"`
@@ -49,6 +56,7 @@ export function StatementPage() {
   const outgoing = filtered
     .filter((item) => item.amount < 0)
     .reduce((sum, item) => sum - item.amount, 0)
+  const pagination = usePagination(filtered, 12)
   const exportCsv = () =>
     downloadText(
       'extrato-puclim.csv',
@@ -98,13 +106,21 @@ export function StatementPage() {
         </section>
         <section className="card stat-card">
           <div>
-            <div className="stat-value positive">+{number(incoming)}</div>
+            <QueryValue
+              value={transactions.data ? incoming : undefined}
+              prefix={incoming > 0 ? '+' : ''}
+              query={transactions}
+            />
             <p>Entradas no período filtrado</p>
           </div>
         </section>
         <section className="card stat-card">
           <div>
-            <div className="stat-value negative">−{number(outgoing)}</div>
+            <QueryValue
+              value={transactions.data ? outgoing : undefined}
+              prefix={outgoing > 0 ? '−' : ''}
+              query={transactions}
+            />
             <p>Saídas no período filtrado</p>
           </div>
         </section>
@@ -121,13 +137,19 @@ export function StatementPage() {
                 teacher ? 'Buscar aluno ou motivo' : 'Buscar uma movimentação'
               }
               value={search}
-              onChange={(event) => setSearch(event.target.value)}
+              onChange={(event) => {
+                setSearch(event.target.value)
+                pagination.setPage(1)
+              }}
             />
           </div>
           <Select
             aria-label="Tipo de movimentação"
             value={kind}
-            onValueChange={(value) => setKind(value)}
+            onValueChange={(value) => {
+              setKind(value)
+              pagination.setPage(1)
+            }}
             style={{ width: 'auto' }}
           >
             <option value="all">Todos os tipos</option>
@@ -161,21 +183,29 @@ export function StatementPage() {
         <div className="form-grid" style={{ marginBottom: 20 }}>
           <div className="field">
             <label htmlFor="from">De</label>
-            <input
+            <DateInput
               id="from"
+              label="De"
               type="date"
               value={from}
-              onChange={(event) => setFrom(event.target.value)}
+              onChange={(event) => {
+                setFrom(event.target.value)
+                pagination.setPage(1)
+              }}
             />
           </div>
           <div className="field">
             <label htmlFor="to">Até</label>
-            <input
+            <DateInput
               id="to"
+              label="Até"
               type="date"
               value={to}
               min={from || undefined}
-              onChange={(event) => setTo(event.target.value)}
+              onChange={(event) => {
+                setTo(event.target.value)
+                pagination.setPage(1)
+              }}
             />
           </div>
         </div>
@@ -194,9 +224,19 @@ export function StatementPage() {
           (filtered.length ? (
             <>
               <p className="small muted">
-                {filtered.length} movimentações encontradas
+                {filtered.length}{' '}
+                {filtered.length === 1
+                  ? 'movimentação encontrada'
+                  : 'movimentações encontradas'}
               </p>
-              <TransactionList transactions={filtered} />
+              <TransactionList transactions={pagination.items} />
+              <Pagination
+                page={pagination.page}
+                total={filtered.length}
+                size={12}
+                onChange={pagination.setPage}
+                label="Páginas do extrato"
+              />
             </>
           ) : (
             <EmptyState

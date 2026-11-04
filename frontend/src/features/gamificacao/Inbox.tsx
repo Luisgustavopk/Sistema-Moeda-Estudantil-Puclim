@@ -5,7 +5,7 @@ import { useAuth } from '@/features/auth/hooks/auth-context'
 import { useToast } from '@/shared/hooks/toast-context'
 import { DATA_MODE } from '@/shared/lib/http'
 import { Button } from '@/shared/components/ui/Button'
-import { QueryState } from '@/shared/components/ui/Feedback'
+import { QueryState, ErrorNotice } from '@/shared/components/ui/Feedback'
 import {
   ExpandableMessage,
   ListItem,
@@ -37,7 +37,7 @@ export function AchievementFeed() {
     if (previous.current && previous.current.userId === user?.id)
       for (const n of query.data) {
         if (!n.readAt && !previous.current.ids.has(n.id))
-          toast(`${n.title} ${n.message}`)
+          toast(`${n.title} ${n.message}`, 'info')
       }
     previous.current = {
       userId: user?.id,
@@ -106,6 +106,7 @@ export function Inbox() {
             : 'Suas conquistas e novidades aparecerão aqui.'}
         </p>
       )}
+      <ErrorNotice error={read.error} />
       <div className="activity-list">
         {pagination.items.map((n) => {
           const Icon = n.type.includes('BADGE')

@@ -263,6 +263,7 @@ test('composição integrada preserva formulário e moeda em todas as larguras e
   )
   await page.getByRole('link', { name: 'Crie sua conta' }).click()
   await expect(page).toHaveURL(/\/cadastro\/aluno$/)
-  await expect(page.locator('.login-experience')).toHaveCount(0)
+  await expect(page.locator('.registration-experience')).toBeVisible()
+  await expect(page.locator('.login-coin-button')).toHaveCount(0)
   expect(errors).toEqual([])
 })

@@ -6,7 +6,7 @@ import { useAuth } from '@/features/auth/hooks/auth-context'
 import { PageHeading } from '@/shared/components/ui/PageHeading'
 import { Button } from '@/shared/components/ui/Button'
 import { Modal } from '@/shared/components/ui/Modal'
-import { QueryState } from '@/shared/components/ui/Feedback'
+import { QueryState, ErrorNotice } from '@/shared/components/ui/Feedback'
 import { gameApi } from './api'
 import { useGameAction } from './hooks'
 import type { Quiz, QuizStatus } from './types'
@@ -50,7 +50,10 @@ function WeekCalendar({
       {dates.map((date) => (
         <div
           key={date.day}
-          className={completed.has(date.day) ? 'day-complete' : ''}
+          className={[
+            completed.has(date.day) ? 'day-complete' : '',
+            date.day === today ? 'day-today' : '',
+          ].join(' ')}
           aria-label={`${date.day}: ${completed.has(date.day) ? 'concluído' : 'sem conclusão registrada'}`}
         >
           <span>{date.label.replace('.', '')}</span>
@@ -220,6 +223,7 @@ function QuizSession({
               ? 'Alternativa selecionada. O gabarito será liberado ao concluir.'
               : 'Escolha uma alternativa. Use as setas ou as teclas de 1 a 4.'}
           </p>
+          <ErrorNotice error={submit.error} />
           <div className="form-actions">
             <Button
               variant="secondary"
@@ -427,6 +431,7 @@ export function QuizPage() {
         title="Quiz diário"
         description="Um momento para aprender. Um passo na sua trajetória."
       />
+      <ErrorNotice error={start.error} />
       <QueryState
         loading={query.isLoading}
         error={query.error}

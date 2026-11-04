@@ -5,6 +5,11 @@
 .cache/
 *.log
 
+# Arquivos locais de revisao e referencias para seus assets
+/.local/
+/docs/evidencias/
+/frontend/public/images/landing/
+
 # Configurações locais e credenciais
 .env
 .env.*

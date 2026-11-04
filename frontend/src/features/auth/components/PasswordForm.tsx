@@ -1,4 +1,5 @@
 import { LockKeyhole } from 'lucide-react'
+import { useEffect } from 'react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import type { z } from 'zod'
@@ -12,19 +13,26 @@ import { ErrorNotice } from '@/shared/components/ui/Feedback'
 export function PasswordForm({
   firstAccess = false,
   onSuccess,
+  onDirtyChange,
 }: {
   firstAccess?: boolean
   onSuccess?: () => void
+  onDirtyChange?: (dirty: boolean) => void
 }) {
   const toast = useToast()
   const form = useForm<z.infer<typeof passwordSchema>>({
     resolver: zodResolver(passwordSchema),
+    defaultValues: { currentPassword: '', password: '', confirmation: '' },
   })
   const action = useAction(
     ({ currentPassword, password }: z.infer<typeof passwordSchema>) =>
       authApi.changePassword(currentPassword, password),
   )
   const errors = form.formState.errors
+  const dirty = form.formState.isDirty
+  useEffect(() => {
+    onDirtyChange?.(dirty)
+  }, [dirty, onDirtyChange])
   return (
     <form
       className="form-stack"

@@ -6,7 +6,6 @@ export function RegistrationHeader() {
       <Link to="/login" className="text-link auth-back">
         <ArrowLeft size={16} /> Voltar para entrar
       </Link>
-      <p className="eyebrow">Uma nova possibilidade</p>
       <h1>Faça parte do Puclim.</h1>
       <p className="muted" style={{ marginTop: 9 }}>
         Escolha seu cadastro e comece a fazer a diferença.

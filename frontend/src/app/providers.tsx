@@ -5,10 +5,12 @@ import { AppRouter } from './router'
 import { AuthProvider } from '@/features/auth/components/AuthProvider'
 import { ToastProvider } from '@/shared/components/ui/ToastProvider'
 import { ErrorBoundary } from '@/shared/components/ui/ErrorBoundary'
+import { ThemeSync } from '@/shared/components/ui/ThemeToggle'
 
 export function AppProviders({ children }: PropsWithChildren) {
   return (
     <ErrorBoundary>
+      <ThemeSync />
       <QueryClientProvider client={queryClient}>
         <AppRouter>
           <AuthProvider>

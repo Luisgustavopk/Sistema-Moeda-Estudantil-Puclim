@@ -1,5 +1,5 @@
 import { Select } from '@/shared/components/ui/Select'
-import { useState } from 'react'
+import { useRef, useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { useForm } from 'react-hook-form'
 import { z } from 'zod'
@@ -8,7 +8,12 @@ import { useAuth } from '@/features/auth/hooks/auth-context'
 import { PageHeading } from '@/shared/components/ui/PageHeading'
 import { Field } from '@/shared/components/ui/Field'
 import { Button } from '@/shared/components/ui/Button'
-import { QueryState, EmptyState } from '@/shared/components/ui/Feedback'
+import {
+  QueryState,
+  EmptyState,
+  ErrorNotice,
+} from '@/shared/components/ui/Feedback'
+import { Modal } from '@/shared/components/ui/Modal'
 import { dateTime, number } from '@/shared/utils/format'
 import { gameApi } from './api'
 import { useGameAction } from './hooks'
@@ -161,25 +166,39 @@ const allocationSchema = z.object({
 })
 export function FundPage() {
   const { user } = useAuth()
-  const [requested, setRequested] = useState('')
+  const [requested, setRequested] = useState<string | null>(null)
+  const [review, setReview] = useState<{
+    semester: string
+    amount: number
+    origin: string
+  } | null>(null)
+  const submitting = useRef(false)
   const context = useQuery({
     queryKey: ['game', 'context', user?.id],
     queryFn: gameApi.context,
   })
-  const semester = requested || context.data?.semester || ''
+  const semester = requested ?? context.data?.semester ?? ''
+  const validSemester = /^[0-9]{4}-[12]$/.test(semester)
   const query = useQuery({
     queryKey: ['game', 'fund', user?.id, semester],
     queryFn: () => gameApi.fund(semester),
-    enabled: /^[0-9]{4}-[12]$/.test(semester),
+    enabled: validSemester,
     refetchInterval: 30000,
   })
   const form = useForm<z.infer<typeof allocationSchema>>({
     resolver: zodResolver(allocationSchema),
   })
   const allocate = useGameAction(
-    (input: z.infer<typeof allocationSchema>) =>
-      gameApi.allocate(semester, input),
+    (input: { semester: string; amount: number; origin: string }) =>
+      gameApi.allocate(input.semester, {
+        amount: input.amount,
+        origin: input.origin,
+      }),
     'Dotação semestral registrada.',
+    () => {
+      setReview(null)
+      form.reset()
+    },
   )
   const retry = useGameAction(
     () => gameApi.retry(semester),
@@ -190,37 +209,72 @@ export function FundPage() {
     'Premiação do semestre processada.',
   )
   return (
-    <>
+    <div className="merit-page fund-page">
       <PageHeading
         title="Fundo institucional"
         description="Defina a dotação e acompanhe o orçamento de recompensas."
       />
-      <Field id="fund-semester" label="Semestre do Fundo">
+      <Field
+        id="fund-semester"
+        label="Semestre do Fundo"
+        hint="Use AAAA-1 ou AAAA-2. O semestre atual é definido pelo servidor."
+        error={
+          requested !== null && !validSemester
+            ? 'Informe um semestre no formato AAAA-1 ou AAAA-2.'
+            : undefined
+        }
+      >
         <input
           id="fund-semester"
           placeholder={context.data?.semester || 'AAAA-1'}
-          value={requested}
-          onChange={(e) => setRequested(e.target.value)}
+          value={semester}
+          aria-invalid={requested !== null && !validSemester}
+          onChange={(e) => {
+            setRequested(e.target.value)
+            allocate.reset()
+            retry.reset()
+            close.reset()
+          }}
           maxLength={6}
         />
       </Field>
       <QueryState
-        loading={context.isLoading || query.isLoading}
-        error={context.error || query.error}
+        loading={context.isLoading || (validSemester && query.isLoading)}
+        error={context.error || (validSemester ? query.error : null)}
         retry={() => {
           void context.refetch()
-          void query.refetch()
+          if (validSemester) void query.refetch()
         }}
       />
-      {query.data && (
+      {validSemester && query.data && (
         <>
-          <section className="card">
-            <h2>Semestre {semester}</h2>
-            <p>
-              Dotação: {number(query.data.allocation)} · Disponível:{' '}
-              {number(query.data.balance)} · Reservado:{' '}
-              {number(query.data.reserved)}
-            </p>
+          <section className="card fund-summary">
+            <h2>Semestre {query.data.semester}</h2>
+            {query.isFetching && (
+              <p className="small muted" role="status">
+                Atualizando orçamento…
+              </p>
+            )}
+            <dl className="fund-values">
+              <div>
+                <dt>Dotação</dt>
+                <dd>
+                  {number(query.data.allocation)} <small>moedas</small>
+                </dd>
+              </div>
+              <div>
+                <dt>Disponível</dt>
+                <dd>
+                  {number(query.data.balance)} <small>moedas</small>
+                </dd>
+              </div>
+              <div>
+                <dt>Reservado</dt>
+                <dd>
+                  {number(query.data.reserved)} <small>moedas</small>
+                </dd>
+              </div>
+            </dl>
             <p>
               Consumo do orçamento:{' '}
               {number(query.data.allocation - query.data.balance)} moedas
@@ -229,8 +283,21 @@ export function FundPage() {
           </section>
           {!query.data.allocation && semester === context.data?.semester && (
             <form
-              className="card"
-              onSubmit={form.handleSubmit((v) => allocate.mutate(v))}
+              className="card form-stack"
+              noValidate
+              onSubmit={form.handleSubmit((v) => {
+                const limit = context.data?.maxAllocation
+                if (limit === undefined) return
+                if (v.amount > limit) {
+                  form.setError('amount', {
+                    message: `O limite é ${number(limit)} moedas.`,
+                  })
+                  form.setFocus('amount')
+                  return
+                }
+                allocate.reset()
+                setReview({ ...v, semester })
+              })}
             >
               <h2>Definir dotação semestral</h2>
               <p>
@@ -245,6 +312,9 @@ export function FundPage() {
                 <input
                   id="fund-amount"
                   type="number"
+                  min={1}
+                  max={context.data.maxAllocation}
+                  aria-invalid={!!form.formState.errors.amount}
                   {...form.register('amount', { valueAsNumber: true })}
                 />
               </Field>
@@ -256,26 +326,38 @@ export function FundPage() {
                 <textarea id="fund-origin" {...form.register('origin')} />
               </Field>
               <Button type="submit" loading={allocate.isPending}>
-                Registrar dotação
+                Revisar dotação
               </Button>
+              <ErrorNotice error={allocate.error} />
             </form>
           )}
-          <div className="toolbar">
-            <Button
-              variant="secondary"
-              loading={retry.isPending}
-              onClick={() => retry.mutate()}
-            >
-              Reprocessar pagamentos pendentes
-            </Button>
-            <Button
-              variant="secondary"
-              disabled={semester >= (context.data?.semester || '')}
-              loading={close.isPending}
-              onClick={() => close.mutate()}
-            >
-              Processar premiação do semestre encerrado
-            </Button>
+          <div className="fund-operations">
+            <div className="toolbar">
+              <Button
+                variant="secondary"
+                loading={retry.isPending}
+                disabled={close.isPending}
+                onClick={() => retry.mutate()}
+              >
+                Reprocessar pagamentos pendentes
+              </Button>
+              <Button
+                variant="secondary"
+                disabled={
+                  semester >= (context.data?.semester || '') || retry.isPending
+                }
+                loading={close.isPending}
+                onClick={() => close.mutate()}
+              >
+                Processar premiação do semestre encerrado
+              </Button>
+            </div>
+            <ErrorNotice error={retry.error || close.error} />
+            {(retry.error || close.error) && (
+              <p className="small muted">
+                Os dados foram preservados. Tente a ação novamente.
+              </p>
+            )}
           </div>
           <section className="card">
             <h2>Recompensas e pendências</h2>
@@ -289,7 +371,11 @@ export function FundPage() {
             {query.data.movements.map((m) => (
               <div className="row" key={m.sourceKey}>
                 <div className="row-text">
-                  <strong>{m.kind}</strong>
+                  <strong>
+                    {m.kind === 'DOTACAO'
+                      ? 'Dotação semestral'
+                      : paymentNames[m.kind] || m.kind}
+                  </strong>
                   <p>{dateTime(m.date)}</p>
                 </div>
                 <strong>
@@ -313,7 +399,51 @@ export function FundPage() {
           </section>
         </>
       )}
-    </>
+      {review && (
+        <Modal
+          title="Revisar dotação semestral"
+          busy={allocate.isPending}
+          onClose={() => setReview(null)}
+        >
+          <p>
+            Confira os dados. Após o registro, a dotação deste semestre não
+            poderá ser alterada.
+          </p>
+          <dl className="allocation-review">
+            <dt>Semestre</dt>
+            <dd>{review.semester}</dd>
+            <dt>Valor</dt>
+            <dd>{number(review.amount)} moedas</dd>
+            <dt>Origem e autorização</dt>
+            <dd>{review.origin}</dd>
+          </dl>
+          <ErrorNotice error={allocate.error} />
+          <div className="form-actions">
+            <Button
+              variant="secondary"
+              disabled={allocate.isPending}
+              onClick={() => setReview(null)}
+            >
+              Voltar à edição
+            </Button>
+            <Button
+              loading={allocate.isPending}
+              onClick={() => {
+                if (submitting.current) return
+                submitting.current = true
+                allocate.mutate(review, {
+                  onSettled: () => {
+                    submitting.current = false
+                  },
+                })
+              }}
+            >
+              Registrar dotação
+            </Button>
+          </div>
+        </Modal>
+      )}
+    </div>
   )
 }
 export function DonationsPage() {
@@ -340,15 +470,19 @@ export function DonationsPage() {
           description="As vantagens doadas aparecerão aqui."
         />
       )}
-      {query.data?.map((d) => (
-        <article className="card" key={d.id}>
-          <h2>{d.advantageName}</h2>
-          <p>
-            {d.companyName} · {d.beneficiaryName}
-          </p>
-          <p>{dateTime(d.date)}</p>
-        </article>
-      ))}
+      <div className="record-list">
+        {query.data?.map((d) => (
+          <article className="card donation-record" key={d.id}>
+            <h2>{d.advantageName}</h2>
+            <p className="muted">
+              {d.companyName} · {d.beneficiaryName}
+            </p>
+            <time dateTime={d.date} className="activity-meta">
+              {dateTime(d.date)}
+            </time>
+          </article>
+        ))}
+      </div>
     </>
   )
 }
@@ -382,6 +516,7 @@ export function ChallengesPage() {
         error={query.error}
         retry={query.refetch}
       />
+      <ErrorNotice error={action.error} />
       {editing && (
         <ActivityForm
           key={editing === 'new' ? 'new' : editing.id}
@@ -396,47 +531,80 @@ export function ChallengesPage() {
           description="Crie seu primeiro desafio patrocinado."
         />
       )}
-      {query.data?.map((c) => (
-        <article className="card" key={c.id}>
-          <h2>{c.title}</h2>
-          <p className="notification-body">{c.description}</p>
-          <p>
-            {number(c.reward)} moedas por participante · {c.capacity} vagas ·
-            Orçamento: {number(c.budget)}
-          </p>
-          <p>Prazo: {dateTime(c.deadline)}</p>
-          <span className="badge">{c.status.replaceAll('_', ' ')}</span>
-          {['PROPOSTA', 'PENDENTE_FINANCIAMENTO'].includes(c.status) && (
-            <div className="toolbar">
-              <Button variant="secondary" onClick={() => setEditing(c)}>
-                Editar proposta
-              </Button>
-              {c.status === 'PROPOSTA' && (
-                <Button
-                  loading={action.isPending}
-                  onClick={() => action.mutate({ id: c.id, action: 'enviar' })}
-                >
-                  Encaminhar proposta
-                </Button>
-              )}
-              <Button
-                variant="ghost"
-                loading={action.isPending}
-                onClick={() => action.mutate({ id: c.id, action: 'cancelar' })}
-              >
-                Cancelar proposta
-              </Button>
-              <Button
-                variant="secondary"
-                loading={action.isPending}
-                onClick={() => action.mutate({ id: c.id, action: 'encerrar' })}
-              >
-                Encerrar proposta
-              </Button>
+      <div className="record-list">
+        {query.data?.map((c) => (
+          <article className="card challenge-record" key={c.id}>
+            <div className="section-heading">
+              <h2>{c.title}</h2>
+              <StatusBadge tone={c.status === 'PROPOSTA' ? 'neutral' : 'info'}>
+                {(
+                  {
+                    PROPOSTA: 'Proposta',
+                    PENDENTE_FINANCIAMENTO: 'Aguardando financiamento',
+                    ENCERRADA: 'Encerrada',
+                    CANCELADA: 'Cancelada',
+                    ATIVA: 'Ativa',
+                  } as Record<string, string>
+                )[c.status] || c.status.replaceAll('_', ' ')}
+              </StatusBadge>
             </div>
-          )}
-        </article>
-      ))}
+            <p className="notification-body">{c.description}</p>
+            <dl className="record-facts">
+              <div>
+                <dt>Por participante</dt>
+                <dd>{number(c.reward)} moedas</dd>
+              </div>
+              <div>
+                <dt>Vagas</dt>
+                <dd>{number(c.capacity)}</dd>
+              </div>
+              <div>
+                <dt>Orçamento</dt>
+                <dd>{number(c.budget)} moedas</dd>
+              </div>
+              <div>
+                <dt>Prazo</dt>
+                <dd>{dateTime(c.deadline)}</dd>
+              </div>
+            </dl>
+            {['PROPOSTA', 'PENDENTE_FINANCIAMENTO'].includes(c.status) && (
+              <div className="action-row record-actions">
+                <Button variant="secondary" onClick={() => setEditing(c)}>
+                  Editar proposta
+                </Button>
+                {c.status === 'PROPOSTA' && (
+                  <Button
+                    loading={action.isPending}
+                    onClick={() =>
+                      action.mutate({ id: c.id, action: 'enviar' })
+                    }
+                  >
+                    Encaminhar proposta
+                  </Button>
+                )}
+                <Button
+                  variant="ghost"
+                  loading={action.isPending}
+                  onClick={() =>
+                    action.mutate({ id: c.id, action: 'cancelar' })
+                  }
+                >
+                  Cancelar proposta
+                </Button>
+                <Button
+                  variant="secondary"
+                  loading={action.isPending}
+                  onClick={() =>
+                    action.mutate({ id: c.id, action: 'encerrar' })
+                  }
+                >
+                  Encerrar proposta
+                </Button>
+              </div>
+            )}
+          </article>
+        ))}
+      </div>
     </>
   )
 }

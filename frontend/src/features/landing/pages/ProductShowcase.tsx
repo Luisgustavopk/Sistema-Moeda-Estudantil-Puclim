@@ -11,14 +11,14 @@ const views = [
     description:
       'Saldo, atividade recente e conquistas no espaço do estudante.',
     width: 1076,
-    height: 607,
+    height: 871,
   },
   {
     name: 'Catálogo',
     image: 'catalog',
     description: 'Vantagens, categorias e custos em moedas no catálogo.',
     width: 1076,
-    height: 840,
+    height: 1125,
   },
   {
     name: 'Meus cupons',
@@ -26,7 +26,7 @@ const views = [
     description:
       'Os cupons gerados depois de um resgate, com seu status e código.',
     width: 1076,
-    height: 326,
+    height: 603,
   },
   {
     name: 'Reconhecimento',
@@ -34,7 +34,7 @@ const views = [
     description:
       'O fluxo do professor para escolher um aluno e reconhecer sua contribuição.',
     width: 1076,
-    height: 511,
+    height: 730,
   },
 ]
 

@@ -1,6 +1,8 @@
 import { Select } from '@/shared/components/ui/Select'
+import { DateInput } from '@/shared/components/ui/DateInput'
 import { useState } from 'react'
-import { ArrowUpRight, CalendarDays, Coins, Flag, Users } from 'lucide-react'
+import { ArrowUpRight, CalendarDays, Flag, Users } from 'lucide-react'
+import { Coin } from '@/shared/components/ui/Brand'
 import { Link } from 'react-router'
 import { useQuery } from '@tanstack/react-query'
 import { useForm } from 'react-hook-form'
@@ -16,7 +18,11 @@ import {
   StatusBadge,
   type StatusTone,
 } from '@/shared/components/ui/ActivitySurface'
-import { QueryState, EmptyState } from '@/shared/components/ui/Feedback'
+import {
+  QueryState,
+  EmptyState,
+  ErrorNotice,
+} from '@/shared/components/ui/Feedback'
 import { dateTime, number } from '@/shared/utils/format'
 import { gameApi } from './api'
 import { useGameAction } from './hooks'
@@ -101,6 +107,7 @@ function ParticipationActions({
           >
             <textarea id={`delivery-${p.id}`} {...form.register('text')} />
           </Field>
+          <ErrorNotice error={action.error} />
           <div className="toolbar">
             <Button type="submit" loading={action.isPending}>
               {teacher ? 'Aprovar entrega' : 'Enviar entrega'}
@@ -157,8 +164,9 @@ function DeadlineForm({ mission }: { mission: Mission }) {
         label="Novo prazo"
         error={form.formState.errors.deadline?.message}
       >
-        <input
+        <DateInput
           id={`deadline-${mission.id}`}
+          label="Novo prazo"
           type="datetime-local"
           {...form.register('deadline')}
         />
@@ -166,6 +174,7 @@ function DeadlineForm({ mission }: { mission: Mission }) {
       <Button type="submit" variant="secondary" loading={action.isPending}>
         Alterar prazo
       </Button>
+      <ErrorNotice error={action.error} />
     </form>
   )
 }
@@ -279,7 +288,7 @@ export function MissionsPage() {
               </span>
               <h2>{m.title}</h2>
               <span className="mission-reward">
-                <Coins size={20} aria-hidden="true" />
+                <Coin size={20} />
                 <strong>{number(m.reward)}</strong>
                 <span>moedas</span>
               </span>
@@ -310,7 +319,7 @@ export function MissionsPage() {
             <div className="mission-detail-heading">
               <MissionStatus status={missionState(selected, teacher)} />
               <span className="mission-reward">
-                <Coins size={20} aria-hidden="true" />
+                <Coin size={20} />
                 <strong>{number(selected.reward)}</strong> moedas
               </span>
             </div>
@@ -353,6 +362,7 @@ export function MissionsPage() {
                 Aceitar missão
               </Button>
             )}
+            <ErrorNotice error={accept.error || close.error} />
             {selected.participants.map((p) => (
               <ParticipationActions
                 key={p.id}

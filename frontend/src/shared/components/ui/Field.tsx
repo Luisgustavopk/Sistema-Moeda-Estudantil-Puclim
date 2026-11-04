@@ -1,4 +1,5 @@
 import { Eye, EyeOff } from 'lucide-react'
+import { DateInput } from './DateInput'
 import {
   cloneElement,
   isValidElement,
@@ -26,6 +27,7 @@ export function Field({
   const isControl =
     isValidElement(children) &&
     (children.type === PasswordInput ||
+      children.type === DateInput ||
       (typeof children.type === 'string' &&
         ['input', 'select', 'textarea'].includes(children.type)))
   const control = isControl

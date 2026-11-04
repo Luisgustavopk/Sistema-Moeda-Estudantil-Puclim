@@ -1,13 +1,6 @@
-import {
-  Award,
-  Coins,
-  Flame,
-  Heart,
-  LockKeyhole,
-  Ticket,
-  Trophy,
-} from 'lucide-react'
+import { Award, Flame, Heart, LockKeyhole, Ticket, Trophy } from 'lucide-react'
 import type { Badge } from '../types'
+import { Wave } from '@/shared/components/ui/Brand'
 
 import {
   rarityPresentation,
@@ -15,7 +8,6 @@ import {
   badgeState,
 } from '../badge-presentation'
 const icons: Record<string, typeof Award> = {
-  Coins,
   Flame,
   Heart,
   Ticket,
@@ -31,7 +23,13 @@ export function BadgeMedal({ badge }: { badge: Badge }) {
       data-unlocked={!!badge.unlockedAt}
       className={`merit-medal finish-${rarityPresentation(badge.rarity).finish} shape-${badge.icon.toLowerCase()} ${badgeState(badge) === 'Bloqueada' ? 'is-locked' : ''}`}
     >
-      <Icon size={34} strokeWidth={1.8} />
+      {badge.icon === 'Coins' ? (
+        <svg width="34" height="34" viewBox="0 0 40 32">
+          <Wave />
+        </svg>
+      ) : (
+        <Icon size={34} strokeWidth={1.8} />
+      )}
       {['RARA', 'EPICA', 'LENDARIA'].includes(rarity) && (
         <span className="medal-ornaments">
           <svg

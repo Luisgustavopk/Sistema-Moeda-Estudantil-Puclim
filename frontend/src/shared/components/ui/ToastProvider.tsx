@@ -1,27 +1,55 @@
-import { CheckCircle2, X } from 'lucide-react'
-import { useEffect, useState, type PropsWithChildren } from 'react'
-import { ToastContext } from '@/shared/hooks/toast-context'
+import { AlertCircle, CheckCircle2, Info, X } from 'lucide-react'
+import { useCallback, useEffect, useState, type PropsWithChildren } from 'react'
+import { ToastContext, type ToastTone } from '@/shared/hooks/toast-context'
 export function ToastProvider({ children }: PropsWithChildren) {
-  const [message, setMessage] = useState('')
+  const [notice, setNotice] = useState<{
+    message: string
+    tone: ToastTone
+  } | null>(null)
+  const show = useCallback(
+    (message: string, tone: ToastTone = 'success') =>
+      setNotice({ message, tone }),
+    [],
+  )
   useEffect(() => {
-    if (!message) return
-    const timer = setTimeout(() => setMessage(''), 6000)
+    if (!notice || notice.tone === 'error') return
+    const timer = setTimeout(() => setNotice(null), 6000)
     return () => clearTimeout(timer)
-  }, [message])
+  }, [notice])
   return (
-    <ToastContext value={setMessage}>
+    <ToastContext value={show}>
       {children}
-      <div
-        className={`toast ${message ? 'visible' : ''}`}
-        role="status"
-        aria-live="polite"
-      >
-        <CheckCircle2 size={20} />
-        <span>{message}</span>
-        <button aria-label="Fechar aviso" onClick={() => setMessage('')}>
-          <X size={18} />
-        </button>
-      </div>
+      {(['status', 'alert'] as const).map((role) => {
+        const active =
+          notice &&
+          (role === 'alert' ? notice.tone === 'error' : notice.tone !== 'error')
+        const Icon =
+          role === 'alert'
+            ? AlertCircle
+            : notice?.tone === 'info'
+              ? Info
+              : CheckCircle2
+        return (
+          <div
+            key={role}
+            className={`toast toast-${role} ${active ? 'visible' : ''}`}
+            role={role}
+          >
+            {active && (
+              <>
+                <Icon size={20} />
+                <span>{notice.message}</span>
+                <button
+                  aria-label="Fechar aviso"
+                  onClick={() => setNotice(null)}
+                >
+                  <X size={18} />
+                </button>
+              </>
+            )}
+          </div>
+        )
+      })}
     </ToastContext>
   )
 }

@@ -1,0 +1,190 @@
+/* Login and registration share their frame and material; the longer form has its own measure. */
+.registration-experience .registration-main {
+  width: min(calc(100% - 64px), calc(720px * var(--login-scale)));
+  margin: auto;
+  padding-block: 24px 48px;
+}
+.registration-experience .auth-panel {
+  width: 100%;
+  max-width: none;
+  margin: auto;
+  padding: calc(32px * var(--login-scale));
+  border-radius: calc(24px * var(--login-scale));
+  background: var(--login-panel);
+  box-shadow: 0 24px 64px -32px #183d4533;
+}
+[data-theme='dark'] .registration-experience .auth-panel {
+  box-shadow: 0 24px 64px -32px #0007;
+}
+.registration-experience .auth-panel h1 {
+  font-size: calc(1.875rem * var(--login-scale));
+  font-weight: 600;
+  line-height: 1.2;
+  letter-spacing: -0.025em;
+}
+.registration-experience .auth-panel > p {
+  margin: 10px 0 24px;
+  color: var(--login-secondary);
+  font-size: calc(0.875rem * var(--login-scale));
+  line-height: 1.5;
+}
+.registration-experience .auth-back {
+  margin-bottom: 24px;
+  min-height: 44px;
+  font-size: calc(0.8125rem * var(--login-scale));
+  color: var(--login-accent);
+}
+.registration-experience .registration-tabs {
+  display: flex;
+  gap: 8px;
+  margin: 24px 0;
+  padding: 6px;
+  background: var(--login-field);
+  border: 1px solid var(--login-line);
+  border-radius: 14px;
+}
+.registration-experience .registration-tabs a {
+  flex: 1;
+  text-align: center;
+  font-weight: 600;
+  display: grid;
+  place-items: center;
+  min-height: 48px;
+  padding: 10px 16px;
+  border: 0;
+  border-radius: 8px;
+  color: var(--login-secondary);
+  font-size: calc(0.8125rem * var(--login-scale));
+  line-height: 1.4;
+}
+.registration-experience .registration-tabs a:hover {
+  color: var(--login-ink);
+}
+.registration-experience .registration-tabs a.active {
+  color: var(--login-ink);
+  background: var(--login-panel);
+  box-shadow: 0 2px 6px #00000012;
+}
+.registration-experience .auth-panel form {
+  margin-top: 28px;
+  gap: 24px;
+  align-items: start;
+}
+.registration-experience .field {
+  gap: 8px;
+  min-width: 0;
+}
+.registration-experience .field label {
+  color: var(--login-ink);
+  font-size: calc(0.8125rem * var(--login-scale));
+  font-weight: 600;
+}
+.registration-experience
+  :is(input:not([type='checkbox']), textarea, .styled-select) {
+  min-height: calc(56px * var(--login-scale));
+  padding: calc(14px * var(--login-scale)) calc(16px * var(--login-scale));
+  border: 1px solid var(--login-line);
+  border-radius: calc(10px * var(--login-scale));
+  background: var(--login-field);
+  color: var(--login-ink);
+  font-size: calc(1rem * var(--login-scale));
+  line-height: 1.5;
+  box-shadow: none;
+}
+.registration-experience input[type='hidden'] {
+  display: none;
+}
+.registration-experience :is(input, textarea)::placeholder {
+  color: var(--login-secondary);
+}
+.registration-experience
+  :is(input, textarea, .styled-select):hover:not(:disabled) {
+  border-color: var(--login-accent);
+}
+.registration-experience :is(input, textarea, .styled-select):focus-visible {
+  background: var(--login-panel);
+  border-color: var(--login-accent);
+  outline: 2px solid var(--login-accent);
+  outline-offset: 3px;
+  box-shadow: none;
+}
+.registration-experience .password-field input {
+  padding-inline-end: 64px;
+}
+.registration-experience .password-field button {
+  top: 50%;
+  right: 8px;
+  transform: translateY(-50%);
+  width: 44px;
+  height: 44px;
+  border-radius: 8px;
+  color: var(--login-secondary);
+}
+.registration-experience .password-field button:hover {
+  background: color-mix(in srgb, var(--login-accent) 8%, transparent);
+}
+.registration-experience :is(.field-hint, .field-error) {
+  font-size: calc(0.75rem * var(--login-scale));
+  line-height: 1.5;
+}
+.registration-experience .field-hint {
+  color: var(--login-secondary);
+}
+.registration-experience .button[type='submit'] {
+  min-height: calc(56px * var(--login-scale));
+  padding: 16px 24px;
+  border-radius: calc(10px * var(--login-scale));
+  background: var(--login-accent);
+  color: var(--login-on-accent);
+  box-shadow: none;
+  font-size: calc(0.875rem * var(--login-scale));
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  margin: 8px 0 0;
+}
+.registration-experience .button[type='submit']:hover:not(:disabled) {
+  background: color-mix(in srgb, var(--login-accent) 90%, var(--login-ink));
+}
+.registration-experience .auth-bottom {
+  color: var(--login-secondary);
+  text-align: center;
+  margin-top: 24px;
+  font-size: 0.875rem;
+}
+@media (max-width: 749px) {
+  .registration-experience .registration-main {
+    width: calc(100% - 32px);
+    padding-block: 16px 32px;
+  }
+  .registration-experience .auth-panel {
+    padding: 28px 24px;
+    border-radius: 23px;
+  }
+  .registration-experience .auth-panel h1 {
+    font-size: calc(1.625rem * var(--login-scale));
+  }
+  .registration-experience .form-grid {
+    grid-template-columns: 1fr;
+  }
+  .registration-experience .auth-panel form {
+    gap: 22px;
+  }
+  .registration-experience .registration-tabs a {
+    padding-inline: 8px;
+    font-size: 0.875rem;
+  }
+  .registration-experience
+    :is(input:not([type='checkbox']), textarea, .styled-select) {
+    font-size: 1rem;
+    min-height: 56px;
+    padding: 14px 16px;
+  }
+  .registration-experience .field label {
+    font-size: 0.9375rem;
+  }
+  .registration-experience .button[type='submit'] {
+    font-size: 1rem;
+    min-height: 56px;
+  }
+}

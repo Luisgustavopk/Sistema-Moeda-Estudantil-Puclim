@@ -31,6 +31,9 @@ export function Coin({
   face?: 'logo' | 'crown'
 }) {
   const gradient = useId()
+  const rim = useId()
+  const compact = size <= 20
+  const presentation = size >= 96
   return (
     <svg
       width={size}
@@ -38,27 +41,55 @@ export function Coin({
       viewBox="0 0 40 40"
       aria-hidden="true"
       data-coin-face={face}
+      data-coin-detail={
+        compact ? 'compact' : size >= 96 ? 'presentation' : 'standard'
+      }
     >
       <defs>
         <radialGradient id={gradient} cx=".35" cy=".3" r=".9">
-          <stop offset="0" stopColor="#F3D77A" />
-          <stop offset=".6" stopColor="#D1A21C" />
-          <stop offset="1" stopColor="#9A7410" />
+          <stop offset="0" stopColor="#F7DF91" />
+          <stop offset=".65" stopColor="#DDB83D" />
+          <stop offset="1" stopColor="#B88A1B" />
         </radialGradient>
+        <linearGradient id={rim} x1="0" y1="0" x2="1" y2="1">
+          <stop stopColor="#FFF0B2" />
+          <stop offset=".45" stopColor="#D9AC31" />
+          <stop offset="1" stopColor="#8E6513" />
+        </linearGradient>
       </defs>
-      <circle cx="20" cy="20" r="19" fill={`url(#${gradient})`} />
       <circle
         cx="20"
-        cy="20"
-        r="15.5"
-        fill="none"
-        stroke="#fff"
-        strokeOpacity=".55"
-        strokeWidth="1"
-        strokeDasharray={face === 'logo' ? '2 2' : '0.5 1.5'}
+        cy={presentation ? 20 : 20.5}
+        r={presentation ? 20 : 19}
+        fill="#896211"
       />
+      <circle
+        cx="20"
+        cy={presentation ? 20 : 19.5}
+        r={presentation ? 20 : 18.5}
+        fill={`url(#${rim})`}
+      />
+      <circle
+        cx="20"
+        cy={presentation ? 20 : 19.3}
+        r={presentation ? 18.9 : compact ? 17 : 15.8}
+        fill={`url(#${gradient})`}
+        stroke="#986B16"
+        strokeOpacity={presentation ? '.35' : compact ? '.65' : '.8'}
+        strokeWidth={compact ? '.8' : '.7'}
+      />
+      {!compact && !presentation && (
+        <path
+          d="M5 20a15 15 0 0 1 25-11"
+          fill="none"
+          stroke="#FFF0AF"
+          strokeWidth=".7"
+          strokeLinecap="round"
+          opacity=".8"
+        />
+      )}
       {face === 'logo' ? (
-        <g transform="translate(9.5 10.5) scale(.52)" color="#6B4E08">
+        <g transform="translate(9.5 10) scale(.52)" color="#674907">
           <Wave />
         </g>
       ) : (

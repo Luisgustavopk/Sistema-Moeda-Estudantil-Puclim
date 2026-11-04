@@ -8,7 +8,12 @@ import { useAuth } from '@/features/auth/hooks/auth-context'
 import { PageHeading } from '@/shared/components/ui/PageHeading'
 import { Field } from '@/shared/components/ui/Field'
 import { Button } from '@/shared/components/ui/Button'
-import { QueryState, EmptyState } from '@/shared/components/ui/Feedback'
+import { StatusBadge } from '@/shared/components/ui/ActivitySurface'
+import {
+  QueryState,
+  EmptyState,
+  ErrorNotice,
+} from '@/shared/components/ui/Feedback'
 import { gameApi } from './api'
 import { useGameAction } from './hooks'
 import type { Question } from './types'
@@ -73,7 +78,7 @@ function QuestionForm({
   )
   return (
     <form
-      className="card"
+      className="card form-stack activity-editor"
       onSubmit={form.handleSubmit((data) =>
         save.mutate(data, { onSuccess: done }),
       )}
@@ -125,6 +130,7 @@ function QuestionForm({
         <input type="checkbox" {...form.register('active')} /> Pergunta ativa
       </label>
       <div className="toolbar">
+        <ErrorNotice error={save.error} />
         <Button type="submit" loading={save.isPending}>
           Salvar pergunta
         </Button>
@@ -157,7 +163,7 @@ export function QuestionsPage() {
       />
       <QueryState
         loading={query.isLoading}
-        error={query.error}
+        error={query.error || remove.error}
         retry={query.refetch}
       />
       {editing && (
@@ -173,34 +179,39 @@ export function QuestionsPage() {
           description="Cadastre perguntas para disponibilizar o quiz diário aos seus alunos."
         />
       )}
-      {query.data?.map((q) => (
-        <article className="card" key={q.id}>
-          <h2>{q.prompt}</h2>
-          <p>
-            {q.area} · {q.active ? 'Ativa' : 'Inativa'}
-          </p>
-          <ol>
-            {q.options.map((option, i) => (
-              <li key={i}>
-                {option} {i === q.correctIndex && <strong>· Correta</strong>}
-              </li>
-            ))}
-          </ol>
-          <div className="toolbar">
-            <Button variant="secondary" onClick={() => setEditing(q)}>
-              Editar pergunta
-            </Button>
-            <Button
-              variant="ghost"
-              disabled={!q.active}
-              loading={remove.isPending}
-              onClick={() => remove.mutate(q.id)}
-            >
-              Desativar pergunta
-            </Button>
-          </div>
-        </article>
-      ))}
+      <div className="record-list">
+        {query.data?.map((q) => (
+          <article className="card question-card" key={q.id}>
+            <div className="section-heading">
+              <h2>{q.prompt}</h2>
+              <StatusBadge tone={q.active ? 'success' : 'neutral'}>
+                {q.active ? 'Ativa' : 'Inativa'}
+              </StatusBadge>
+            </div>
+            <p className="activity-meta">{q.area}</p>
+            <ol className="question-options">
+              {q.options.map((option, i) => (
+                <li key={i} data-correct={i === q.correctIndex}>
+                  {option} {i === q.correctIndex && <strong>· Correta</strong>}
+                </li>
+              ))}
+            </ol>
+            <div className="action-row record-actions">
+              <Button variant="secondary" onClick={() => setEditing(q)}>
+                Editar pergunta
+              </Button>
+              <Button
+                variant="ghost"
+                disabled={!q.active}
+                loading={remove.isPending}
+                onClick={() => remove.mutate(q.id)}
+              >
+                Desativar pergunta
+              </Button>
+            </div>
+          </article>
+        ))}
+      </div>
     </>
   )
 }

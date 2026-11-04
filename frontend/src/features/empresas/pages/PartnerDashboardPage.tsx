@@ -15,7 +15,7 @@ import { vantagensApi } from '@/features/vantagens/api/vantagens.api'
 import { cuponsApi } from '@/features/cupons/api/cupons.api'
 import { instituicoesApi } from '@/features/instituicoes/api/instituicoes.api'
 import { PageHeading } from '@/shared/components/ui/PageHeading'
-import { QueryState } from '@/shared/components/ui/Feedback'
+import { QueryState, QueryValue } from '@/shared/components/ui/Feedback'
 import { dateTime } from '@/shared/utils/format'
 
 export function PartnerDashboardPage() {
@@ -68,9 +68,10 @@ export function PartnerDashboardPage() {
                 <Gift size={21} />
               </span>
               <div>
-                <div className="stat-value">
-                  {advantages.data?.filter((item) => item.active).length || 0}
-                </div>
+                <QueryValue
+                  value={advantages.data?.filter((item) => item.active).length}
+                  query={advantages}
+                />
                 <p>Vantagens ativas</p>
               </div>
             </div>
@@ -79,7 +80,7 @@ export function PartnerDashboardPage() {
                 <Ticket size={21} />
               </span>
               <div>
-                <div className="stat-value">{coupons.data?.length || 0}</div>
+                <QueryValue value={coupons.data?.length} query={coupons} />
                 <p>Resgates realizados</p>
               </div>
             </div>
@@ -88,10 +89,13 @@ export function PartnerDashboardPage() {
                 <ScanLine size={21} />
               </span>
               <div>
-                <div className="stat-value">
-                  {coupons.data?.filter((item) => item.status === 'UTILIZADO')
-                    .length || 0}
-                </div>
+                <QueryValue
+                  value={
+                    coupons.data?.filter((item) => item.status === 'UTILIZADO')
+                      .length
+                  }
+                  query={coupons}
+                />
                 <p>Cupons utilizados</p>
               </div>
             </div>
@@ -126,7 +130,13 @@ export function PartnerDashboardPage() {
                   <span
                     className={`badge ${item.status === 'VALIDO' ? 'badge-success' : ''}`}
                   >
-                    {item.status === 'VALIDO' ? 'Disponível' : 'Utilizado'}
+                    {
+                      {
+                        VALIDO: 'Disponível',
+                        UTILIZADO: 'Utilizado',
+                        DOADO: 'Doado',
+                      }[item.status]
+                    }
                   </span>
                 </div>
               ))}
@@ -180,7 +190,7 @@ export function PartnerDashboardPage() {
             <p>
               {isInstitution
                 ? 'Sua instituição já está disponível no cadastro dos alunos. Importe os professores para que possam começar a reconhecer boas atitudes.'
-                : 'Seu cadastro está pronto. O recebimento de doações será disponibilizado na próxima etapa do projeto.'}
+                : 'Acompanhe as vantagens que os alunos destinaram à sua organização e participe dessa rede de reconhecimento.'}
             </p>
           </div>
           {isInstitution && (
@@ -195,13 +205,38 @@ export function PartnerDashboardPage() {
                 <div>
                   <strong>Professores da instituição</strong>
                   <small>
-                    {teachers.data?.length || 0} professores vinculados ·
-                    importar e consultar
+                    {teachers.data
+                      ? `${teachers.data.length} professores vinculados · importar e consultar`
+                      : teachers.isLoading
+                        ? 'Consultando professores…'
+                        : 'Consulta indisponível · tentar novamente acima'}
+                  </small>
+                </div>
+                <ArrowRight size={17} />
+              </Link>
+              <Link className="quick-link" to="/empresa/fundo">
+                <GraduationCap size={21} />
+                <div>
+                  <strong>Fundo institucional</strong>
+                  <small>
+                    Acompanhe o orçamento e as recompensas do semestre.
                   </small>
                 </div>
                 <ArrowRight size={17} />
               </Link>
             </>
+          )}
+          {!isInstitution && (
+            <Link className="quick-link" to="/empresa/doacoes">
+              <HeartHandshake size={21} />
+              <div>
+                <strong>Doações recebidas</strong>
+                <small>
+                  Consulte as vantagens destinadas à sua instituição.
+                </small>
+              </div>
+              <ArrowRight size={17} />
+            </Link>
           )}
         </section>
       )}

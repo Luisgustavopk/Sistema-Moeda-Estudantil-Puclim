@@ -6,7 +6,7 @@ import { moedasApi } from '../api/moedas.api'
 import { TransactionList } from '../components/TransactionList'
 import { PageHeading } from '@/shared/components/ui/PageHeading'
 import { Coin } from '@/shared/components/ui/Brand'
-import { QueryState } from '@/shared/components/ui/Feedback'
+import { QueryState, QueryValue } from '@/shared/components/ui/Feedback'
 import { number } from '@/shared/utils/format'
 
 export function TeacherDashboardPage() {
@@ -43,11 +43,17 @@ export function TeacherDashboardPage() {
         </section>
         <section className="card teacher-stat-card">
           <p className="muted">Pucoins distribuídos</p>
-          <div className="stat-value">{number(total)}</div>
+          <QueryValue
+            value={transactions.data ? total : undefined}
+            query={transactions}
+          />
         </section>
         <section className="card teacher-stat-card">
           <p className="muted">Alunos reconhecidos</p>
-          <div className="stat-value">{recipients}</div>
+          <QueryValue
+            value={transactions.data ? recipients : undefined}
+            query={transactions}
+          />
         </section>
       </div>
       <div className="dashboard-grid">
@@ -88,7 +94,9 @@ export function TeacherDashboardPage() {
               utilizadas são acumuladas ao seu saldo.
             </p>
             <p className="muted" style={{ marginTop: 12 }}>
-              {sent.length} reconhecimentos registrados no seu extrato.
+              {transactions.data
+                ? `${sent.length} reconhecimentos registrados no seu extrato.`
+                : 'A quantidade de reconhecimentos depende da consulta ao extrato.'}
             </p>
           </section>
         </div>

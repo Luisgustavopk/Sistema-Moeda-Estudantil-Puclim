@@ -3,6 +3,14 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <script>
+      try {
+        document.documentElement.dataset.theme =
+          localStorage.getItem('puclim.theme') === 'dark' ? 'dark' : 'light'
+      } catch {
+        document.documentElement.dataset.theme = 'light'
+      }
+    </script>
     <meta
       name="description"
       content="No Puclim, a dedicação dos estudantes vira reconhecimento, moedas e novas possibilidades. Conheça o caminho do mérito na comunidade acadêmica."
