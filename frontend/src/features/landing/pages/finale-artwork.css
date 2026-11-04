@@ -137,27 +137,12 @@
   display: grid;
   place-items: center;
   border-radius: inherit;
-  border: 2px solid var(--finale-metal-light); /* taste-skill-ignore: the reference's milled coin rim. */
-  /* prettier-ignore */
-  background: linear-gradient(125deg, var(--finale-metal-light), var(--finale-metal) 48%, var(--finale-metal-deep)); /* taste-skill-ignore: brand gold rendered as a material, following the pinned reference. */
-}
-
-.puclim-landing .lp-finale-coin-face::before {
-  content: '';
-  position: absolute;
-  inset: 9px;
-  border: 1px solid color-mix(in srgb, var(--lp-paper) 65%, transparent); /* taste-skill-ignore: engraved inner rim of the brand object. */
-  border-radius: inherit;
+  border: 0;
 }
 
 .puclim-landing .lp-finale-coin-face > svg {
-  width: 44%;
-  height: auto;
-  color: var(--finale-bronze);
-}
-
-.puclim-landing .lp-finale-engraving-edge {
-  color: var(--finale-metal-light);
+  width: 100%;
+  height: 100%;
 }
 
 .puclim-landing .lp-finale-milestone {

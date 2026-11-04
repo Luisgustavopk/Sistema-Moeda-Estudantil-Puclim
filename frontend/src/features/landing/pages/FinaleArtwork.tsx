@@ -1,5 +1,5 @@
 import { Award, GraduationCap, Users } from 'lucide-react'
-import { Wave } from '@/shared/components/ui/Brand'
+import { Coin } from '@/shared/components/ui/Brand'
 import './finale-artwork.css'
 
 const milestones = [
@@ -83,15 +83,7 @@ export function FinaleArtwork() {
             <div className="lp-finale-coin-drift">
               <div className="lp-finale-coin">
                 <div className="lp-finale-coin-face">
-                  <svg width="80" height="64" viewBox="0 0 40 32">
-                    <g
-                      className="lp-finale-engraving-edge"
-                      transform="translate(0 .4)"
-                    >
-                      <Wave />
-                    </g>
-                    <Wave />
-                  </svg>
+                  <Coin size={176} />
                 </div>
               </div>
             </div>
