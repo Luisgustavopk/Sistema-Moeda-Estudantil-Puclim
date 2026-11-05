@@ -20,7 +20,10 @@ import {
   rarities,
   normalizeRarity,
   rarityPresentation,
+  badgePresentation,
+  familyLabels,
 } from './badge-presentation'
+import { useProfileRewards } from './hooks'
 import type { Badge } from './types'
 
 export function AchievementsPage() {
@@ -54,6 +57,7 @@ export function AchievementsPage() {
     return () => window.clearTimeout(timer)
   }, [celebration])
   const profile = query.data
+  const cosmetics = useProfileRewards(profile)
   const badges = profile?.badges || []
   const unlocked = badges.filter((b) => b.unlockedAt).length
   const next = badges
@@ -71,11 +75,14 @@ export function AchievementsPage() {
         : Number(!!a.unlockedAt) - Number(!!b.unlockedAt) ||
           badgeRatio(b) - badgeRatio(a),
     )
+  const families = [...new Set(filtered.map((b) => b.family || 'OTHER'))]
+  const selectedRewards =
+    cosmetics.data?.filter((r) => r.badgeId === selected?.id) || []
   return (
     <div className="merit-page">
       <PageHeading
         title="Minhas conquistas"
-        description="Cada conquista conta um pedaço da sua trajetória."
+        description="Evolua suas medalhas de bronze a ouro e desbloqueie novas personalizações."
         action={
           <Link className="button button-secondary" to={`/perfis/${user?.id}`}>
             Ver perfil público
@@ -150,6 +157,10 @@ export function AchievementsPage() {
                 {filtered.length} resultados
               </span>
             </div>
+            <p className="medal-collection-help">
+              Bronze, prata e ouro reconhecem etapas da mesma trajetória. As
+              conquistas anteriores ficam na sua coleção.
+            </p>
             <div
               className="merit-filters"
               role="group"
@@ -202,43 +213,82 @@ export function AchievementsPage() {
                 description="Experimente outro estado ou raridade para explorar a coleção."
               />
             )}
-            <div className="achievement-grid">
-              {filtered.map((badge) => (
-                <button
-                  key={badge.id}
-                  className={`card achievement-card ${badge.unlockedAt ? 'is-unlocked' : ''}`}
-                  onClick={() => setSelected(badge)}
-                  aria-label={`Ver conquista: ${badge.name}`}
+            <div className="medal-families">
+              {families.map((family) => (
+                <section
+                  className="medal-family"
+                  key={family}
+                  aria-label={familyLabels[family] || 'Outras conquistas'}
                 >
-                  <BadgeMedal badge={badge} />
-                  <span className="small muted">
-                    {rarityPresentation(badge.rarity).label}
-                  </span>
-                  <h3>{badge.name}</h3>
-                  <StatusBadge
-                    tone={
-                      badge.unlockedAt
-                        ? 'success'
-                        : badge.progress
-                          ? 'info'
-                          : 'neutral'
-                    }
-                  >
-                    {badge.unlockedAt ? 'Conquistada' : badgeState(badge)}
-                  </StatusBadge>
-                  {!badge.unlockedAt && badge.progress > 0 && (
-                    <>
-                      <progress
-                        aria-label={`Progresso: ${badge.name}`}
-                        max={Math.max(1, badge.target)}
-                        value={badge.progress}
-                      />
+                  {family !== 'OTHER' && (
+                    <div className="medal-family-heading">
+                      <h3>{familyLabels[family] || family}</h3>
                       <span className="small muted">
-                        {badge.progress} de {badge.target}
+                        {
+                          badges.filter(
+                            (b) => b.family === family && b.unlockedAt,
+                          ).length
+                        }{' '}
+                        de {badges.filter((b) => b.family === family).length}{' '}
+                        etapas conquistadas
                       </span>
-                    </>
+                    </div>
                   )}
-                </button>
+                  <div
+                    className={`achievement-grid ${family !== 'OTHER' ? 'medal-family-grid' : ''}`}
+                  >
+                    {filtered
+                      .filter((b) => (b.family || 'OTHER') === family)
+                      .sort((a, b) =>
+                        family === 'OTHER' ? 0 : a.target - b.target,
+                      )
+                      .map((badge) => (
+                        <button
+                          key={badge.id}
+                          className={`card achievement-card ${badge.unlockedAt ? 'is-unlocked' : ''}`}
+                          onClick={() => setSelected(badge)}
+                          aria-label={`Ver conquista: ${badge.name}`}
+                        >
+                          <BadgeMedal badge={badge} />
+                          <span className="small muted medal-stage">
+                            {badgePresentation(badge).label}
+                            {badge.tier
+                              ? ` · ${rarityPresentation(badge.rarity).label}`
+                              : ''}
+                          </span>
+                          <h4>{badge.name}</h4>
+                          <StatusBadge
+                            tone={
+                              badge.unlockedAt
+                                ? 'success'
+                                : badge.progress
+                                  ? 'info'
+                                  : 'neutral'
+                            }
+                          >
+                            {badge.unlockedAt
+                              ? 'Conquistada'
+                              : badgeState(badge)}
+                          </StatusBadge>
+                          <progress
+                            aria-label={`Progresso: ${badge.name}`}
+                            max={Math.max(1, badge.target)}
+                            value={badge.progress}
+                          />
+                          <span className="small muted medal-progress-count">
+                            {badge.progress} de {badge.target}
+                          </span>
+                          {cosmetics.data?.some(
+                            (r) => r.badgeId === badge.id,
+                          ) && (
+                            <span className="small medal-reward-hint">
+                              Libera personalização
+                            </span>
+                          )}
+                        </button>
+                      ))}
+                  </div>
+                </section>
               ))}
             </div>
           </section>
@@ -249,8 +299,7 @@ export function AchievementsPage() {
           <div className="badge-detail">
             <BadgeMedal badge={selected} />
             <span className="badge">
-              {rarityPresentation(selected.rarity).label} ·{' '}
-              {badgeState(selected)}
+              {badgePresentation(selected).label} · {badgeState(selected)}
             </span>
             <p>{selected.description}</p>
             <h3>Como conquistar</h3>
@@ -265,6 +314,30 @@ export function AchievementsPage() {
             </p>
             {selected.unlockedAt && (
               <p>Conquistada em {dateTime(selected.unlockedAt)}</p>
+            )}
+            {selectedRewards.length > 0 && (
+              <div className="medal-reward-detail">
+                <h3>
+                  {selected.unlockedAt
+                    ? 'Personalizações liberadas'
+                    : 'Ao conquistar, você libera'}
+                </h3>
+                <ul>
+                  {selectedRewards.map((r) => (
+                    <li key={`${r.kind}-${r.id}`}>
+                      {
+                        { AVATAR: 'Avatar', FRAME: 'Moldura', BANNER: 'Fundo' }[
+                          r.kind
+                        ]
+                      }
+                      : {r.name}
+                    </li>
+                  ))}
+                </ul>
+                <Link className="text-link" to="/perfil/editar">
+                  Personalizar meu perfil
+                </Link>
+              </div>
             )}
           </div>
         </Modal>

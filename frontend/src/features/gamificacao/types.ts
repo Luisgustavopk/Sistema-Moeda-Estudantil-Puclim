@@ -8,6 +8,8 @@ export interface Badge {
   target: number
   progress: number
   unlockedAt: string | null
+  family?: string | null
+  tier?: 'BRONZE' | 'SILVER' | 'GOLD' | null
 }
 export interface Rank {
   position: number
@@ -20,6 +22,7 @@ export interface Rank {
   level: number
   firstCoin: string | null
   avatar?: string
+  avatarVisual?: import('./profile-rewards').RewardVisual | null
 }
 export interface Ranking {
   content: Rank[]

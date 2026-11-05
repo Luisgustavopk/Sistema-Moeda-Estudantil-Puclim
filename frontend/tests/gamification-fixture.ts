@@ -1,6 +1,8 @@
 import type { Page } from '@playwright/test'
 import type { Profile, Quiz, Rank } from '../src/features/gamificacao/types'
 import type { ProfileCustomization } from '../src/features/gamificacao/profile-customization'
+import { basicDemoRewards } from '../src/features/gamificacao/profile-rewards'
+import type { ProfileReward } from '../src/features/gamificacao/profile-rewards'
 
 // Respostas controladas apenas para testes; nunca importadas pela aplicação.
 export const student = {
@@ -134,7 +136,11 @@ export const ranks: Rank[] = Array.from({ length: 30 }, (_, i) => ({
   firstCoin: '2026-10-10T12:00:00Z',
 }))
 
-export async function mockGame(page: Page, role = 'ALUNO') {
+export async function mockGame(
+  page: Page,
+  role = 'ALUNO',
+  rewards: ProfileReward[] = basicDemoRewards(profile),
+) {
   let appearance: ProfileCustomization = {
     displayName: student.name,
     bio: '',
@@ -163,10 +169,26 @@ export async function mockGame(page: Page, role = 'ALUNO') {
       else if (path === '/api/instituicoes')
         data = [{ id: 'institution', name: 'PUC Minas' }]
       else if (path === '/api/gamificacao/perfil/personalizacao') {
-        if (route.request().method() === 'PUT')
+        if (route.request().method() === 'PUT') {
           appearance = route.request().postDataJSON()
+          appearance.visuals = {
+            avatar:
+              rewards.find(
+                (r) => r.kind === 'AVATAR' && r.id === appearance.avatar,
+              )?.visual || null,
+            frame:
+              rewards.find(
+                (r) => r.kind === 'FRAME' && r.id === appearance.frame,
+              )?.visual || null,
+            banner:
+              rewards.find(
+                (r) => r.kind === 'BANNER' && r.id === appearance.banner,
+              )?.visual || null,
+          }
+        }
         data = appearance
-      } else if (path === '/api/gamificacao/perfil') data = profile
+      } else if (path === '/api/gamificacao/perfil/desbloqueios') data = rewards
+      else if (path === '/api/gamificacao/perfil') data = profile
       else if (path.startsWith('/api/gamificacao/perfis/'))
         data = publicProfileFixture(profile, appearance)
       else if (path === '/api/gamificacao/contexto')

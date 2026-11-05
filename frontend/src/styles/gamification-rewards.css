@@ -1,0 +1,603 @@
+.sidebar-avatar {
+  display: inline-grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  flex: 0 0 44px;
+}
+.sidebar .sidebar-profile-avatar {
+  width: 44px;
+  height: 44px;
+  padding: 2px;
+  border-radius: 12px;
+}
+.sidebar-profile-avatar[data-frame='classic'] {
+  border: 0;
+}
+.sidebar .sidebar-profile-avatar > .avatar,
+.sidebar .sidebar-profile-avatar > .profile-initials {
+  width: 100%;
+  height: 100%;
+  border-radius: 8px;
+  font-size: 0.875rem;
+}
+.sidebar-profile-avatar[data-frame='classic'] > .avatar,
+.sidebar-profile-avatar[data-frame='classic'] > .profile-initials,
+.sidebar-profile-avatar[data-shape='CIRCLE'] > .avatar,
+.sidebar-profile-avatar[data-shape='CIRCLE'] > .profile-initials {
+  border-radius: 50%;
+}
+.sidebar-profile-avatar[data-shape='SQUARE'] > .avatar,
+.sidebar-profile-avatar[data-shape='SQUARE'] > .profile-initials {
+  border-radius: 0;
+}
+.sidebar-profile-avatar .profile-initials > svg {
+  width: 24px;
+  height: 24px;
+}
+.sidebar-profile-avatar .frame-crown {
+  top: -8px;
+  left: calc(50% - 12px);
+  width: 24px;
+  height: 18px;
+  border-radius: 4px;
+}
+.sidebar-profile-avatar .frame-crown > svg {
+  width: 20px;
+  height: 20px;
+}
+.sidebar-profile-avatar .frame-orbit {
+  inset: -5px;
+}
+.sidebar-profile-avatar .frame-emblem {
+  padding: 1px;
+  right: -2px;
+  bottom: -2px;
+}
+.sidebar-profile-avatar .frame-emblem > svg {
+  width: 10px;
+  height: 10px;
+}
+.medal-collection-help {
+  color: var(--muted);
+  margin-bottom: 24px;
+  max-width: 70ch;
+}
+.medal-families {
+  display: grid;
+  gap: 32px;
+}
+.medal-family {
+  min-width: 0;
+}
+.medal-family-heading {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 8px 16px;
+  margin-bottom: 16px;
+}
+.medal-family-heading h3 {
+  font-size: 1.125rem;
+}
+.medal-family-grid {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+.achievement-card h4 {
+  font-size: 1.125rem;
+  line-height: 1.4;
+  text-wrap: balance;
+}
+.medal-reward-hint {
+  color: var(--ink);
+}
+.medal-reward-detail {
+  display: grid;
+  gap: 12px;
+  width: 100%;
+}
+.medal-reward-detail ul {
+  padding-left: 24px;
+  margin: 0;
+}
+.merit-medal.finish-silver {
+  --finish: var(--merit-silver);
+}
+.merit-medal[data-tier] {
+  border-style: solid;
+  border-width: 3px;
+}
+.medal-tier-mark {
+  position: absolute;
+  inset: auto 0 4px;
+  text-align: center;
+  font-size: 0.75rem;
+  font-weight: 700;
+  line-height: 1;
+}
+
+.reward-options {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 17rem), 1fr));
+  gap: 12px;
+}
+.reward-option {
+  display: grid;
+  grid-template-columns: 64px minmax(0, 1fr);
+  align-items: start;
+  gap: 16px;
+  min-width: 0;
+  padding: 16px;
+  border: 1px solid var(--control-border);
+  border-radius: 12px;
+  background: var(--surface);
+  color: var(--ink);
+  text-align: left;
+  box-shadow: none;
+}
+.reward-option[aria-pressed='true'] {
+  border-color: var(--primary);
+  outline: 2px solid var(--primary);
+  outline-offset: -2px;
+  background: color-mix(in srgb, var(--primary) 6%, var(--surface));
+}
+.reward-option[aria-disabled='true'] {
+  cursor: not-allowed;
+  border-style: dashed;
+}
+.reward-option[aria-disabled='true'] .reward-art {
+  opacity: 0.65;
+}
+.reward-option:focus-visible {
+  outline: 3px solid var(--primary);
+  outline-offset: 3px;
+}
+@media (hover: hover) {
+  .reward-option[aria-disabled='false']:hover {
+    background: var(--surface-raised);
+  }
+}
+.reward-copy {
+  display: grid;
+  gap: 8px;
+  min-width: 0;
+}
+.reward-copy strong {
+  font-size: 1rem;
+  line-height: 1.5;
+  overflow-wrap: anywhere;
+}
+.reward-copy > span {
+  color: var(--muted);
+  font-size: 0.875rem;
+  line-height: 1.5;
+}
+.reward-copy .reward-status {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  color: var(--ink);
+}
+.reward-art {
+  display: grid;
+  place-items: center;
+  width: 64px;
+  height: 64px;
+}
+.reward-art > .avatar,
+.reward-art > .profile-initials {
+  width: 64px;
+  height: 64px;
+  border-radius: 12px;
+}
+.reward-art .profile-initials > svg {
+  width: 32px;
+  height: 32px;
+}
+.profile-framed-avatar {
+  --frame-color: var(--control-border);
+  --emblem-ink: var(--ink);
+  display: grid;
+  position: relative;
+  width: 100%;
+  height: 100%;
+  padding: 4px;
+  border: 2px solid var(--frame-color);
+  border-radius: 23px;
+  background: var(--surface);
+}
+.profile-framed-avatar > .avatar,
+.profile-framed-avatar > .profile-initials {
+  display: grid;
+  width: 100%;
+  height: 100%;
+  min-width: 0;
+  min-height: 0;
+  object-fit: cover;
+  border-radius: 16px;
+}
+.public-avatar.profile-framed-avatar {
+  width: 120px;
+  height: 120px;
+}
+.reward-art .profile-framed-avatar {
+  border-radius: 16px;
+}
+.reward-art .profile-framed-avatar > .avatar,
+.reward-art .profile-framed-avatar > .profile-initials {
+  border-radius: 8px;
+}
+/* Palettes and primitives are independent of reward codes. */
+[data-palette='PETROLEUM'] {
+  --cosmetic-color: var(--control-border);
+  --cosmetic-fill: var(--petroleum);
+  --cosmetic-ink: #e2eeeb;
+}
+[data-palette='CREAM'] {
+  --cosmetic-color: var(--control-border);
+  --cosmetic-fill: var(--canvas);
+  --cosmetic-ink: var(--ink);
+}
+[data-palette='GOLD'] {
+  --cosmetic-color: var(--merit-gold);
+  --cosmetic-fill: var(--gold);
+  --cosmetic-ink: #16353b;
+}
+[data-palette='BRONZE'] {
+  --cosmetic-color: var(--merit-bronze);
+  --cosmetic-fill: #70482d;
+  --cosmetic-ink: #ffe7cf;
+}
+[data-palette='SILVER'] {
+  --cosmetic-color: var(--merit-silver);
+  --cosmetic-fill: #415b69;
+  --cosmetic-ink: #e3edf0;
+}
+[data-palette='FOREST'] {
+  --cosmetic-color: var(--success);
+  --cosmetic-fill: #295440;
+  --cosmetic-ink: #e6eedb;
+}
+[data-palette='COSMOS'] {
+  --cosmetic-color: var(--merit-silver);
+  --cosmetic-fill: #253f55;
+  --cosmetic-ink: #dbe9f0;
+}
+[data-palette='COPPER'] {
+  --cosmetic-color: var(--badge-copper);
+  --cosmetic-fill: #70482d;
+  --cosmetic-ink: #ffe7cf;
+}
+[data-palette='TEAL'] {
+  --cosmetic-color: var(--badge-teal);
+  --cosmetic-fill: #214d50;
+  --cosmetic-ink: #f2d58b;
+}
+.profile-framed-avatar[data-palette] {
+  --frame-color: var(--cosmetic-color);
+  --emblem-ink: var(--cosmetic-color);
+}
+.profile-framed-avatar[data-variant='DOUBLE'] {
+  border-style: double;
+  border-width: 4px;
+}
+.profile-framed-avatar[data-artwork='true'] {
+  border: 0;
+  background: transparent;
+}
+.profile-framed-avatar .frame-artwork {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  pointer-events: none;
+}
+.profile-framed-avatar[data-shape='CIRCLE'] > :not(.frame-artwork) {
+  border-radius: 50%;
+}
+.profile-framed-avatar[data-shape='SQUARE'] > :not(.frame-artwork) {
+  border-radius: 0;
+}
+.profile-cover .cover-artwork {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.profile-cover:has(> .cover-artwork) {
+  padding: 0;
+}
+.frame-emblem {
+  display: grid;
+  place-items: center;
+  position: absolute;
+  bottom: -4px;
+  right: -4px;
+  padding: 4px;
+  color: var(--emblem-ink);
+  background: var(--surface);
+  border: 1px solid var(--frame-color);
+  border-radius: 50%;
+}
+.reward-art .frame-emblem {
+  padding: 2px;
+}
+.reward-art .frame-emblem svg {
+  width: 12px;
+  height: 12px;
+}
+.themed-avatar {
+  background: var(--cosmetic-fill, var(--petroleum));
+  color: var(--cosmetic-ink, #fffdf8);
+}
+.public-profile-hero:has(> .profile-cover)::before {
+  content: none;
+}
+.profile-cover {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 24px;
+  padding-inline: 24px;
+  background: var(--petroleum);
+  color: #b8d2d7;
+  overflow: hidden;
+}
+.public-profile-hero > .profile-cover {
+  position: absolute;
+  inset: 0 0 auto;
+  height: var(--profile-cover);
+}
+.profile-cover svg {
+  width: 48px;
+  height: 48px;
+  flex: 0 0 auto;
+  opacity: 0.6;
+}
+.profile-cover svg:nth-child(2) {
+  width: 64px;
+  height: 64px;
+}
+.profile-cover[data-palette] {
+  background: var(--cosmetic-fill);
+  color: var(--cosmetic-ink);
+}
+.reward-cover-art {
+  overflow: hidden;
+  border-radius: 8px;
+}
+.reward-cover-art .profile-cover {
+  width: 100%;
+  height: 100%;
+  padding-inline: 8px;
+  gap: 8px;
+}
+.reward-cover-art .profile-cover svg {
+  width: 32px;
+  height: 32px;
+}
+.reward-cover-art .profile-cover svg:not(:first-child) {
+  display: none;
+}
+
+@media (max-width: 600px) {
+  .medal-family-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .medal-family-grid .achievement-card {
+    display: grid;
+    grid-template-columns: 72px minmax(0, 1fr);
+    text-align: left;
+    align-items: start;
+    min-height: 0;
+    padding: 16px;
+    gap: 8px 16px;
+  }
+  .medal-family-grid .achievement-card .merit-medal {
+    width: 64px;
+    height: 64px;
+    grid-row: 1 / span 6;
+  }
+  .medal-family-grid .achievement-card > :not(.merit-medal) {
+    grid-column: 2;
+  }
+  .medal-family-grid .achievement-card .activity-status {
+    justify-self: start;
+    margin-top: 0;
+  }
+}
+@media (forced-colors: active) {
+  .reward-option[aria-pressed='true'] {
+    outline-color: Highlight;
+  }
+  .frame-emblem,
+  .profile-framed-avatar {
+    border-color: CanvasText;
+  }
+}
+
+/* Earned identity effects: CSS transforms only, static galleries, visible profile
+   only. A visitor can pause the effect without changing the equipped reward. */
+.frame-orbit {
+  position: absolute;
+  inset: -8px;
+  color: var(--frame-color);
+  pointer-events: none;
+  animation: profile-frame-orbit var(--frame-cycle, 4000ms) linear infinite;
+}
+.frame-orbit > svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+.frame-crown {
+  position: absolute;
+  top: -20px;
+  left: calc(50% - 20px);
+  width: 40px;
+  height: 32px;
+  display: grid;
+  place-items: center;
+  color: var(--emblem-ink);
+  background: var(--surface);
+  border-radius: 8px;
+  pointer-events: none;
+  animation: profile-frame-crown var(--frame-cycle, 2400ms)
+    cubic-bezier(0.77, 0, 0.175, 1) infinite alternate;
+}
+.frame-shimmer {
+  position: absolute;
+  inset: -2px;
+  border-radius: inherit;
+  overflow: hidden;
+  pointer-events: none;
+  padding: 4px;
+  mask:
+    linear-gradient(#fff 0 0) content-box,
+    linear-gradient(#fff 0 0);
+  mask-composite: exclude;
+}
+.frame-shimmer > span {
+  display: block;
+  position: absolute;
+  inset: -25%;
+  background: linear-gradient(
+    115deg,
+    transparent 35%,
+    var(--merit-gold) 50%,
+    transparent 65%
+  );
+  animation: profile-frame-shimmer var(--frame-cycle, 4000ms) linear infinite;
+}
+.profile-framed-avatar[data-motion-playing='false'] .frame-orbit,
+.profile-framed-avatar[data-motion-playing='false'] .frame-crown,
+.profile-framed-avatar[data-motion-playing='false'] .frame-shimmer > span {
+  animation-play-state: paused;
+}
+.profile-motion-toggle {
+  display: inline-flex;
+  align-items: center;
+  justify-self: start;
+  gap: 8px;
+  min-height: 44px;
+  padding: 8px 12px;
+  border: 1px solid var(--control-border);
+  border-radius: 8px;
+  background: var(--surface);
+  color: var(--ink);
+  font-size: 0.875rem;
+  line-height: 1.5;
+}
+.profile-motion-toggle:focus-visible {
+  outline: 3px solid var(--primary);
+  outline-offset: 3px;
+}
+@media (hover: hover) and (pointer: fine) {
+  .profile-motion-toggle:hover {
+    background: var(--surface-raised);
+  }
+}
+@keyframes profile-frame-orbit {
+  to {
+    transform: rotate(360deg);
+  }
+}
+@keyframes profile-frame-crown {
+  from {
+    transform: translateY(0);
+  }
+  to {
+    transform: translateY(-3px);
+  }
+}
+@keyframes profile-frame-shimmer {
+  from {
+    transform: translateX(-100%);
+  }
+  to {
+    transform: translateX(100%);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .profile-framed-avatar .frame-orbit,
+  .profile-framed-avatar .frame-crown,
+  .profile-framed-avatar .frame-shimmer > span {
+    animation: none;
+    transform: none;
+  }
+}
+@container profile (max-width: 620px) {
+  .public-avatar.profile-framed-avatar {
+    width: 88px;
+    height: 88px;
+    border-radius: 18px;
+  }
+}
+.medal-family-grid .achievement-card {
+  display: grid;
+  grid-template-rows: 86px auto minmax(2.8em, auto) auto 8px auto 20px;
+  align-items: center;
+  justify-items: center;
+}
+.medal-family-grid .achievement-card .merit-medal {
+  grid-row: 1;
+}
+.medal-family-grid .medal-stage {
+  grid-row: 2;
+}
+.medal-family-grid .achievement-card h4 {
+  grid-row: 3;
+}
+.medal-family-grid .activity-status {
+  grid-row: 4;
+}
+.medal-family-grid .achievement-card progress {
+  grid-row: 5;
+  width: 100%;
+}
+.medal-family-grid .medal-progress-count {
+  grid-row: 6;
+}
+.medal-family-grid .medal-reward-hint {
+  grid-row: 7;
+}
+.editor-preview {
+  scroll-margin-top: 96px;
+}
+@media (min-width: 1024px) {
+  .editor-preview {
+    position: sticky;
+    top: 96px;
+  }
+  .editor-preview-link {
+    display: none;
+  }
+}
+@media (max-width: 600px) {
+  .medal-family-grid .achievement-card {
+    grid-template-rows: auto;
+    justify-items: start;
+  }
+  .medal-family-grid .achievement-card .merit-medal {
+    grid-row: 1 / span 7;
+  }
+  .medal-family-grid .medal-stage {
+    grid-row: 1;
+  }
+  .medal-family-grid .achievement-card h4 {
+    grid-row: 2;
+  }
+  .medal-family-grid .activity-status {
+    grid-row: 3;
+  }
+  .medal-family-grid .achievement-card progress {
+    grid-row: 4;
+  }
+  .medal-family-grid .medal-progress-count {
+    grid-row: 5;
+  }
+  .medal-family-grid .medal-reward-hint {
+    grid-row: 6;
+  }
+}

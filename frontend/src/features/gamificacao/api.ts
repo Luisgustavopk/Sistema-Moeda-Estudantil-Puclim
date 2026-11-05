@@ -23,6 +23,10 @@ function request<R>(
 }
 const id = encodeURIComponent
 export const gameApi = {
+  cosmetics: () =>
+    request<import('./profile-rewards').ProfileReward[]>(
+      '/perfil/desbloqueios',
+    ),
   context: () =>
     request<{ semester: string; today: string; maxAllocation: number }>(
       '/contexto',

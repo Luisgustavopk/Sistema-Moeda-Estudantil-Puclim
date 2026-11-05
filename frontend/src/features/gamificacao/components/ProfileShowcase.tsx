@@ -1,45 +1,16 @@
-import { useRef, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { Modal } from '@/shared/components/ui/Modal'
 import { Panel, ProgressRing } from '@/shared/components/ui/ActivitySurface'
-import { rarityPresentation } from '../badge-presentation'
-import { GraduationCap, Sparkles, Trophy, Flame } from 'lucide-react'
-import { Avatar } from '@/shared/components/ui/Avatar'
+import { badgePresentation } from '../badge-presentation'
+import { Sparkles, Trophy, Flame, Pause, Play } from 'lucide-react'
 import { dateTime, number } from '@/shared/utils/format'
 import type { ProfileCustomization } from '../profile-customization'
 import type { Profile, Badge } from '../types'
 import { BadgeMedal } from './BadgeMedal'
+import { ProfileIdentity } from './ProfileIdentity'
+import { ProfileFrame, ProfileCover } from './ProfileDecorations'
+export { ProfileIdentity } from './ProfileIdentity'
 
-export function ProfileIdentity({
-  name,
-  avatar,
-}: {
-  name: string
-  avatar: string
-}) {
-  return avatar.startsWith('data:image/') ||
-    avatar.startsWith('/api/gamificacao/perfil/avatar/') ? (
-    <img
-      className="avatar avatar-large"
-      src={avatar}
-      alt={`Avatar de ${name}`}
-    />
-  ) : avatar === 'initials' ? (
-    <span className="profile-initials" aria-hidden="true">
-      {name
-        .split(' ')
-        .filter(Boolean)
-        .slice(0, 2)
-        .map((n) => n[0])
-        .join('')}
-    </span>
-  ) : avatar === 'graduate' ? (
-    <span className="profile-initials">
-      <GraduationCap size={42} aria-label="Avatar de formatura" />
-    </span>
-  ) : (
-    <Avatar name={name} large />
-  )
-}
 export function ProfileShowcase({
   profile,
   settings,
@@ -50,6 +21,16 @@ export function ProfileShowcase({
   preview?: boolean
 }) {
   const [selected, setSelected] = useState<Badge | null>(null)
+  const [motionPaused, setMotionPaused] = useState(false)
+  const [reducedMotion, setReducedMotion] = useState(
+    () => window.matchMedia('(prefers-reduced-motion: reduce)').matches,
+  )
+  useEffect(() => {
+    const media = window.matchMedia('(prefers-reduced-motion: reduce)')
+    const update = () => setReducedMotion(media.matches)
+    media.addEventListener('change', update)
+    return () => media.removeEventListener('change', update)
+  }, [])
   const [collectionOpen, setCollectionOpen] = useState(false)
   const [returnToCollection, setReturnToCollection] = useState(false)
   const collectionTrigger = useRef<HTMLButtonElement>(null)
@@ -91,12 +72,22 @@ export function ProfileShowcase({
       className={`profile-showcase banner-${settings.banner} ${preview ? 'is-preview' : ''}`}
     >
       <section className="card public-profile-hero">
-        <div className={`public-avatar frame-${settings.frame}`}>
+        <ProfileCover
+          banner={settings.banner}
+          visual={settings.visuals?.banner}
+        />
+        <ProfileFrame
+          frame={settings.frame}
+          visual={settings.visuals?.frame}
+          className="public-avatar"
+          animate={!motionPaused && !reducedMotion}
+        >
           <ProfileIdentity
             name={settings.displayName}
             avatar={settings.avatar}
+            visual={settings.visuals?.avatar}
           />
-        </div>
+        </ProfileFrame>
         <div className="public-identity">
           <p className="public-display-name">{settings.displayName}</p>
           {settings.showRealName &&
@@ -107,6 +98,29 @@ export function ProfileShowcase({
             {profile.course} · {profile.institution}
           </p>
           {settings.bio && <p className="profile-bio">{settings.bio}</p>}
+          {settings.visuals?.frame?.motion &&
+            settings.visuals.frame.motion !== 'NONE' &&
+            (reducedMotion ? (
+              <p className="small muted">
+                Efeito estático: movimento reduzido ativado.
+              </p>
+            ) : (
+              <button
+                type="button"
+                className="profile-motion-toggle"
+                aria-pressed={motionPaused}
+                onClick={() => setMotionPaused((paused) => !paused)}
+              >
+                {motionPaused ? (
+                  <Play size={14} aria-hidden="true" />
+                ) : (
+                  <Pause size={14} aria-hidden="true" />
+                )}
+                {motionPaused
+                  ? 'Ativar efeito da moldura'
+                  : 'Pausar efeito da moldura'}
+              </button>
+            ))}
         </div>
         <div className="profile-level-display">
           <div className="profile-level-ring">
@@ -157,7 +171,7 @@ export function ProfileShowcase({
                   <strong>{highlight.name}</strong>
                   <span>{highlight.description}</span>
                   <span className="small muted">
-                    {rarityPresentation(highlight.rarity).label} ·{' '}
+                    {badgePresentation(highlight).label} ·{' '}
                     {dateTime(highlight.unlockedAt!)}
                   </span>
                 </span>
@@ -179,7 +193,7 @@ export function ProfileShowcase({
                     <BadgeMedal badge={b} />
                     <strong>{b.name}</strong>
                     <span className="small muted">
-                      {rarityPresentation(b.rarity).label}
+                      {badgePresentation(b).label}
                     </span>
                   </button>
                 ))}
@@ -318,9 +332,7 @@ export function ProfileShowcase({
         >
           <div className="badge-detail">
             <BadgeMedal badge={selected} />
-            <span className="badge">
-              {rarityPresentation(selected.rarity).label}
-            </span>
+            <span className="badge">{badgePresentation(selected).label}</span>
             <p>{selected.description}</p>
             <p>Conquistada em {dateTime(selected.unlockedAt!)}</p>
           </div>

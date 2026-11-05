@@ -31,6 +31,7 @@ export default defineConfig({
         'registration.spec.ts',
         'landing.spec.ts',
         'gamification.spec.ts',
+        'profile-rewards.spec.ts',
         'design-round1.spec.ts',
         'design-round2.spec.ts',
         'refinements.spec.ts',

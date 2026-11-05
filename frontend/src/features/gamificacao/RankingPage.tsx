@@ -245,6 +245,7 @@ export function RankingPage() {
                       <ProfileIdentity
                         name={row.name}
                         avatar={row.avatar || 'portrait'}
+                        visual={row.avatarVisual}
                       />
                     </span>
                     <strong>{row.name}</strong>
@@ -279,6 +280,7 @@ export function RankingPage() {
                     <ProfileIdentity
                       name={row.name}
                       avatar={row.avatar || 'portrait'}
+                      visual={row.avatarVisual}
                     />
                   </span>
                   <span className="rank-identity">

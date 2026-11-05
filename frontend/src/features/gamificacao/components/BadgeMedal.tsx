@@ -3,7 +3,7 @@ import type { Badge } from '../types'
 import { Wave } from '@/shared/components/ui/Brand'
 
 import {
-  rarityPresentation,
+  badgePresentation,
   normalizeRarity,
   badgeState,
 } from '../badge-presentation'
@@ -21,7 +21,8 @@ export function BadgeMedal({ badge }: { badge: Badge }) {
       aria-hidden="true"
       data-rarity={rarity.toLowerCase()}
       data-unlocked={!!badge.unlockedAt}
-      className={`merit-medal finish-${rarityPresentation(badge.rarity).finish} shape-${badge.icon.toLowerCase()} ${badgeState(badge) === 'Bloqueada' ? 'is-locked' : ''}`}
+      data-tier={badge.tier?.toLowerCase()}
+      className={`merit-medal finish-${badgePresentation(badge).finish} shape-${badge.icon.toLowerCase()} ${badgeState(badge) === 'Bloqueada' ? 'is-locked' : ''}`}
     >
       {badge.icon === 'Coins' ? (
         <svg width="34" height="34" viewBox="0 0 40 32">
@@ -55,6 +56,15 @@ export function BadgeMedal({ badge }: { badge: Badge }) {
         <span className="medal-reflection" />
       )}
       {!badge.unlockedAt && <LockKeyhole className="medal-lock" size={16} />}
+      {badge.tier && (
+        <span className="medal-tier-mark">
+          {badge.tier === 'BRONZE'
+            ? 'I'
+            : badge.tier === 'SILVER'
+              ? 'II'
+              : 'III'}
+        </span>
+      )}
     </span>
   )
 }

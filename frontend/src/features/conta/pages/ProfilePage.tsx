@@ -27,9 +27,15 @@ import { useToast } from '@/shared/hooks/toast-context'
 import type { ProfileUpdate } from '@/shared/types/domain'
 import { SoundPreference } from '@/shared/components/ui/ConfirmationFeedback'
 import { UnsavedPrompt } from '@/features/gamificacao/components/UnsavedPrompt'
+import { ProfileIdentity } from '@/features/gamificacao/components/ProfileIdentity'
+import { useProfileCustomization } from '@/features/gamificacao/use-profile-customization'
 
 export function ProfilePage() {
   const { user } = useAuth()
+  const { data: customization } = useProfileCustomization(
+    user,
+    user?.role === 'ALUNO',
+  )
   const toast = useToast()
   const navigate = useNavigate()
   const client = useQueryClient()
@@ -85,7 +91,17 @@ export function ProfilePage() {
       <div className="profile-grid">
         <aside className="card profile-summary">
           <div className="account-identity">
-            <Avatar name={user.name} large />
+            <span className="account-avatar">
+              {user.role === 'ALUNO' ? (
+                <ProfileIdentity
+                  name={customization?.displayName || user.name}
+                  avatar={customization?.avatar || 'portrait'}
+                  visual={customization?.visuals?.avatar}
+                />
+              ) : (
+                <Avatar name={user.name} large />
+              )}
+            </span>
             <h2>{user.name}</h2>
             <p>{roleLabel}</p>
           </div>

@@ -40,6 +40,9 @@ test('demonstração: salvar personalização, recortar avatar e restaurar prév
   await page.getByRole('slider', { name: 'Zoom', exact: true }).fill('2')
   await page.getByRole('button', { name: 'Usar recorte' }).click()
   await expect(page.locator('.editor-preview img.avatar')).toBeVisible()
+  const savedAvatar = await page
+    .locator('.editor-preview img.avatar')
+    .getAttribute('src')
   await page.getByRole('button', { name: 'Vitrines', exact: true }).click()
   await page.getByLabel('Primeira moeda', { exact: true }).check()
   await chooseOption(
@@ -47,7 +50,25 @@ test('demonstração: salvar personalização, recortar avatar e restaurar prév
     'demo-first-coin',
   )
   await page.getByRole('button', { name: 'Salvar perfil' }).click()
-  await expect(page.getByText('Perfil salvo neste navegador.', { exact: false })).toBeVisible()
+  await expect(
+    page.getByText('Perfil salvo neste navegador.', { exact: false }),
+  ).toBeVisible()
+  await page
+    .getByRole('link', { name: 'Abrir minha conta', exact: true })
+    .click()
+  await expect(page).toHaveURL(/\/perfil$/)
+  await expect(page.locator('.account-avatar img')).toHaveAttribute(
+    'src',
+    savedAvatar!,
+  )
+  await expect(
+    page.locator('.sidebar-profile-avatar img.avatar'),
+  ).toHaveAttribute('src', savedAvatar!)
+  await page.reload()
+  await expect(page.locator('.account-avatar img')).toHaveAttribute(
+    'src',
+    savedAvatar!,
+  )
   await page
     .getByRole('link', { name: 'Ver perfil público', exact: true })
     .click()

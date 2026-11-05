@@ -21,13 +21,17 @@ import {
   customizationSchema,
   type ProfileCustomization,
 } from './profile-customization'
-import { ProfileIdentity, ProfileShowcase } from './components/ProfileShowcase'
+import { ProfileShowcase } from './components/ProfileShowcase'
+import { RewardOptions } from './components/ProfileDecorations'
+import { useProfileRewards } from './hooks'
+import { useProfileCustomization } from './use-profile-customization'
 import { UnsavedPrompt } from './components/UnsavedPrompt'
 import type { Profile } from './types'
 
 const sections = [
   'Geral',
   'Avatar',
+  'Molduras',
   'Fundo do perfil',
   'Vitrines',
   'Privacidade',
@@ -43,10 +47,7 @@ export function ProfileEditPage() {
     queryFn: () => gameApi.profile(),
     enabled: DATA_MODE === 'api',
   })
-  const settings = useQuery({
-    queryKey: ['profile-customization', user?.id],
-    queryFn: () => customizationAdapter.load(user!.id, user!.name),
-  })
+  const settings = useProfileCustomization(user)
   const sample =
     user && DATA_MODE === 'demo'
       ? demoProfile(
@@ -103,6 +104,7 @@ function ProfileEditor({
   initial: ProfileCustomization
 }) {
   const [section, setSection] = useState('Geral')
+  const rewards = useProfileRewards(profile)
   const [image, setImage] = useState<HTMLImageElement | null>(null)
   const [crop, setCrop] = useState({ x: 50, y: 50, zoom: 1 })
   const [uploadError, setUploadError] = useState('')
@@ -137,6 +139,20 @@ function ProfileEditor({
       ),
   })
   const unlocked = profile.badges.filter((b) => b.unlockedAt)
+  const selectedVisual = (kind: 'AVATAR' | 'FRAME' | 'BANNER', id: string) =>
+    rewards.data?.find((r) => r.kind === kind && r.id === id)?.visual
+  const visuals = {
+    avatar:
+      selectedVisual('AVATAR', values.avatar) ||
+      initial.visuals?.avatar ||
+      null,
+    frame:
+      selectedVisual('FRAME', values.frame) || initial.visuals?.frame || null,
+    banner:
+      selectedVisual('BANNER', values.banner) ||
+      initial.visuals?.banner ||
+      null,
+  }
   const set = <K extends keyof ProfileCustomization>(
     key: K,
     value: ProfileCustomization[K],
@@ -230,11 +246,13 @@ function ProfileEditor({
               ? 'Seu nome e sua apresentação na comunidade.'
               : section === 'Avatar'
                 ? 'Uma imagem para acompanhar suas conquistas.'
-                : section === 'Vitrines'
-                  ? 'Escolha os marcos que contam a sua história.'
-                  : section === 'Privacidade'
-                    ? 'Escolha quem pode ver seu perfil e suas informações.'
-                    : 'Um fundo que combina com seu perfil.'}
+                : section === 'Molduras'
+                  ? 'Níveis e conquistas dão novas formas ao seu avatar.'
+                  : section === 'Vitrines'
+                    ? 'Escolha os marcos que contam a sua história.'
+                    : section === 'Privacidade'
+                      ? 'Escolha quem pode ver seu perfil e suas informações.'
+                      : 'Um fundo que combina com seu perfil.'}
           </p>
           {section === 'Geral' && (
             <>
@@ -282,24 +300,25 @@ function ProfileEditor({
           )}
           {section === 'Avatar' && (
             <>
-              <p>Escolha como quer aparecer na comunidade.</p>
-              <div className="avatar-gallery">
-                {['initials', 'graduate', 'portrait'].map((avatar) => (
-                  <button
-                    type="button"
-                    key={avatar}
-                    className="avatar-choice"
-                    aria-label={`Avatar: ${avatar === 'initials' ? 'iniciais' : avatar === 'graduate' ? 'formatura' : 'ilustração'}`}
-                    aria-pressed={values.avatar === avatar}
-                    onClick={() => set('avatar', avatar)}
-                  >
-                    <ProfileIdentity
-                      name={values.displayName || profile.name}
-                      avatar={avatar}
-                    />
-                  </button>
-                ))}
-              </div>
+              <a
+                className="text-link editor-preview-link"
+                href="#profile-preview"
+              >
+                Ver prévia ao vivo
+              </a>
+              <QueryState
+                loading={rewards.isLoading}
+                error={rewards.error}
+                retry={rewards.refetch}
+              />
+              <RewardOptions
+                kind="AVATAR"
+                rewards={rewards.data || []}
+                value={values.avatar}
+                name={values.displayName || profile.name}
+                avatar={values.avatar}
+                onSelect={(id) => set('avatar', id)}
+              />
               <Field
                 id="avatar-upload"
                 label="Enviar avatar (PNG, JPEG ou WebP, até 2 MB)"
@@ -313,53 +332,70 @@ function ProfileEditor({
                   onChange={(event) => void loadImage(event.target.files?.[0])}
                 />
               </Field>
-              <h3>Moldura</h3>
-              <div className="merit-links">
-                <Button
-                  variant="secondary"
-                  aria-pressed={values.frame === 'classic'}
-                  onClick={() => set('frame', 'classic')}
-                >
-                  Clássica
-                </Button>
-                <Button
-                  variant="secondary"
-                  aria-pressed={values.frame === 'merit'}
-                  disabled={!unlocked.length}
-                  onClick={() => set('frame', 'merit')}
-                >
-                  Mérito
-                </Button>
-              </div>
+            </>
+          )}
+          {section === 'Molduras' && (
+            <>
               <p className="small muted">
-                Moldura por conquista:{' '}
-                {unlocked.length
-                  ? 'você já possui uma conquista desbloqueada.'
-                  : 'desbloqueie sua primeira conquista.'}{' '}
-                A moldura Mérito fica disponível após a primeira conquista.
+                As molduras acompanham qualquer avatar, inclusive uma foto
+                enviada.
               </p>
+              <a
+                className="text-link editor-preview-link"
+                href="#profile-preview"
+              >
+                Ver prévia ao vivo
+              </a>
+              <QueryState
+                loading={rewards.isLoading}
+                error={rewards.error}
+                retry={rewards.refetch}
+              />
+              <RewardOptions
+                kind="FRAME"
+                avatarVisual={visuals.avatar}
+                rewards={rewards.data || []}
+                value={values.frame}
+                name={values.displayName || profile.name}
+                avatar={values.avatar}
+                onSelect={(id) =>
+                  set('frame', id as ProfileCustomization['frame'])
+                }
+              />
+              <Link className="text-link" to="/aluno/conquistas">
+                Ver progresso das conquistas
+              </Link>
             </>
           )}
           {section === 'Fundo do perfil' && (
             <>
-              <p>Uma composição em tons do Puclim.</p>
-              <div className="banner-gallery">
-                {[
-                  { id: 'petroleum' as const, name: 'Petróleo' },
-                  { id: 'cream' as const, name: 'Creme' },
-                  { id: 'gold' as const, name: 'Ouro' },
-                ].map((b) => (
-                  <button
-                    className={`banner-choice banner-${b.id}`}
-                    type="button"
-                    key={b.id}
-                    aria-pressed={values.banner === b.id}
-                    onClick={() => set('banner', b.id)}
-                  >
-                    {b.name}
-                  </button>
-                ))}
-              </div>
+              <p className="small muted">
+                Novos cenários registram os marcos da sua trajetória.
+              </p>
+              <a
+                className="text-link editor-preview-link"
+                href="#profile-preview"
+              >
+                Ver prévia ao vivo
+              </a>
+              <QueryState
+                loading={rewards.isLoading}
+                error={rewards.error}
+                retry={rewards.refetch}
+              />
+              <RewardOptions
+                kind="BANNER"
+                rewards={rewards.data || []}
+                value={values.banner}
+                name={values.displayName || profile.name}
+                avatar={values.avatar}
+                onSelect={(id) =>
+                  set('banner', id as ProfileCustomization['banner'])
+                }
+              />
+              <Link className="text-link" to="/aluno/conquistas">
+                Ver progresso das conquistas
+              </Link>
             </>
           )}
           {section === 'Vitrines' && (
@@ -497,11 +533,11 @@ function ProfileEditor({
             </div>
           </div>
         </section>
-        <aside className="editor-preview">
+        <aside className="editor-preview" id="profile-preview" tabIndex={-1}>
           <h2>Pré-visualização ao vivo</h2>
           <ProfileShowcase
             profile={profile}
-            settings={{ ...initial, ...values }}
+            settings={{ ...initial, ...values, visuals }}
             preview
           />
         </aside>

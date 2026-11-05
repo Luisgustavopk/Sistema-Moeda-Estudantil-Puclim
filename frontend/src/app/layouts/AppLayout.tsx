@@ -28,6 +28,7 @@ import { errorMessage } from '@/shared/lib/errors'
 import { AchievementFeed } from '@/features/gamificacao/Inbox'
 import { ConfirmationFeedback } from '@/shared/components/ui/ConfirmationFeedback'
 import { ResponsiveSidebar } from '@/shared/components/ui/ResponsiveSidebar'
+import { SidebarProfileAvatar } from '@/features/gamificacao/components/SidebarProfileAvatar'
 
 export function AppLayout() {
   const { user, logout } = useAuth()
@@ -225,7 +226,15 @@ export function AppLayout() {
               className="sidebar-profile"
               aria-label="Abrir minha conta"
             >
-              <Avatar name={user.name} />
+              {user.role === 'ALUNO' ? (
+                <SidebarProfileAvatar
+                  key={user.id}
+                  id={user.id}
+                  name={user.name}
+                />
+              ) : (
+                <Avatar name={user.name} />
+              )}
               <div className="sidebar-user-info">
                 <strong>{user.name.split(' ').slice(0, 2).join(' ')}</strong>
                 <small>{roleLabel}</small>

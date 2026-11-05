@@ -226,6 +226,21 @@
   justify-items: center;
   gap: 8px;
 }
+.account-avatar {
+  display: grid;
+  width: 96px;
+  height: 96px;
+  border-radius: 50%;
+  overflow: hidden;
+}
+.account-avatar > .avatar,
+.account-avatar > .profile-initials {
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  border-radius: inherit;
+  object-fit: cover;
+}
 .account-identity h2 {
   margin-top: 8px;
   overflow-wrap: anywhere;
@@ -478,10 +493,17 @@
     grid-template-columns: 54px minmax(0, 1fr);
     gap: 4px 14px;
   }
-  .account-identity .avatar {
+  .account-identity .account-avatar {
     grid-row: 1 / 3;
     width: 54px;
     height: 54px;
+  }
+  .account-avatar > .profile-initials {
+    font-size: 1.25rem;
+  }
+  .account-avatar .themed-avatar > svg {
+    width: 28px;
+    height: 28px;
   }
   .account-identity h2 {
     margin: 0;
