@@ -22,6 +22,13 @@ export const customizationSchema = z.object({
 })
 export type ProfileCustomization = z.infer<typeof customizationSchema> & {
   visuals?: ProfileVisuals
+  uploadPolicy?: {
+    gifRequiredLevel: number
+    gifUnlocked: boolean
+    maxBytes: number
+    gifMaxDimension: number
+    gifMaxFrames: number
+  } | null
 }
 export interface CustomizationAdapter {
   canPersist: boolean
@@ -80,7 +87,11 @@ export const customizationAdapter: CustomizationAdapter = {
       if (avatar.startsWith('data:image/')) {
         const image = await fetch(avatar).then((response) => response.blob())
         const body = new FormData()
-        body.append('file', image, 'avatar.png')
+        body.append(
+          'file',
+          image,
+          image.type === 'image/gif' ? 'avatar.gif' : 'avatar.png',
+        )
         const uploaded = await http<{ url: string }>(
           '/gamificacao/perfil/avatar',
           { method: 'POST', body },

@@ -10,6 +10,7 @@ import org.springframework.context.annotation.Bean;
 @ConfigurationProperties(prefix = "puclim.gamification")
 public class GamificationPolicy {
     private List<Long> levels = new ArrayList<>(List.of(0L, 100L, 300L, 700L, 1500L));
+    private int animatedAvatarLevel = 5;
     private int quizSize = 5, perfectPercent = 10, donationPercent = 5, streakPercent = 5, bonusCap = 25;
     private long weeklyReward = 20, maxAllocation = 1000000;
     private List<Long> prizes = new ArrayList<>(List.of(100L, 60L, 40L));
@@ -18,6 +19,7 @@ public class GamificationPolicy {
     public void validate() {
         if (levels == null || levels.isEmpty() || levels.get(0) != 0L) throw new IllegalStateException("Níveis devem começar em zero.");
         for (int i = 1; i < levels.size(); i++) if (levels.get(i) <= levels.get(i-1)) throw new IllegalStateException("Limites dos níveis devem ser crescentes.");
+        if (animatedAvatarLevel < 1 || animatedAvatarLevel > levels.size()) throw new IllegalStateException("O nível para avatar GIF deve existir na progressão.");
         if (quizSize < 1 || quizSize > 30 || weeklyReward < 1 || maxAllocation < 1 || maxAllocation > 1000000000L || bonusCap < 0 || bonusCap > 25 || perfectPercent < 0 || donationPercent < 0 || streakPercent < 0 || perfectPercent > 100 || donationPercent > 100 || streakPercent > 100 || prizes == null || prizes.size() != 3 || prizes.stream().anyMatch(p -> p < 0 || p > maxAllocation)) throw new IllegalStateException("Política de gamificação inválida.");
     }
 
@@ -29,6 +31,9 @@ public class GamificationPolicy {
     public List<Long> getLevels() {
         return levels;
     }
+
+    public int getAnimatedAvatarLevel() { return animatedAvatarLevel; }
+    public void setAnimatedAvatarLevel(int value) { animatedAvatarLevel = value; }
 
     public void setLevels(List<Long> v) {
         levels = v;

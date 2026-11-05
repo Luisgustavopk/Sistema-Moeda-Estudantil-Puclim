@@ -9,6 +9,7 @@ import type { Profile, Badge } from '../types'
 import { BadgeMedal } from './BadgeMedal'
 import { ProfileIdentity } from './ProfileIdentity'
 import { ProfileFrame, ProfileCover } from './ProfileDecorations'
+import { isAnimatedAvatar } from '../avatar-media'
 export { ProfileIdentity } from './ProfileIdentity'
 
 export function ProfileShowcase({
@@ -22,6 +23,7 @@ export function ProfileShowcase({
 }) {
   const [selected, setSelected] = useState<Badge | null>(null)
   const [motionPaused, setMotionPaused] = useState(false)
+  const animatedAvatar = isAnimatedAvatar(settings.avatar)
   const [reducedMotion, setReducedMotion] = useState(
     () => window.matchMedia('(prefers-reduced-motion: reduce)').matches,
   )
@@ -86,6 +88,7 @@ export function ProfileShowcase({
             name={settings.displayName}
             avatar={settings.avatar}
             visual={settings.visuals?.avatar}
+            animate={!motionPaused && !reducedMotion}
           />
         </ProfileFrame>
         <div className="public-identity">
@@ -98,8 +101,9 @@ export function ProfileShowcase({
             {profile.course} · {profile.institution}
           </p>
           {settings.bio && <p className="profile-bio">{settings.bio}</p>}
-          {settings.visuals?.frame?.motion &&
-            settings.visuals.frame.motion !== 'NONE' &&
+          {(animatedAvatar ||
+            (settings.visuals?.frame?.motion &&
+              settings.visuals.frame.motion !== 'NONE')) &&
             (reducedMotion ? (
               <p className="small muted">
                 Efeito estático: movimento reduzido ativado.
@@ -116,9 +120,13 @@ export function ProfileShowcase({
                 ) : (
                   <Pause size={14} aria-hidden="true" />
                 )}
-                {motionPaused
-                  ? 'Ativar efeito da moldura'
-                  : 'Pausar efeito da moldura'}
+                {animatedAvatar
+                  ? motionPaused
+                    ? 'Ativar animações do perfil'
+                    : 'Pausar animações do perfil'
+                  : motionPaused
+                    ? 'Ativar efeito da moldura'
+                    : 'Pausar efeito da moldura'}
               </button>
             ))}
         </div>

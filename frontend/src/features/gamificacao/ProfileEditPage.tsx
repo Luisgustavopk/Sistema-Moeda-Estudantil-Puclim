@@ -162,18 +162,56 @@ function ProfileEditor({
       shouldValidate: true,
     })
   const dirty = form.formState.isDirty
+  const uploadPolicy = initial.uploadPolicy
+  const gifUnlocked = uploadPolicy?.gifUnlocked === true
+  const uploadHelp = uploadPolicy
+    ? gifUnlocked
+      ? `GIF animado liberado no nível ${uploadPolicy.gifRequiredLevel}. Envie até 2 MB, de 64 a ${uploadPolicy.gifMaxDimension} pixels por lado e até ${uploadPolicy.gifMaxFrames} quadros. A animação é preservada, sem recorte.`
+      : `GIF animado desbloqueia no nível ${uploadPolicy.gifRequiredLevel}. Seu nível atual é ${profile.level}.`
+    : 'GIFs animados podem ser desbloqueados por nível no ambiente integrado.'
   const selectedIds = values.featuredBadgeIds || []
   async function loadImage(file?: File) {
     setUploadError('')
     if (!file) return
-    if (
-      !['image/jpeg', 'image/png', 'image/webp'].includes(file.type) ||
-      file.size > 2 * 1024 * 1024
-    ) {
-      setUploadError('Escolha PNG, JPEG ou WebP de até 2 MB.')
-      return
-    }
     try {
+      const gif = file.type === 'image/gif'
+      if (gif && !gifUnlocked)
+        throw new Error(
+          uploadPolicy
+            ? `Alcance o nível ${uploadPolicy.gifRequiredLevel} para usar um GIF animado como avatar.`
+            : 'O envio de GIF está disponível no ambiente integrado, após desbloquear o nível exigido.',
+        )
+      if (
+        ![
+          'image/jpeg',
+          'image/png',
+          'image/webp',
+          ...(gifUnlocked ? ['image/gif'] : []),
+        ].includes(file.type) ||
+        file.size > (uploadPolicy?.maxBytes ?? 2 * 1024 * 1024)
+      )
+        throw new Error(
+          gifUnlocked
+            ? 'Escolha PNG, JPEG, WebP ou GIF de até 2 MB.'
+            : 'Escolha PNG, JPEG ou WebP de até 2 MB.',
+        )
+      if (gif) {
+        const header = new Uint8Array(await file.slice(0, 10).arrayBuffer())
+        const signature = String.fromCharCode(...header.slice(0, 6))
+        if (header.length < 10 || !['GIF87a', 'GIF89a'].includes(signature))
+          throw new Error('Escolha um arquivo GIF válido.')
+        const width = header[6] | (header[7] << 8)
+        const height = header[8] | (header[9] << 8)
+        if (
+          width < 64 ||
+          height < 64 ||
+          width > uploadPolicy!.gifMaxDimension ||
+          height > uploadPolicy!.gifMaxDimension
+        )
+          throw new Error(
+            `Use um GIF entre 64 e ${uploadPolicy!.gifMaxDimension} pixels por lado.`,
+          )
+      }
       const bitmap = await createImageBitmap(file)
       if (
         bitmap.width < 64 ||
@@ -194,6 +232,18 @@ function ProfileEditor({
       const img = new Image()
       img.src = data
       await img.decode()
+      if (gif) {
+        if (
+          img.naturalWidth > uploadPolicy!.gifMaxDimension ||
+          img.naturalHeight > uploadPolicy!.gifMaxDimension
+        )
+          throw new Error(
+            `Use um GIF entre 64 e ${uploadPolicy!.gifMaxDimension} pixels por lado.`,
+          )
+        set('avatar', data)
+        setImage(null)
+        return
+      }
       setCrop({ x: 50, y: 50, zoom: 1 })
       setImage(img)
     } catch (error) {
@@ -202,8 +252,9 @@ function ProfileEditor({
           ? error.message
           : 'Não foi possível abrir a imagem. Escolha outro arquivo.',
       )
+    } finally {
+      if (fileInput.current) fileInput.current.value = ''
     }
-    if (fileInput.current) fileInput.current.value = ''
   }
   function applyCrop() {
     if (!image) return
@@ -321,14 +372,19 @@ function ProfileEditor({
               />
               <Field
                 id="avatar-upload"
-                label="Enviar avatar (PNG, JPEG ou WebP, até 2 MB)"
+                label={
+                  gifUnlocked
+                    ? 'Enviar avatar (PNG, JPEG, WebP ou GIF, até 2 MB)'
+                    : 'Enviar avatar (PNG, JPEG ou WebP, até 2 MB)'
+                }
                 error={uploadError}
+                hint={uploadHelp}
               >
                 <input
                   ref={fileInput}
                   id="avatar-upload"
                   type="file"
-                  accept="image/png,image/jpeg,image/webp"
+                  accept={`image/png,image/jpeg,image/webp${gifUnlocked ? ',image/gif' : ''}`}
                   onChange={(event) => void loadImage(event.target.files?.[0])}
                 />
               </Field>

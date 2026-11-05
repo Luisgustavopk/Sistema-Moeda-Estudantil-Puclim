@@ -1,13 +1,8 @@
 package br.pucminas.puclim.service;
 
-import java.awt.RenderingHints;
-import java.awt.image.BufferedImage;
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.time.Instant;
 import java.util.*;
-import javax.imageio.ImageIO;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -41,15 +36,36 @@ public class ProfileCustomizationService {
     }
     public record Appearance(String displayName, String bio, boolean showRealName, String avatar,
         String frame, String banner, List<String> featuredBadgeIds, String favoriteBadgeId,
-        String visibility, boolean showStats, boolean showActivity, ProfileRewardCatalog.Visuals visuals) {}
+        String visibility, boolean showStats, boolean showActivity, ProfileRewardCatalog.Visuals visuals, UploadPolicy uploadPolicy) {}
+    public record UploadPolicy(int gifRequiredLevel, boolean gifUnlocked, int maxBytes, int gifMaxDimension, int gifMaxFrames) {}
     public Appearance view(ProfileCustomization p) {
+        return view(p, null);
+    }
+    private Appearance view(ProfileCustomization p, UploadPolicy uploadPolicy) {
         return new Appearance(p.displayName, p.bio, p.showRealName, p.avatar, p.frame, p.banner,
             p.featuredBadgeIds.isBlank() ? List.of() : List.of(p.featuredBadgeIds.split(",")),
-            p.favoriteBadgeId, p.visibility, p.showStats, p.showActivity, catalog.visuals(p.avatar, p.frame, p.banner));
+            p.favoriteBadgeId, p.visibility, p.showStats, p.showActivity, catalog.visuals(p.avatar, p.frame, p.banner), uploadPolicy);
     }
     public Appearance own() {
         var owner = identity.require("ALUNO");
-        return view(settings(owner.id, owner.name));
+        return view(settings(owner.id, owner.name), uploadPolicy(level(owner.id)));
+    }
+    private int level(String studentId) {
+        var progress = db.optional(StudentProgress.class, studentId);
+        return Math.max(progress == null ? 1 : progress.level, policy.level(db.totalEligibleReceived(studentId)));
+    }
+    private UploadPolicy uploadPolicy(int level) {
+        return new UploadPolicy(policy.getAnimatedAvatarLevel(), level >= policy.getAnimatedAvatarLevel(),
+            ProfileAvatarImages.MAX_BYTES, ProfileAvatarImages.GIF_MAX_DIMENSION, ProfileAvatarImages.GIF_MAX_FRAMES);
+    }
+    private void requireGifLevel(int level) {
+        if (level < policy.getAnimatedAvatarLevel()) throw ApiException.bad("Alcance o nível " + policy.getAnimatedAvatarLevel() + " para usar um GIF animado como avatar.");
+    }
+    private String avatarUrl(ProfileAvatar asset) {
+        return AVATARS + asset.id + (asset.contentType.equals("image/gif") ? ".gif" : "");
+    }
+    private ProfileAvatar findAvatar(String id) {
+        return db.get(ProfileAvatar.class, id.endsWith(".gif") ? id.substring(0, id.length() - 4) : id);
     }
     public List<ProfileRewardCatalog.Unlock> unlocks(Profile profile) {
         var awards = new HashSet<String>();
@@ -78,16 +94,16 @@ public class ProfileCustomizationService {
             || !unlocked.containsAll(input.featuredBadgeIds())
             || input.favoriteBadgeId() != null && !unlocked.contains(input.favoriteBadgeId()))
             throw ApiException.bad("Escolha conquistas próprias e desbloqueadas, sem repetições.");
-        var progress = db.optional(StudentProgress.class, owner.id);
-        long received = db.totalEligibleReceived(owner.id);
-        int level = Math.max(progress == null ? 1 : progress.level, policy.level(received));
+        int level = level(owner.id);
         var selections = new EnumMap<Kind, String>(Kind.class);
         selections.put(Kind.FRAME, input.frame());
         selections.put(Kind.BANNER, input.banner());
         String avatar = input.avatar();
         if (avatar.startsWith(AVATARS)) {
-            var asset = db.get(ProfileAvatar.class, avatar.substring(AVATARS.length()));
+            var asset = findAvatar(avatar.substring(AVATARS.length()));
             if (!asset.studentId.equals(owner.id)) throw ApiException.forbidden();
+            if (asset.contentType.equals("image/gif")) requireGifLevel(level);
+            avatar = avatarUrl(asset);
         } else selections.put(Kind.AVATAR, avatar);
         catalog.requireAll(selections, level, unlocked);
         boolean fresh = db.optional(ProfileCustomization.class, owner.id) == null;
@@ -99,7 +115,7 @@ public class ProfileCustomizationService {
         p.featuredBadgeIds = String.join(",", input.featuredBadgeIds()); p.favoriteBadgeId = input.favoriteBadgeId();
         p.visibility = input.visibility(); p.showStats = input.showStats(); p.showActivity = input.showActivity();
         if (fresh) db.save(p);
-        return view(p);
+        return view(p, uploadPolicy(level));
     }
     public ProfileCustomization assertCanView(String id) {
         var viewer = identity.current();
@@ -146,39 +162,23 @@ public class ProfileCustomizationService {
     public record AvatarAsset(String assetId, String url, int width, int height) {}
     public AvatarAsset upload(MultipartFile file) throws IOException {
         var owner = identity.require("ALUNO");
-        if (file.isEmpty() || file.getSize() > 2 * 1024 * 1024) throw ApiException.bad("Envie uma imagem de até 2 MB.");
-        BufferedImage image;
-        try (var input = ImageIO.createImageInputStream(new ByteArrayInputStream(file.getBytes()))) {
-            var readers = ImageIO.getImageReaders(input);
-            if (!readers.hasNext()) throw ApiException.bad("Envie uma imagem PNG ou JPEG válida.");
-            var reader = readers.next();
-            try {
-                reader.setInput(input);
-                if (!Set.of("png", "jpeg", "jpg").contains(reader.getFormatName().toLowerCase(Locale.ROOT)))
-                    throw ApiException.bad("Envie o recorte em PNG ou JPEG.");
-                int w = reader.getWidth(0), h = reader.getHeight(0);
-                if (w < 64 || h < 64 || w > 8192 || h > 8192 || (long) w * h > 20_000_000)
-                    throw ApiException.bad("Dimensões da imagem inválidas.");
-                image = reader.read(0);
-            } finally { reader.dispose(); }
-        }
-        if (image == null) throw ApiException.bad("Imagem inválida.");
-        var normalized = new BufferedImage(256, 256, BufferedImage.TYPE_INT_ARGB);
-        var graphics = normalized.createGraphics();
-        try {
-            graphics.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BICUBIC);
-            int side = Math.min(image.getWidth(), image.getHeight());
-            int x = (image.getWidth() - side) / 2, y = (image.getHeight() - side) / 2;
-            graphics.drawImage(image, 0, 0, 256, 256, x, y, x + side, y + side, null);
-        } finally { graphics.dispose(); }
-        var bytes = new ByteArrayOutputStream(); ImageIO.write(normalized, "png", bytes);
-        var asset = new ProfileAvatar(); asset.studentId = owner.id; asset.content = bytes.toByteArray(); db.save(asset);
-        return new AvatarAsset(asset.id, AVATARS + asset.id, 256, 256);
+        if (file.isEmpty() || file.getSize() > ProfileAvatarImages.MAX_BYTES) throw ApiException.bad("Envie uma imagem de até 2 MB.");
+        byte[] bytes = file.getBytes();
+        boolean gif = ProfileAvatarImages.isGif(bytes);
+        if (gif) requireGifLevel(level(owner.id));
+        var image = ProfileAvatarImages.decode(bytes);
+        if (!gif && image.contentType().equals("image/gif")) requireGifLevel(level(owner.id));
+        var asset = new ProfileAvatar();
+        asset.studentId = owner.id; asset.content = image.content(); asset.contentType = image.contentType(); asset.staticContent = image.staticContent();
+        db.save(asset);
+        return new AvatarAsset(asset.id, avatarUrl(asset), image.width(), image.height());
     }
-    public byte[] avatar(String id) {
-        var asset = db.get(ProfileAvatar.class, id);
+    public record StoredAvatar(byte[] content, String contentType) {}
+    public StoredAvatar avatar(String id, boolean staticImage) {
+        var asset = findAvatar(id);
         var p = assertCanView(asset.studentId);
-        if (!identity.current().id.equals(asset.studentId) && !p.avatar.equals(AVATARS + id)) throw ApiException.missing();
-        return asset.content;
+        if (!identity.current().id.equals(asset.studentId) && !p.avatar.equals(avatarUrl(asset))) throw ApiException.missing();
+        if (staticImage && asset.staticContent != null) return new StoredAvatar(asset.staticContent, "image/png");
+        return new StoredAvatar(asset.content, asset.contentType);
     }
 }

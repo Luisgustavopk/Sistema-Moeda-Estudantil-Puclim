@@ -7,6 +7,17 @@ import org.junit.jupiter.api.Test;
 import br.pucminas.puclim.config.GamificationPolicy;
 
 class GamificationPolicyTest {
+    @Test void animatedAvatarDefaultsToLevelFiveAndMustBeReachable() {
+        var policy = new GamificationPolicy();
+        assertEquals(5, policy.getAnimatedAvatarLevel());
+        policy.validate();
+        policy.setAnimatedAvatarLevel(3);
+        assertDoesNotThrow(policy::validate);
+        policy.setAnimatedAvatarLevel(0);
+        assertThrows(IllegalStateException.class, policy::validate);
+        policy.setAnimatedAvatarLevel(6);
+        assertThrows(IllegalStateException.class, policy::validate);
+    }
     @Test void levelsUseLifetimeReceiptsAndRespectEveryBoundary() {
         GamificationPolicy p=new GamificationPolicy();
         long[] boundaries={0,99,100,299,300,699,700,1499,1500,100000};

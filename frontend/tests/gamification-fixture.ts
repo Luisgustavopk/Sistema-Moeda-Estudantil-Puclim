@@ -142,6 +142,13 @@ export async function mockGame(
   rewards: ProfileReward[] = basicDemoRewards(profile),
 ) {
   let appearance: ProfileCustomization = {
+    uploadPolicy: {
+      gifRequiredLevel: 5,
+      gifUnlocked: false,
+      maxBytes: 2097152,
+      gifMaxDimension: 512,
+      gifMaxFrames: 100,
+    },
     displayName: student.name,
     bio: '',
     showRealName: false,
@@ -170,7 +177,9 @@ export async function mockGame(
         data = [{ id: 'institution', name: 'PUC Minas' }]
       else if (path === '/api/gamificacao/perfil/personalizacao') {
         if (route.request().method() === 'PUT') {
+          const uploadPolicy = appearance.uploadPolicy
           appearance = route.request().postDataJSON()
+          appearance.uploadPolicy = uploadPolicy
           appearance.visuals = {
             avatar:
               rewards.find(

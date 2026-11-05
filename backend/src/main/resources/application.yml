@@ -46,6 +46,8 @@ server:
         same-site: lax
         secure: ${SESSION_COOKIE_SECURE:false}
 puclim:
+  gamification:
+    animated-avatar-level: ${ANIMATED_AVATAR_LEVEL:5}
   images:
     directory: ${UPLOAD_DIRECTORY:./storage/images}
   semester:

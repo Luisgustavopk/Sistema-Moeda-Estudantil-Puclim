@@ -1,20 +1,26 @@
 import { Avatar } from '@/shared/components/ui/Avatar'
 import type { RewardVisual } from '../profile-rewards'
 import { rewardIcons } from './reward-icons'
+import { AnimatedAvatar } from './AnimatedAvatar'
+import { isAnimatedAvatar } from '../avatar-media'
 
 export function ProfileIdentity({
   name,
   avatar,
   visual,
+  animate,
 }: {
   name: string
   avatar: string
   visual?: RewardVisual | null
+  animate?: boolean
 }) {
   const personalUpload =
     avatar.startsWith('data:image/') ||
     avatar.startsWith('/api/gamificacao/perfil/avatar/')
   const source = personalUpload ? avatar : visual?.assetUrl
+  if (source && isAnimatedAvatar(source))
+    return <AnimatedAvatar source={source} name={name} animate={animate} />
   if (source)
     return (
       <img

@@ -32,11 +32,12 @@ public class ProfileCustomizationController {
     @ResponseStatus(HttpStatus.CREATED)
     public ProfileCustomizationService.AvatarAsset upload(@RequestParam("file") MultipartFile file) {
         try { return profiles.upload(file); }
-        catch (IOException ex) { throw ApiException.bad("Não foi possível ler a imagem. Envie um PNG ou JPEG válido."); }
+        catch (IOException ex) { throw ApiException.bad("Não foi possível ler a imagem. Envie um PNG, JPEG ou GIF válido."); }
     }
     @GetMapping("/avatar/{id}")
-    public ResponseEntity<byte[]> avatar(@PathVariable String id) {
-        return ResponseEntity.ok().contentType(MediaType.IMAGE_PNG).cacheControl(CacheControl.noStore())
-            .header("X-Content-Type-Options", "nosniff").body(profiles.avatar(id));
+    public ResponseEntity<byte[]> avatar(@PathVariable String id, @RequestParam(defaultValue = "false", name = "static") boolean staticImage) {
+        var asset = profiles.avatar(id, staticImage);
+        return ResponseEntity.ok().contentType(MediaType.parseMediaType(asset.contentType())).cacheControl(CacheControl.noStore())
+            .header("X-Content-Type-Options", "nosniff").body(asset.content());
     }
 }
