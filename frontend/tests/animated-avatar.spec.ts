@@ -112,7 +112,7 @@ test('GIF informa o nível mínimo e bloqueia o envio no nível 4', async ({
 })
 
 for (const width of [390, 820, 1440]) {
-  test(`GIF mantém animação, pausa e foto sincronizada após salvar em ${width}px`, async ({
+  test(`GIF anima sem hover na sidebar e em Minha conta após salvar em ${width}px`, async ({
     page,
   }, testInfo) => {
     const mock = await setup(page)
@@ -140,26 +140,47 @@ for (const width of [390, 820, 1440]) {
     await page
       .getByRole('button', { name: 'Salvar perfil', exact: true })
       .click()
-    await expect(page.locator('.sidebar-profile-avatar img')).toHaveAttribute(
-      'src',
-      `${gifUrl}?static=true`,
-    )
+    const sidebarPhoto = page.locator('.sidebar-profile-avatar img')
+    if (width === 390)
+      await page
+        .getByRole('button', { name: 'Abrir menu', exact: true })
+        .click()
+    await page.mouse.move(0, 0)
+    await expect(sidebarPhoto).toHaveAttribute('src', gifUrl)
+    if (width === 390) {
+      await page.keyboard.press('Escape')
+      await expect(sidebarPhoto).toHaveAttribute('src', `${gifUrl}?static=true`)
+    }
     expect(mock.uploads()).toBe(1)
     await page.goto('/perfil')
     const accountPhoto = page.locator('.account-avatar img')
-    await expect(accountPhoto).toHaveAttribute('src', `${gifUrl}?static=true`)
+    await page.mouse.move(0, 0)
+    await expect(accountPhoto).toHaveAttribute('src', gifUrl)
     if (width === 1440) {
-      await accountPhoto.hover()
-      await expect(accountPhoto).toHaveAttribute('src', gifUrl)
-      await page
-        .getByRole('heading', { name: 'Minha conta', exact: true })
-        .hover()
+      for (const photo of [accountPhoto, sidebarPhoto]) {
+        const firstFrame = await photo.screenshot()
+        await expect
+          .poll(
+            async () =>
+              Buffer.compare(await photo.screenshot(), firstFrame) !== 0,
+          )
+          .toBeTruthy()
+      }
+      await page.evaluate(() => {
+        Object.defineProperty(document, 'hidden', {
+          configurable: true,
+          value: true,
+        })
+        document.dispatchEvent(new Event('visibilitychange'))
+      })
       await expect(accountPhoto).toHaveAttribute('src', `${gifUrl}?static=true`)
-      await page.locator('.sidebar-avatar').hover()
-      await expect(page.locator('.sidebar-profile-avatar img')).toHaveAttribute(
-        'src',
-        gifUrl,
-      )
+      await expect(sidebarPhoto).toHaveAttribute('src', `${gifUrl}?static=true`)
+      await page.evaluate(() => {
+        delete (document as unknown as Record<string, unknown>).hidden
+        document.dispatchEvent(new Event('visibilitychange'))
+      })
+      await expect(accountPhoto).toHaveAttribute('src', gifUrl)
+      await expect(sidebarPhoto).toHaveAttribute('src', gifUrl)
     }
     await page
       .getByRole('link', { name: 'Ver perfil público', exact: true })
@@ -206,10 +227,16 @@ for (const width of [390, 820, 1440]) {
         exact: true,
       }),
     ).toHaveCount(0)
-    await expect(page.locator('.sidebar-profile-avatar img')).toHaveAttribute(
-      'src',
-      `${gifUrl}?static=true`,
-    )
+    if (width === 390)
+      await page
+        .getByRole('button', { name: 'Abrir menu', exact: true })
+        .click()
+    await expect(sidebarPhoto).toHaveAttribute('src', `${gifUrl}?static=true`)
+    if (width === 390) await page.keyboard.press('Escape')
+    await page.goto('/perfil')
+    await expect(accountPhoto).toHaveAttribute('src', `${gifUrl}?static=true`)
+    await page.emulateMedia({ reducedMotion: 'no-preference' })
+    await expect(accountPhoto).toHaveAttribute('src', gifUrl)
   })
 }
 

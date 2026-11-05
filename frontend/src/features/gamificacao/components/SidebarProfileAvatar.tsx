@@ -37,7 +37,7 @@ export function SidebarProfileAvatar({
           name={settings?.displayName || name}
           avatar={settings?.avatar || 'portrait'}
           visual={settings?.visuals?.avatar}
-          animate={active}
+          animate
         />
       </ProfileFrame>
     </span>

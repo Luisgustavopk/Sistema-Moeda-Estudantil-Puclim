@@ -7,7 +7,7 @@ function subscribeMotion(listener: () => void) {
   return () => media.removeEventListener('change', listener)
 }
 
-/** Full profile playback is explicit; compact identities play on pointer hover. */
+/** Explicit playback overrides the default pointer-hover behavior. */
 export function AnimatedAvatar({
   source,
   name,

@@ -97,6 +97,7 @@ export function ProfilePage() {
                   name={customization?.displayName || user.name}
                   avatar={customization?.avatar || 'portrait'}
                   visual={customization?.visuals?.avatar}
+                  animate
                 />
               ) : (
                 <Avatar name={user.name} large />
