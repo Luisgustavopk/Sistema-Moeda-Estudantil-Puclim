@@ -10,7 +10,7 @@ import zlib
 
 KINDS = ('AVATAR', 'FRAME', 'BANNER')
 PALETTES = ('PETROLEUM', 'CREAM', 'GOLD', 'BRONZE', 'SILVER', 'FOREST', 'COSMOS', 'COPPER', 'TEAL')
-ICONS = ('Award', 'BookOpen', 'Compass', 'Crown', 'Flame', 'GraduationCap', 'Heart', 'Orbit', 'Rocket', 'Sparkles', 'Sprout', 'Ticket', 'Trophy', 'Initials', 'Portrait')
+ICONS = ('Award', 'BookOpen', 'Compass', 'Crown', 'Flame', 'GraduationCap', 'Heart', 'Orbit', 'Rocket', 'Sparkles', 'Sprout', 'Ticket', 'Trophy', 'Waves', 'Initials', 'Portrait')
 ROOT = Path(__file__).resolve().parents[1]
 
 
@@ -32,7 +32,8 @@ def parser():
     p.add_argument('--shape', type=str.upper, choices=('ROUNDED', 'CIRCLE', 'SQUARE'), default='ROUNDED')
     p.add_argument('--inset', type=int, default=12, help='Avatar inset inside a frame, 0–35 percent')
     p.add_argument('--motion', type=str.upper, choices=('NONE', 'ORBIT', 'CROWN', 'SHIMMER'), default='NONE')
-    p.add_argument('--cycle-ms', type=int, default=4000)
+    p.add_argument('--banner-motion', type=str.upper, choices=('NONE', 'AURORA', 'METEORS', 'WAVES'), default='NONE')
+    p.add_argument('--cycle-ms', type=int, help='Frame: 1.200–20.000 ms; animated banner: 8.000–20.000 ms')
     p.add_argument('--order', type=int, default=1000)
     p.add_argument('--dry-run', action='store_true')
     return p
@@ -92,10 +93,13 @@ def create_reward(args, root=ROOT):
         raise ValueError('O nível deve ser positivo.')
     if args.badge and not re.fullmatch('[A-Za-z0-9_-]{1,40}', args.badge):
         raise ValueError('ID de conquista inválido.')
-    if not 0 <= args.inset <= 35 or not 1200 <= args.cycle_ms <= 20000:
+    cycle_ms = args.cycle_ms if args.cycle_ms is not None else 14000 if args.banner_motion != 'NONE' else 4000
+    if not 0 <= args.inset <= 35 or not 1200 <= cycle_ms <= 20000:
         raise ValueError('Use recuo de 0 a 35% e ciclo de 1.200 a 20.000 ms.')
     if args.kind != 'FRAME' and args.motion != 'NONE':
         raise ValueError('Efeitos de moldura só podem ser usados em FRAME.')
+    if args.banner_motion != 'NONE' and (args.kind != 'BANNER' or cycle_ms < 8000):
+        raise ValueError('Efeitos de fundo exigem BANNER e ciclo de 8.000 a 20.000 ms.')
     data = read_png(args.asset, args.kind == 'FRAME') if args.asset else None
     migrations = root / 'backend/src/main/resources/db/migration'
     if any(sql(f'{args.kind.lower()}-{args.code}') in f.read_text(encoding='utf-8') for f in migrations.glob('V*__*.sql')):
@@ -111,9 +115,9 @@ def create_reward(args, root=ROOT):
     rule = 'LEVEL' if args.level is not None else 'BADGE' if args.badge else 'ANY_BADGE' if args.any_badge else 'DEFAULT'
     values = (f'{args.kind.lower()}-{args.code}', args.code, args.kind, args.name.strip(), rule,
               args.level, args.badge, args.icon, args.palette, args.variant, args.order,
-              asset_url, args.inset, args.shape, args.motion, args.cycle_ms)
+              asset_url, args.inset, args.shape, args.motion, cycle_ms, args.banner_motion)
     statement = ('-- Generated catalog addition. Existing IDs and awards remain unchanged.\n'
-                 'INSERT INTO profile_rewards (id,code,kind,name,rule,required_level,badge_id,icon,palette,variant,sort_order,asset_path,avatar_inset,avatar_shape,motion,cycle_ms)\n VALUES ('
+                 'INSERT INTO profile_rewards (id,code,kind,name,rule,required_level,badge_id,icon,palette,variant,sort_order,asset_path,avatar_inset,avatar_shape,motion,cycle_ms,banner_motion)\n VALUES ('
                  + ','.join(map(sql, values)) + ');\n')
     result = {'migration': str(destination), 'asset': str(asset) if asset else None, 'sql': statement}
     if args.dry_run:

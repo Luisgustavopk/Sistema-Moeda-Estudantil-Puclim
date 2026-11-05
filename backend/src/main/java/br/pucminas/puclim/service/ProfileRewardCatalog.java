@@ -11,6 +11,7 @@ import org.springframework.transaction.annotation.Transactional;
 import br.pucminas.puclim.entity.ProfileReward;
 import br.pucminas.puclim.entity.ProfileReward.Kind;
 import br.pucminas.puclim.entity.ProfileReward.Motion;
+import br.pucminas.puclim.entity.ProfileReward.BannerMotion;
 import br.pucminas.puclim.entity.ProfileReward.Palette;
 import br.pucminas.puclim.entity.ProfileReward.Shape;
 import br.pucminas.puclim.entity.ProfileReward.Variant;
@@ -31,7 +32,7 @@ public class ProfileRewardCatalog {
     }
 
     public record Visual(String icon, Palette palette, Variant variant, String assetUrl, int avatarInset,
-            Shape avatarShape, Motion motion, int cycleMs) {
+            Shape avatarShape, Motion motion, int cycleMs, BannerMotion bannerMotion) {
     }
 
     public record Visuals(Visual avatar, Visual frame, Visual banner) {
@@ -61,7 +62,7 @@ public class ProfileRewardCatalog {
 
     private Visual visual(ProfileReward item) {
         return new Visual(item.icon, item.palette, item.variant, item.assetPath, item.avatarInset, item.avatarShape,
-                item.motion, item.cycleMs);
+                item.motion, item.cycleMs, item.bannerMotion);
     }
 
     public List<Unlock> unlocks(int level, Set<String> awards) {

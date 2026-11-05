@@ -12,6 +12,7 @@ import {
   Sprout,
   Ticket,
   Trophy,
+  Waves,
 } from 'lucide-react'
 // Supported visual vocabulary. New combinations come from catalog data; new
 // drawing primitives are added here once, independently of reward IDs or rules.
@@ -29,4 +30,5 @@ export const rewardIcons: Record<string, typeof Award> = {
   Sprout,
   Ticket,
   Trophy,
+  Waves,
 }

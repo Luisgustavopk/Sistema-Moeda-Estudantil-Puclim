@@ -140,11 +140,12 @@ export async function mockGame(
   page: Page,
   role = 'ALUNO',
   rewards: ProfileReward[] = basicDemoRewards(profile),
+  currentProfile: Profile = profile,
 ) {
   let appearance: ProfileCustomization = {
     uploadPolicy: {
       gifRequiredLevel: 5,
-      gifUnlocked: false,
+      gifUnlocked: currentProfile.level >= 5,
       maxBytes: 2097152,
       gifMaxDimension: 512,
       gifMaxFrames: 100,
@@ -155,7 +156,7 @@ export async function mockGame(
     avatar: 'portrait',
     frame: 'classic',
     banner: 'petroleum',
-    featuredBadgeIds: profile.badges
+    featuredBadgeIds: currentProfile.badges
       .filter((b) => b.unlockedAt)
       .map((b) => b.id),
     favoriteBadgeId: null,
@@ -197,9 +198,9 @@ export async function mockGame(
         }
         data = appearance
       } else if (path === '/api/gamificacao/perfil/desbloqueios') data = rewards
-      else if (path === '/api/gamificacao/perfil') data = profile
+      else if (path === '/api/gamificacao/perfil') data = currentProfile
       else if (path.startsWith('/api/gamificacao/perfis/'))
-        data = publicProfileFixture(profile, appearance)
+        data = publicProfileFixture(currentProfile, appearance)
       else if (path === '/api/gamificacao/contexto')
         data = {
           today: '2026-10-20',

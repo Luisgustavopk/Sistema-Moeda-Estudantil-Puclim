@@ -39,6 +39,9 @@ public class ProfileReward {
     public enum Motion {
         NONE, ORBIT, CROWN, SHIMMER
     }
+    public enum BannerMotion {
+        NONE, AURORA, METEORS, WAVES
+    }
 
     @Id
     @Column(length = 64)
@@ -81,5 +84,9 @@ public class ProfileReward {
     @JdbcTypeCode(SqlTypes.VARCHAR)
     @Column(nullable = false, length = 20)
     public Motion motion = Motion.NONE;
+    @Enumerated(EnumType.STRING)
+    @JdbcTypeCode(SqlTypes.VARCHAR)
+    @Column(nullable = false, length = 20)
+    public BannerMotion bannerMotion = BannerMotion.NONE;
     public int cycleMs = 4000;
 }

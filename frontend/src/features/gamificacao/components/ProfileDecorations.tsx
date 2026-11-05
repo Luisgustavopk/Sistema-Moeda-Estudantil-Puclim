@@ -1,14 +1,10 @@
 import { Check, Crown, LockKeyhole } from 'lucide-react'
-import {
-  useEffect,
-  useRef,
-  useState,
-  type CSSProperties,
-  type ReactNode,
-} from 'react'
+import type { CSSProperties, ReactNode } from 'react'
 import type { ProfileReward, RewardVisual } from '../profile-rewards'
 import { ProfileIdentity } from './ProfileIdentity'
 import { rewardIcons } from './reward-icons'
+import { useProfileMotion } from '../use-profile-motion'
+import { ProfileCoverEffects } from './ProfileCoverEffects'
 export function ProfileFrame({
   frame,
   children,
@@ -22,25 +18,8 @@ export function ProfileFrame({
   visual?: RewardVisual | null
   animate?: boolean
 }) {
-  const element = useRef<HTMLSpanElement>(null)
-  const [visible, setVisible] = useState(true)
   const motion = visual?.motion || 'NONE'
-  useEffect(() => {
-    if (!animate || motion === 'NONE' || !element.current) return
-    let intersecting = true
-    const update = () => setVisible(intersecting && !document.hidden)
-    const observer = new IntersectionObserver(([entry]) => {
-      intersecting = entry.isIntersecting
-      update()
-    })
-    observer.observe(element.current)
-    document.addEventListener('visibilitychange', update)
-    update()
-    return () => {
-      observer.disconnect()
-      document.removeEventListener('visibilitychange', update)
-    }
-  }, [animate, motion])
+  const { element, playing } = useProfileMotion(animate && motion !== 'NONE')
   const Icon = visual?.icon
     ? rewardIcons[visual.icon] || rewardIcons.Award
     : null
@@ -54,7 +33,7 @@ export function ProfileFrame({
       data-artwork={!!visual?.assetUrl}
       data-shape={visual?.avatarShape || 'ROUNDED'}
       data-motion={motion}
-      data-motion-playing={animate && visible}
+      data-motion-playing={playing}
       style={
         {
           '--frame-cycle': `${Math.min(20000, Math.max(1200, visual?.cycleMs ?? 4000))}ms`,
@@ -113,17 +92,29 @@ export function ProfileFrame({
 export function ProfileCover({
   banner,
   visual,
+  animate = true,
 }: {
   banner: string
   visual?: RewardVisual | null
+  animate?: boolean
 }) {
+  const motion = visual?.bannerMotion || 'NONE'
+  const { element, playing } = useProfileMotion(animate && motion !== 'NONE')
   const Icon = visual?.icon
     ? rewardIcons[visual.icon] || rewardIcons.Award
     : null
   return (
     <span
       className="profile-cover"
+      ref={element}
       data-banner={banner}
+      data-banner-motion={motion}
+      data-motion-playing={playing}
+      style={
+        {
+          '--cover-cycle': `${Math.min(20000, Math.max(8000, visual?.cycleMs ?? 14000))}ms`,
+        } as CSSProperties
+      }
       data-palette={
         visual?.palette ||
         (banner === 'cream'
@@ -137,7 +128,8 @@ export function ProfileCover({
       {visual?.assetUrl && (
         <img className="cover-artwork" src={visual.assetUrl} alt="" />
       )}
-      {!visual?.assetUrl && Icon && (
+      {motion !== 'NONE' && <ProfileCoverEffects motion={motion} />}
+      {motion === 'NONE' && !visual?.assetUrl && Icon && (
         <>
           <Icon />
           <Icon />
@@ -195,7 +187,11 @@ export function RewardOptions({
                 aria-hidden="true"
               >
                 {kind === 'BANNER' ? (
-                  <ProfileCover banner={reward.id} visual={reward.visual} />
+                  <ProfileCover
+                    banner={reward.id}
+                    visual={reward.visual}
+                    animate={false}
+                  />
                 ) : kind === 'FRAME' ? (
                   <ProfileFrame
                     frame={reward.id}
@@ -230,6 +226,19 @@ export function RewardOptions({
                     }
                   </span>
                 )}
+                {reward.visual.bannerMotion &&
+                  reward.visual.bannerMotion !== 'NONE' && (
+                    <span className="reward-effect-label">
+                      Fundo animado ·{' '}
+                      {
+                        {
+                          AURORA: 'Aurora',
+                          METEORS: 'Meteoros',
+                          WAVES: 'Ondas',
+                        }[reward.visual.bannerMotion]
+                      }
+                    </span>
+                  )}
                 <span className="reward-status">
                   {selected ? (
                     <Check size={14} aria-hidden="true" />

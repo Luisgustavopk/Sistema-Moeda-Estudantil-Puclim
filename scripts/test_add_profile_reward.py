@@ -21,6 +21,18 @@ def png(alpha=True):
 
 
 class AuthoringTest(unittest.TestCase):
+    def test_animated_banner_is_data_driven_and_uses_a_slow_cycle(self):
+        with tempfile.TemporaryDirectory() as folder:
+            args = module.parser().parse_args(['--kind', 'BANNER', '--code', 'mar', '--name', 'Mar', '--icon', 'Waves', '--level', '3', '--banner-motion', 'WAVES'])
+            result = module.create_reward(args, Path(folder))
+            self.assertIn('banner_motion', result['sql'])
+            self.assertIn("14000,'WAVES'", result['sql'])
+            args.code = 'outro'; args.cycle_ms = 2000
+            with self.assertRaises(ValueError):
+                module.create_reward(args, Path(folder))
+            args.cycle_ms = 14000; args.kind = 'FRAME'
+            with self.assertRaises(ValueError):
+                module.create_reward(args, Path(folder))
     def test_artwork_and_migration_are_created_together_without_overwriting(self):
         with tempfile.TemporaryDirectory() as folder:
             root = Path(folder)

@@ -24,6 +24,13 @@ export function ProfileShowcase({
   const [selected, setSelected] = useState<Badge | null>(null)
   const [motionPaused, setMotionPaused] = useState(false)
   const animatedAvatar = isAnimatedAvatar(settings.avatar)
+  const animatedBanner =
+    !!settings.visuals?.banner?.bannerMotion &&
+    settings.visuals.banner.bannerMotion !== 'NONE'
+  const animatedFrame =
+    !!settings.visuals?.frame?.motion &&
+    settings.visuals.frame.motion !== 'NONE'
+  const multipleMotion = animatedAvatar || (animatedBanner && animatedFrame)
   const [reducedMotion, setReducedMotion] = useState(
     () => window.matchMedia('(prefers-reduced-motion: reduce)').matches,
   )
@@ -77,6 +84,7 @@ export function ProfileShowcase({
         <ProfileCover
           banner={settings.banner}
           visual={settings.visuals?.banner}
+          animate={!motionPaused && !reducedMotion}
         />
         <ProfileFrame
           frame={settings.frame}
@@ -101,9 +109,7 @@ export function ProfileShowcase({
             {profile.course} · {profile.institution}
           </p>
           {settings.bio && <p className="profile-bio">{settings.bio}</p>}
-          {(animatedAvatar ||
-            (settings.visuals?.frame?.motion &&
-              settings.visuals.frame.motion !== 'NONE')) &&
+          {(animatedAvatar || animatedBanner || animatedFrame) &&
             (reducedMotion ? (
               <p className="small muted">
                 Efeito estático: movimento reduzido ativado.
@@ -120,13 +126,17 @@ export function ProfileShowcase({
                 ) : (
                   <Pause size={14} aria-hidden="true" />
                 )}
-                {animatedAvatar
+                {multipleMotion
                   ? motionPaused
                     ? 'Ativar animações do perfil'
                     : 'Pausar animações do perfil'
-                  : motionPaused
-                    ? 'Ativar efeito da moldura'
-                    : 'Pausar efeito da moldura'}
+                  : animatedBanner
+                    ? motionPaused
+                      ? 'Ativar animação do fundo'
+                      : 'Pausar animação do fundo'
+                    : motionPaused
+                      ? 'Ativar efeito da moldura'
+                      : 'Pausar efeito da moldura'}
               </button>
             ))}
         </div>

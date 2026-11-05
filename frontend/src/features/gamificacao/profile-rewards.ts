@@ -17,6 +17,7 @@ export interface RewardVisual {
   avatarInset?: number
   avatarShape?: 'ROUNDED' | 'CIRCLE' | 'SQUARE'
   motion?: 'NONE' | 'ORBIT' | 'CROWN' | 'SHIMMER'
+  bannerMotion?: 'NONE' | 'AURORA' | 'METEORS' | 'WAVES'
   cycleMs?: number
 }
 export interface ProfileVisuals {
