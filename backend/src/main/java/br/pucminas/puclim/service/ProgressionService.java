@@ -78,9 +78,7 @@ public class ProgressionService {
     }
 
     public long total(String id) {
-        return db.first(Long.class,
-                "select coalesce(sum(e.amount),0) from LedgerEntry e where e.account.id=:id and e.amount>0 and e.kind in ('RECEBIMENTO','MISSAO','BONUS','RECOMPENSA','PREMIO')",
-                "id", id).orElse(0L);
+        return db.totalEligibleReceived(id);
     }
 
     public void notify(Account account, String type, String title, String message, String ref) {
@@ -163,7 +161,7 @@ public class ProgressionService {
                             "select a from BadgeAward a where a.student.id=:s and a.badge.id=:b", "s", id, "b", b.id);
                     return new Badge(b.id, b.name, b.description, b.criterion, b.rarity, b.icon, b.target,
                             Math.min(b.target, badgeProgress(p, b.criterion, total)),
-                            award.map(a -> a.date).orElse(null));
+                            award.map(a -> a.date).orElse(null), b.family, b.tier);
                 }).toList();
         List<Rank> coins = rankRows(student.institution.id, semester(), "MOEDAS");
         List<Rank> streak = rankRows(student.institution.id, semester(), "STREAK");
@@ -213,15 +211,17 @@ public class ProgressionService {
                 "f", start, "t", start.plusMonths(6))
                 .forEach(row -> streaks.put((String) row[0], ((Number) row[1]).intValue()));
         List<Rank> result = new ArrayList<>();
+        var avatarVisuals = appearances.avatarVisuals();
         for (Student s : db.list(Student.class,
                 "select s from Student s join fetch s.account where s.institution.id=:i and s.account.active=true", "i",
                 institution)) {
             Object[] row = totals.get(s.id);
             long received = row == null ? 0 : ((Number) row[1]).longValue();
             var appearance = appearances.settings(s.id, s.account.name);
+            String avatar = appearances.rankingAvatar(appearance, s);
             result.add(new Rank(0, s.id, appearance.displayName, s.course, s.institution.account.name, received,
                     streaks.getOrDefault(s.id, 0), policy.level(total(s.id)), row == null ? null : (Instant) row[2],
-                    appearances.rankingAvatar(appearance, s)));
+                    avatar, avatarVisuals.get(avatar)));
         }
         Comparator<Rank> comparator = type.equals("STREAK") ? Comparator.comparingInt((Rank rank) -> rank.streak()).reversed()
                 : Comparator.comparingLong((Rank rank) -> rank.received()).reversed()
@@ -232,7 +232,7 @@ public class ProgressionService {
         int pos = 1;
         for (Rank r : result)
             positioned.add(new Rank(pos++, r.studentId(), r.name(), r.course(), r.institution(), r.received(),
-                    r.streak(), r.level(), r.firstCoin(), r.avatar()));
+                    r.streak(), r.level(), r.firstCoin(), r.avatar(), r.avatarVisual()));
         return positioned;
     }
 

@@ -9,11 +9,12 @@ public final class GamificationResponses {
     }
 
     public record Badge(String id, String name, String description, String criterion, String rarity, String icon,
-            long target, long progress, Instant unlockedAt) {
+            long target, long progress, Instant unlockedAt, String family, String tier) {
     }
 
     public record Rank(int position, String studentId, String name, String course, String institution, long received,
-            int streak, int level, Instant firstCoin, String avatar) {
+            int streak, int level, Instant firstCoin, String avatar,
+            br.pucminas.puclim.service.ProfileRewardCatalog.Visual avatarVisual) {
     }
 
     public record Ranking(List<Rank> content, int page, int size, int total, Rank own, String semester, String type) {

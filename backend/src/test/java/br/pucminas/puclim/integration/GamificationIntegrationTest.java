@@ -127,7 +127,7 @@ class GamificationIntegrationTest extends AbstractDatabaseTest {
             for (String key : List.of("cpf", "rg", "address", "email", "login", "passwordHash", "balance"))
                 assertFalse(profile.has(key), key);
         }
-        assertEquals(1, jdbc.queryForObject("SELECT COUNT(*) FROM badge_awards WHERE student_id=?", Long.class,
+        assertEquals(2, jdbc.queryForObject("SELECT COUNT(*) FROM badge_awards WHERE student_id=?", Long.class,
                 f.student().id()));
         assertEquals(1, jdbc.queryForObject("SELECT COUNT(*) FROM level_history WHERE student_id=?", Long.class,
                 f.student().id()));
@@ -501,5 +501,48 @@ class GamificationIntegrationTest extends AbstractDatabaseTest {
                 Long.class, f.student().id()));
         assertEquals(0,
                 f.institution().client().ok("GET", "/gamificacao/fundo/" + closed, null).path("balance").asLong());
+    }
+
+    @Test
+    void streakMilestonesUseTheBestRecordAndKeepCosmeticsAfterAnInterruption() throws Exception {
+        var f = data.academic(); questions(f.teacher());
+        for (int day = 0; day < 14; day++) {
+            complete(f.student());
+            clock.value = clock.value.plus(Duration.ofDays(1));
+        }
+        clock.value = clock.value.plus(Duration.ofDays(1));
+        var profile = f.student().client().ok("GET", "/gamificacao/perfil", null);
+        assertEquals(0, profile.path("streak").asInt());
+        assertEquals(14, profile.path("bestStreak").asInt());
+        var tiers = new HashMap<String,Boolean>();
+        for (var badge : profile.path("badges")) tiers.put(badge.path("id").asString(), !badge.path("unlockedAt").isNull());
+        assertTrue(tiers.get("STREAK_7")); assertTrue(tiers.get("STREAK_SILVER")); assertFalse(tiers.get("STREAK_GOLD"));
+        for (var reward : f.student().client().ok("GET", "/gamificacao/perfil/desbloqueios", null))
+            if (reward.path("id").asString().equals("scholar")) assertTrue(reward.path("unlocked").asBoolean());
+        assertEquals(1, jdbc.queryForObject("select count(*) from badge_awards where student_id=? and badge_id='STREAK_SILVER'", Integer.class, f.student().id()));
+    }
+
+    @Test
+    void topThreeGoldCountsThreeDistinctSemesterClosures() throws Exception {
+        var f = data.academic();
+        for (int i = 0; i < 3; i++) {
+            String closed = semester();
+            f.institution().client().ok("POST", "/gamificacao/fundo/" + closed + "/dotacao",
+                Map.of("amount", 100, "origin", "Premiação de teste"));
+            data.transfer(f, 10, "Reconhecimento do semestre " + closed);
+            // Place this fixture receipt inside the simulated semester. Ledger timestamps
+            // use the real clock in FinancialService, independently of the quiz clock.
+            jdbc.update("update ledger_entries set date=? where account_id=? and kind='RECEBIMENTO' and reason=?",
+                java.sql.Timestamp.from(clock.instant().plus(Duration.ofHours(12))), f.student().id(), "Reconhecimento do semestre " + closed);
+            clock.value = GamificationPolicy.start(closed).plusMonths(6).atStartOfDay(clock.getZone()).toInstant();
+            for (int replay = 0; replay < 2; replay++)
+                f.institution().client().expect("POST", "/gamificacao/fundo/" + closed + "/encerrar", null, 204);
+        }
+        var profile = f.student().client().ok("GET", "/gamificacao/perfil", null);
+        for (var badge : profile.path("badges")) if (badge.path("family").asString().equals("TOP3"))
+            assertFalse(badge.path("unlockedAt").isNull(), badge.path("id").asString());
+        assertEquals(3, jdbc.queryForObject("select count(*) from semester_winners where student_id=?", Integer.class, f.student().id()));
+        for (var reward : f.student().client().ok("GET", "/gamificacao/perfil/desbloqueios", null))
+            if (reward.path("id").asString().equals("laurels")) assertTrue(reward.path("unlocked").asBoolean());
     }
 }

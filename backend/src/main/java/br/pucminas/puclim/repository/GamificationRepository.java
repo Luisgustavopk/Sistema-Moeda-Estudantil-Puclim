@@ -29,4 +29,9 @@ public class GamificationRepository {
     public <T> Optional<T> first(Class<T> type, String jpql, Object... args) {
         return list(type, jpql, args).stream().findFirst();
     }
+    public long totalEligibleReceived(String studentId) {
+        return first(Long.class,
+            "select coalesce(sum(e.amount),0) from LedgerEntry e where e.account.id=:id and e.amount>0 and e.kind in ('RECEBIMENTO','MISSAO','BONUS','RECOMPENSA','PREMIO')",
+            "id", studentId).orElse(0L);
+    }
 }

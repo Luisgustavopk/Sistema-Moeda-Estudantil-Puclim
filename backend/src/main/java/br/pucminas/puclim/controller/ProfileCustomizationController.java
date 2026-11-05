@@ -7,15 +7,23 @@ import org.springframework.web.multipart.MultipartFile;
 import jakarta.validation.Valid;
 import br.pucminas.puclim.dto.request.ProfileAppearanceRequest;
 import br.pucminas.puclim.service.ProfileCustomizationService;
+import br.pucminas.puclim.service.ProfileRewardCatalog;
+import br.pucminas.puclim.service.ProgressionService;
+import java.util.List;
 import br.pucminas.puclim.exception.ApiException;
 
 @RestController
 @RequestMapping("/api/gamificacao/perfil")
 public class ProfileCustomizationController {
     private final ProfileCustomizationService profiles;
-    public ProfileCustomizationController(ProfileCustomizationService profiles) { this.profiles = profiles; }
+    private final ProgressionService progression;
+    public ProfileCustomizationController(ProfileCustomizationService profiles, ProgressionService progression) {
+        this.profiles = profiles; this.progression = progression;
+    }
     @GetMapping("/personalizacao")
     public ProfileCustomizationService.Appearance own() { return profiles.own(); }
+    @GetMapping("/desbloqueios")
+    public List<ProfileRewardCatalog.Unlock> unlocks() { return profiles.unlocks(progression.profile(null)); }
     @PutMapping("/personalizacao")
     public ProfileCustomizationService.Appearance save(@Valid @RequestBody ProfileAppearanceRequest input) {
         return profiles.save(input);

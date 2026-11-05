@@ -21,5 +21,9 @@ public class BadgeDefinition {
     public String rarity;
     @Column(nullable = false, length = 40)
     public String icon;
+    @Column(length = 40)
+    public String family;
+    @Column(length = 10)
+    public String tier;
     public long target;
 }
