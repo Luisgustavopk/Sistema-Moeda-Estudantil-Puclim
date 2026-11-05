@@ -3,11 +3,13 @@ import { X } from 'lucide-react'
 
 export function ResponsiveSidebar({
   open,
+  collapsed = false,
   onClose,
   returnFocus,
   children,
 }: {
   open: boolean
+  collapsed?: boolean
   onClose: () => void
   returnFocus: RefObject<HTMLElement | null>
   children: ReactNode
@@ -35,6 +37,7 @@ export function ResponsiveSidebar({
       <aside
         id="menu-lateral"
         className="sidebar"
+        data-collapsed={collapsed}
         aria-label="Menu principal"
         onClick={handleClick}
       >
@@ -46,6 +49,7 @@ export function ResponsiveSidebar({
       ref={dialog}
       id="menu-lateral"
       className="sidebar open"
+      data-collapsed={collapsed}
       aria-label="Menu principal"
       onKeyDown={(event) => {
         if (event.key !== 'Tab') return

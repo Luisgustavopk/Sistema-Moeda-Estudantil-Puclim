@@ -32,6 +32,8 @@ export default defineConfig({
         'landing.spec.ts',
         'gamification.spec.ts',
         'profile-rewards.spec.ts',
+        'sidebar-notifications.spec.ts',
+        'sidebar-collapse.spec.ts',
         'design-round1.spec.ts',
         'design-round2.spec.ts',
         'refinements.spec.ts',

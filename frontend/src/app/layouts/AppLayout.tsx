@@ -6,6 +6,8 @@ import {
   Home,
   LogOut,
   Menu,
+  PanelLeftClose,
+  PanelLeftOpen,
   ScanLine,
   Send,
   Sparkles,
@@ -29,9 +31,17 @@ import { AchievementFeed } from '@/features/gamificacao/Inbox'
 import { ConfirmationFeedback } from '@/shared/components/ui/ConfirmationFeedback'
 import { ResponsiveSidebar } from '@/shared/components/ui/ResponsiveSidebar'
 import { SidebarProfileAvatar } from '@/features/gamificacao/components/SidebarProfileAvatar'
+import { useInbox } from '@/features/gamificacao/use-inbox'
+import { useSidebarCollapse } from '@/shared/hooks/use-sidebar-collapse'
 
 export function AppLayout() {
   const { user, logout } = useAuth()
+  const { collapsed, toggle: toggleSidebar } = useSidebarCollapse()
+  const inbox = useInbox()
+  const unreadCount = inbox.data?.filter((notice) => !notice.readAt).length || 0
+  const notificationLabel = unreadCount
+    ? `Notificações, ${unreadCount} ${unreadCount === 1 ? 'não lida' : 'não lidas'}`
+    : 'Notificações'
   const location = useLocation()
   const toast = useToast()
   const [open, setOpen] = useState(false)
@@ -158,7 +168,7 @@ export function AppLayout() {
                       location.pathname.startsWith(`${item.path}/`),
                   )?.label || 'Meu espaço'
   return (
-    <div className="app-shell">
+    <div className="app-shell" data-sidebar-collapsed={collapsed}>
       <AchievementFeed />
       <ConfirmationFeedback />
       <a className="skip-link" href="#conteudo">
@@ -166,14 +176,40 @@ export function AppLayout() {
       </a>
       <ResponsiveSidebar
         open={open}
+        collapsed={collapsed}
         returnFocus={menuTrigger}
         onClose={() => setOpen(false)}
       >
-        <Link to={homeFor(user)} aria-label="Puclim, página inicial">
-          <Brand />
-        </Link>
+        <div className="sidebar-heading">
+          <Link
+            className="sidebar-brand-link"
+            to={homeFor(user)}
+            aria-label="Puclim, página inicial"
+          >
+            <Brand />
+          </Link>
+          <button
+            type="button"
+            className="icon-button sidebar-toggle"
+            aria-label={
+              collapsed ? 'Expandir menu lateral' : 'Recolher menu lateral'
+            }
+            title={
+              collapsed ? 'Expandir menu lateral' : 'Recolher menu lateral'
+            }
+            aria-expanded={!collapsed}
+            aria-controls="sidebar-navigation"
+            onClick={toggleSidebar}
+          >
+            {collapsed ? (
+              <PanelLeftOpen size={20} aria-hidden="true" />
+            ) : (
+              <PanelLeftClose size={20} aria-hidden="true" />
+            )}
+          </button>
+        </div>
         <div>
-          <nav aria-label="Navegação principal">
+          <nav id="sidebar-navigation" aria-label="Navegação principal">
             {items.map(({ path, label, icon: Icon }) => (
               <NavLink
                 key={path}
@@ -193,15 +229,20 @@ export function AppLayout() {
             ))}
             <NavLink
               to="/notificacoes"
-              aria-label="Notificações"
+              aria-label={notificationLabel}
               className={({ isActive }) =>
                 `nav-link nav-group-start ${isActive ? 'active' : ''}`
               }
             >
-              <Bell size={19} />
+              <Bell size={19} aria-hidden="true" />
               <span>Notificações</span>
+              {unreadCount > 0 && (
+                <span className="notification-count" aria-hidden="true">
+                  {unreadCount > 99 ? '99+' : unreadCount}
+                </span>
+              )}
               <span className="nav-tooltip" aria-hidden="true">
-                Notificações
+                {notificationLabel}
               </span>
             </NavLink>
             <NavLink

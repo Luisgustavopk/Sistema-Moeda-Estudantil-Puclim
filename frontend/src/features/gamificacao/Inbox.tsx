@@ -1,6 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
 import { Award, CheckCheck, Flag, TrendingUp } from 'lucide-react'
-import { useQuery } from '@tanstack/react-query'
 import { useAuth } from '@/features/auth/hooks/auth-context'
 import { useToast } from '@/shared/hooks/toast-context'
 import { DATA_MODE } from '@/shared/lib/http'
@@ -15,18 +14,10 @@ import {
 import { dateTime } from '@/shared/utils/format'
 import { gameApi } from './api'
 import { useGameAction } from './hooks'
+import { useInbox } from './use-inbox'
 import { Pagination } from '@/shared/components/ui/Pagination'
 import { usePagination } from '@/shared/hooks/use-pagination'
 
-function useInbox() {
-  const { user } = useAuth()
-  return useQuery({
-    queryKey: ['game', 'inbox', user?.id],
-    queryFn: gameApi.notices,
-    enabled: DATA_MODE === 'api',
-    refetchInterval: 15000,
-  })
-}
 export function AchievementFeed() {
   const { user } = useAuth()
   const query = useInbox()
