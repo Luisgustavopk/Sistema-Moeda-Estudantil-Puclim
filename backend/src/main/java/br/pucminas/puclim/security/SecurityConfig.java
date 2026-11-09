@@ -50,7 +50,8 @@ public class SecurityConfig {
                         .dispatcherTypeMatchers(jakarta.servlet.DispatcherType.ERROR).permitAll()
                         .requestMatchers(org.springframework.http.HttpMethod.GET, "/api/auth/csrf", "/api/instituicoes")
                         .permitAll()
-                        .requestMatchers(org.springframework.http.HttpMethod.POST, "/api/auth/login", "/api/alunos",
+                        .requestMatchers(org.springframework.http.HttpMethod.POST, "/api/auth/login",
+                                "/api/auth/recuperar-senha", "/api/auth/redefinir-senha", "/api/alunos",
                                 "/api/empresas")
                         .permitAll()
                         .requestMatchers("/api/auth/**", "/api/conta/**", "/api/uploads/imagens/**").authenticated()
@@ -73,12 +74,16 @@ public class SecurityConfig {
                             FilterChain chain) throws ServletException, IOException {
                         var auth = org.springframework.security.core.context.SecurityContextHolder.getContext()
                                 .getAuthentication();
+                        String path = request.getRequestURI();
+                        // Recovery must remain usable even when the browser carries an expired/revoked login.
+                        boolean publicRecovery = java.util.Set.of("/api/auth/csrf", "/api/auth/recuperar-senha",
+                                "/api/auth/redefinir-senha").contains(path);
                         if (auth != null && auth.getPrincipal() instanceof SessionPrincipal) {
                             try {
                                 var account = accounts.current();
-                                String path = request.getRequestURI();
                                 if (account.mustChangePassword && !java.util.Set.of("/api/auth/csrf",
-                                        "/api/auth/session", "/api/auth/logout", "/api/conta/senha").contains(path)) {
+                                        "/api/auth/session", "/api/auth/logout", "/api/conta/senha",
+                                        "/api/auth/recuperar-senha", "/api/auth/redefinir-senha").contains(path)) {
                                     error(response, 403, "Defina sua senha no primeiro acesso.");
                                     return;
                                 }
@@ -86,8 +91,10 @@ public class SecurityConfig {
                                 if (request.getSession(false) != null)
                                     request.getSession(false).invalidate();
                                 org.springframework.security.core.context.SecurityContextHolder.clearContext();
-                                error(response, 401, "Sessão encerrada. Entre novamente.");
-                                return;
+                                if (!publicRecovery) {
+                                    error(response, 401, "Sessão encerrada. Entre novamente.");
+                                    return;
+                                }
                             }
                         }
                         chain.doFilter(request, response);

@@ -94,6 +94,9 @@ export function LoginPage() {
                   {...form.register('password')}
                 />
               </Field>
+              <Link to="/recuperar-senha" className="login-forgot-password">
+                Esqueci minha senha
+              </Link>
               <ErrorNotice error={login.error} />
               <Button
                 className={loginStyles.submit}

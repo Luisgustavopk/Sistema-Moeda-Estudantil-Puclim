@@ -1,3 +1,4 @@
+import './features/auth/utils/password-reset-token'
 import { StrictMode } from 'react'
 import '@fontsource/bricolage-grotesque/400.css'
 import '@fontsource/bricolage-grotesque/500.css'
@@ -15,6 +16,8 @@ import './styles/workspace.css'
 import './styles/gamification-rewards.css'
 import './styles/profile-titles.css'
 import './styles/reward-unlocks.css'
+import './styles/password-recovery.css'
+import './styles/coupon-qr.css'
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>

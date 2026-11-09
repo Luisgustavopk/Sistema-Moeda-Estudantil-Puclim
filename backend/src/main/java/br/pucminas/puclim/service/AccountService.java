@@ -26,6 +26,7 @@ import br.pucminas.puclim.exception.ApiException;
 import br.pucminas.puclim.repository.AccountRepository;
 import br.pucminas.puclim.repository.AdvantageRepository;
 import br.pucminas.puclim.repository.PartnerRepository;
+import br.pucminas.puclim.repository.PasswordResetRepository;
 import br.pucminas.puclim.repository.StudentRepository;
 import br.pucminas.puclim.repository.TeacherRepository;
 import br.pucminas.puclim.security.SessionPrincipal;
@@ -41,15 +42,17 @@ public class AccountService {
   private final PartnerRepository partners;
   private final AdvantageRepository advantages;
   private final PasswordEncoder encoder;
+  private final PasswordResetRepository passwordResets;
 
   public AccountService(AccountRepository a, StudentRepository s, TeacherRepository t, PartnerRepository p,
-      AdvantageRepository v, PasswordEncoder e) {
+      AdvantageRepository v, PasswordEncoder e, PasswordResetRepository passwordResets) {
     accounts = a;
     students = s;
     teachers = t;
     partners = p;
     advantages = v;
     encoder = e;
+    this.passwordResets = passwordResets;
   }
 
   public Account current() {
@@ -185,6 +188,8 @@ public class AccountService {
       p.phone = input.phone().trim();
       p.description = input.description() == null ? "" : input.description().trim();
     }
+    if (!email.equals(a.email))
+      passwordResets.invalidateForAccount(a.id, java.time.Instant.now());
     a.name = input.name().trim();
     a.email = email;
     return view(a);
@@ -197,6 +202,7 @@ public class AccountService {
     a.passwordHash = encoder.encode(input.password());
     a.mustChangePassword = false;
     a.credentialVersion++;
+    passwordResets.invalidateForAccount(a.id, java.time.Instant.now());
     return a;
   }
 
@@ -210,6 +216,7 @@ public class AccountService {
     }
     a.active = false;
     a.credentialVersion++;
+    passwordResets.invalidateForAccount(a.id, java.time.Instant.now());
   }
 
   @Transactional(readOnly = true)

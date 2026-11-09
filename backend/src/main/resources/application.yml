@@ -46,6 +46,13 @@ server:
         same-site: lax
         secure: ${SESSION_COOKIE_SECURE:false}
 puclim:
+  public-app-url: ${PUBLIC_APP_URL:http://localhost:5173}
+  password-reset:
+    delivery-delay-ms: ${PASSWORD_RESET_DELIVERY_DELAY_MS:5000}
+    token-ttl: ${PASSWORD_RESET_TOKEN_TTL:30m}
+    email-cooldown: ${PASSWORD_RESET_EMAIL_COOLDOWN:60s}
+    ip-window: ${PASSWORD_RESET_IP_WINDOW:15m}
+    ip-limit: ${PASSWORD_RESET_IP_LIMIT:20}
   gamification:
     animated-avatar-level: ${ANIMATED_AVATAR_LEVEL:5}
   images:

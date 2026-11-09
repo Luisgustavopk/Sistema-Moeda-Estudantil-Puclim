@@ -11,6 +11,8 @@ import br.pucminas.puclim.entity.Account;
 public interface AccountRepository extends JpaRepository<Account, String> {
     Optional<Account> findByLoginOrEmail(String login, String email);
 
+    Optional<Account> findByEmail(String email);
+
     boolean existsByLogin(String login);
 
     boolean existsByEmail(String email);

@@ -15,6 +15,7 @@ import org.springframework.stereotype.Component;
 import br.pucminas.puclim.repository.TeacherRepository;
 import br.pucminas.puclim.service.FinancialService;
 import br.pucminas.puclim.service.OutboxService;
+import br.pucminas.puclim.service.PasswordResetDelivery;
 
 @Component
 @EnableScheduling
@@ -23,13 +24,15 @@ public class ScheduledJobs {
     private final TeacherRepository teachers;
     private final FinancialService finance;
     private final OutboxService outbox;
+    private final PasswordResetDelivery recovery;
     private final ZoneId zone;
 
-    public ScheduledJobs(TeacherRepository t, FinancialService f, OutboxService o,
+    public ScheduledJobs(TeacherRepository t, FinancialService f, OutboxService o, PasswordResetDelivery recovery,
             @Value("${puclim.semester.zone}") String z) {
         teachers = t;
         finance = f;
         outbox = o;
+        this.recovery = recovery;
         zone = ZoneId.of(z);
     }
 
@@ -49,7 +52,7 @@ public class ScheduledJobs {
             }
     }
 
-    @Scheduled(fixedDelayString = "${puclim.mail.retry-delay-ms:30000}")
+    @Scheduled(fixedDelayString = "${puclim.mail.retry-delay-ms:30000}", initialDelayString = "${puclim.mail.initial-delay-ms:0}")
     public void deliver() {
         for (String id : outbox.pending())
             try {
@@ -57,5 +60,20 @@ public class ScheduledJobs {
             } catch (RuntimeException e) {
                 log.warn("Notificação pendente {} ({})", id, e.getClass().getSimpleName());
             }
+    }
+
+    @Scheduled(fixedDelayString = "${puclim.password-reset.delivery-delay-ms:5000}", initialDelayString = "${puclim.password-reset.delivery-delay-ms:5000}")
+    public void deliverPasswordRecovery() {
+        for (String id : recovery.pending())
+            try {
+                recovery.deliver(id);
+            } catch (RuntimeException e) {
+                log.warn("Recuperação de senha pendente {} ({})", id, e.getClass().getSimpleName());
+            }
+    }
+
+    @Scheduled(cron = "0 30 3 * * *", zone = "${puclim.semester.zone}")
+    public void cleanPasswordRecovery() {
+        recovery.clean();
     }
 }

@@ -9,7 +9,8 @@ import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT, properties = {
-        "puclim.mail.retry-delay-ms=3600000", "spring.mail.port=1" })
+        "puclim.mail.retry-delay-ms=3600000", "puclim.mail.initial-delay-ms=3600000",
+        "puclim.password-reset.delivery-delay-ms=3600000", "spring.mail.port=1" })
 @Import(SessionTestConfiguration.class)
 public abstract class AbstractDatabaseTest {
     @Autowired
