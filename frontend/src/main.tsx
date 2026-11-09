@@ -13,6 +13,8 @@ import './styles/form-controls.css'
 import './styles/refinements.css'
 import './styles/workspace.css'
 import './styles/gamification-rewards.css'
+import './styles/profile-titles.css'
+import './styles/reward-unlocks.css'
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>

@@ -56,7 +56,7 @@ class RankingOrderTest {
         saved.studentId = "custom"; saved.displayName = "Nome escolhido"; saved.avatar = "initials";
         db.customizations.put(saved.studentId, saved);
         ProgressionService service = new ProgressionService(db, null, new GamificationPolicy(), Clock.systemUTC(), null,
-                new ProfileCustomizationService(db, null, new GamificationPolicy(), new br.pucminas.puclim.service.ProfileRewardCatalog(org.mockito.Mockito.mock(br.pucminas.puclim.repository.ProfileRewardRepository.class))));
+                new ProfileCustomizationService(db, null, new GamificationPolicy(), new br.pucminas.puclim.service.ProfileRewardCatalog(org.mockito.Mockito.mock(br.pucminas.puclim.repository.ProfileRewardRepository.class)), null), null);
         List<Rank> rows = service.rankRows("institution", "2026-2", "MOEDAS");
         assertEquals("initials", rows.get(0).avatar());
         assertEquals("Nome escolhido", rows.get(0).name());
@@ -73,7 +73,7 @@ class RankingOrderTest {
         db.add("fourteen-b", 14, 300, "2026-10-01T12:00:00Z");
         db.add("fourteen-a", 14, 400, "2026-10-01T12:00:00Z");
         ProgressionService service = new ProgressionService(db, null, new GamificationPolicy(), Clock.systemUTC(), null,
-                new ProfileCustomizationService(db, null, new GamificationPolicy(), new br.pucminas.puclim.service.ProfileRewardCatalog(org.mockito.Mockito.mock(br.pucminas.puclim.repository.ProfileRewardRepository.class))));
+                new ProfileCustomizationService(db, null, new GamificationPolicy(), new br.pucminas.puclim.service.ProfileRewardCatalog(org.mockito.Mockito.mock(br.pucminas.puclim.repository.ProfileRewardRepository.class)), null), null);
         List<Rank> rows = service.rankRows("institution", "2026-2", "STREAK");
         assertTrue(rows.stream().allMatch(row -> row.avatar().equals("portrait")),
                 "Perfis sem personalização mantêm o avatar ilustrado no ranking");

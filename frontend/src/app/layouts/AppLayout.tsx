@@ -31,6 +31,8 @@ import { AchievementFeed } from '@/features/gamificacao/Inbox'
 import { ConfirmationFeedback } from '@/shared/components/ui/ConfirmationFeedback'
 import { ResponsiveSidebar } from '@/shared/components/ui/ResponsiveSidebar'
 import { SidebarProfileAvatar } from '@/features/gamificacao/components/SidebarProfileAvatar'
+import { SidebarProfileTitle } from '@/features/gamificacao/components/ProfileTitle'
+import { RewardUnlocks } from '@/features/gamificacao/components/RewardUnlocks'
 import { useInbox } from '@/features/gamificacao/use-inbox'
 import { useSidebarCollapse } from '@/shared/hooks/use-sidebar-collapse'
 
@@ -171,6 +173,9 @@ export function AppLayout() {
     <div className="app-shell" data-sidebar-collapsed={collapsed}>
       <AchievementFeed />
       <ConfirmationFeedback />
+      {user.role === 'ALUNO' && DATA_MODE === 'api' && (
+        <RewardUnlocks key={user.id} user={user} />
+      )}
       <a className="skip-link" href="#conteudo">
         Pular para o conteúdo
       </a>
@@ -278,6 +283,7 @@ export function AppLayout() {
               )}
               <div className="sidebar-user-info">
                 <strong>{user.name.split(' ').slice(0, 2).join(' ')}</strong>
+                {user.role === 'ALUNO' && <SidebarProfileTitle user={user} />}
                 <small>{roleLabel}</small>
               </div>
             </Link>
@@ -338,7 +344,7 @@ export function AppLayout() {
             </div>
           </div>
         </header>
-        <main id="conteudo" className="content">
+        <main id="conteudo" className="content" tabIndex={-1}>
           <Outlet />
           <footer className="content-footer">
             <span>Puclim · mérito que vale moeda</span>

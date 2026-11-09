@@ -17,7 +17,7 @@ import jakarta.persistence.UniqueConstraint;
 @Table(name = "profile_rewards", uniqueConstraints = @UniqueConstraint(columnNames = { "kind", "code" }))
 public class ProfileReward {
     public enum Kind {
-        AVATAR, FRAME, BANNER
+        AVATAR, FRAME, BANNER, TITLE
     }
 
     public enum Rule {

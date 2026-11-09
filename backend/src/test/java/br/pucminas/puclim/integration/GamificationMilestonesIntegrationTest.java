@@ -32,6 +32,8 @@ class GamificationMilestonesIntegrationTest extends AbstractDatabaseTest {
             jdbc.update("insert into profile_rewards(id,code,kind,name,rule,required_level,icon,palette,variant,sort_order,asset_path,avatar_inset,avatar_shape,motion,cycle_ms) values(?,?,'FRAME','Moldura do campus','LEVEL',2,'BookOpen','TEAL','DOUBLE',999,'/images/rewards/campus.png',15,'CIRCLE','ORBIT',3600)", id, code);
             var reward = find(f.student().client().ok("GET", "/gamificacao/perfil/desbloqueios", null), code);
             assertTrue(reward.path("unlocked").asBoolean());
+            assertTrue(reward.path("newlyUnlocked").asBoolean());
+            assertFalse(reward.path("unlockedAt").isNull());
             assertEquals("BookOpen", reward.path("visual").path("icon").asString());
             var p = appearance(); p.put("frame", code);
             f.student().client().ok("PUT", "/gamificacao/perfil/personalizacao", p);
@@ -43,6 +45,8 @@ class GamificationMilestonesIntegrationTest extends AbstractDatabaseTest {
             assertEquals("ORBIT", publicProfile.path("appearance").path("visuals").path("frame").path("motion").asString());
             assertEquals(3600, publicProfile.path("appearance").path("visuals").path("frame").path("cycleMs").asInt());
         } finally {
+            jdbc.update("update profile_customizations set frame='classic' where frame=?", code);
+            jdbc.update("delete from profile_reward_unlocks where reward_id=?", id);
             jdbc.update("delete from profile_rewards where id=?", id);
         }
     }

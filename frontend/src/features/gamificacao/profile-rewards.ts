@@ -27,12 +27,14 @@ export interface ProfileVisuals {
 }
 export interface ProfileReward {
   id: string
-  kind: 'AVATAR' | 'FRAME' | 'BANNER'
+  kind: 'AVATAR' | 'FRAME' | 'BANNER' | 'TITLE'
   name: string
   requirement: string
   requiredLevel: number | null
   badgeId: string | null
   unlocked: boolean
+  unlockedAt?: string | null
+  newlyUnlocked?: boolean
   visual: RewardVisual
 }
 

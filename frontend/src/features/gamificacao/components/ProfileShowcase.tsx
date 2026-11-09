@@ -8,6 +8,7 @@ import type { ProfileCustomization } from '../profile-customization'
 import type { Profile, Badge } from '../types'
 import { BadgeMedal } from './BadgeMedal'
 import { ProfileIdentity } from './ProfileIdentity'
+import { ProfileTitle } from './ProfileTitle'
 import { ProfileFrame, ProfileCover } from './ProfileDecorations'
 import { isAnimatedAvatar } from '../avatar-media'
 export { ProfileIdentity } from './ProfileIdentity'
@@ -101,6 +102,7 @@ export function ProfileShowcase({
         </ProfileFrame>
         <div className="public-identity">
           <p className="public-display-name">{settings.displayName}</p>
+          <ProfileTitle name={settings.titleName} />
           {settings.showRealName &&
             settings.displayName !== (profile.realName ?? profile.name) && (
               <p>{profile.realName ?? profile.name}</p>

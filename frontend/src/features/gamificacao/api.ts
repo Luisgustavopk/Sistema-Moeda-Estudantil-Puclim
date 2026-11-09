@@ -27,6 +27,22 @@ export const gameApi = {
     request<import('./profile-rewards').ProfileReward[]>(
       '/perfil/desbloqueios',
     ),
+  equipReward: (input: {
+    kind: import('./profile-rewards').ProfileReward['kind']
+    id: string | null
+  }) =>
+    request<import('./profile-customization').ProfileCustomization>(
+      '/perfil/personalizacao/recompensa',
+      'PATCH',
+      input,
+    ),
+  acknowledgeReward: (
+    reward: Pick<import('./profile-rewards').ProfileReward, 'kind' | 'id'>,
+  ) =>
+    request<void>(
+      `/perfil/desbloqueios/${id(reward.kind)}/${id(reward.id)}/visualizado`,
+      'POST',
+    ),
   context: () =>
     request<{ semester: string; today: string; maxAllocation: number }>(
       '/contexto',

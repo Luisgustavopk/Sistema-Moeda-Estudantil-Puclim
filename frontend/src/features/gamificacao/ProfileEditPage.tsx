@@ -1,6 +1,7 @@
 import { Select, FormSelect } from '@/shared/components/ui/Select'
 import { useRef, useState } from 'react'
 import { Link } from 'react-router'
+import { Check, LockKeyhole } from 'lucide-react'
 import { useForm, useWatch, type FieldPathValue } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
@@ -30,6 +31,7 @@ import type { Profile } from './types'
 
 const sections = [
   'Geral',
+  'Títulos',
   'Avatar',
   'Molduras',
   'Fundo do perfil',
@@ -141,6 +143,11 @@ function ProfileEditor({
   const unlocked = profile.badges.filter((b) => b.unlockedAt)
   const selectedVisual = (kind: 'AVATAR' | 'FRAME' | 'BANNER', id: string) =>
     rewards.data?.find((r) => r.kind === kind && r.id === id)?.visual
+  const titles = rewards.data?.filter((reward) => reward.kind === 'TITLE') || []
+  const titleName = values.title
+    ? titles.find((reward) => reward.id === values.title)?.name ||
+      (values.title === initial.title ? initial.titleName : null)
+    : null
   const visuals = {
     avatar:
       selectedVisual('AVATAR', values.avatar) ||
@@ -295,15 +302,17 @@ function ProfileEditor({
           <p className="editor-section-description">
             {section === 'Geral'
               ? 'Seu nome e sua apresentação na comunidade.'
-              : section === 'Avatar'
-                ? 'Uma imagem para acompanhar suas conquistas.'
-                : section === 'Molduras'
-                  ? 'Níveis e conquistas dão novas formas ao seu avatar.'
-                  : section === 'Vitrines'
-                    ? 'Escolha os marcos que contam a sua história.'
-                    : section === 'Privacidade'
-                      ? 'Escolha quem pode ver seu perfil e suas informações.'
-                      : 'Um fundo que combina com seu perfil.'}
+              : section === 'Títulos'
+                ? 'Leve uma conquista abaixo do seu nome no perfil, no ranking e no menu lateral.'
+                : section === 'Avatar'
+                  ? 'Uma imagem para acompanhar suas conquistas.'
+                  : section === 'Molduras'
+                    ? 'Níveis e conquistas dão novas formas ao seu avatar.'
+                    : section === 'Vitrines'
+                      ? 'Escolha os marcos que contam a sua história.'
+                      : section === 'Privacidade'
+                        ? 'Escolha quem pode ver seu perfil e suas informações.'
+                        : 'Um fundo que combina com seu perfil.'}
           </p>
           {section === 'Geral' && (
             <>
@@ -388,6 +397,89 @@ function ProfileEditor({
                   onChange={(event) => void loadImage(event.target.files?.[0])}
                 />
               </Field>
+            </>
+          )}
+          {section === 'Títulos' && (
+            <>
+              <a
+                className="text-link editor-preview-link"
+                href="#profile-preview"
+              >
+                Ver prévia ao vivo
+              </a>
+              <QueryState
+                loading={rewards.isLoading}
+                error={rewards.error}
+                retry={rewards.refetch}
+              />
+              <div
+                className="reward-options profile-title-options"
+                role="group"
+                aria-label="Título: opções e requisitos"
+              >
+                <button
+                  type="button"
+                  className="reward-option profile-title-option"
+                  aria-label="Título: Sem título"
+                  aria-pressed={!values.title}
+                  aria-disabled={false}
+                  onClick={() => set('title', null)}
+                >
+                  <span className="reward-copy">
+                    <strong>Sem título</strong>
+                    <span>Exibir somente seu nome.</span>
+                    <span className="reward-status">
+                      <Check size={14} aria-hidden="true" />
+                      {!values.title ? 'Selecionado' : 'Disponível'}
+                    </span>
+                  </span>
+                </button>
+                {titles.map((reward) => (
+                  <button
+                    type="button"
+                    key={reward.id}
+                    className="reward-option profile-title-option"
+                    aria-label={`Título: ${reward.name}`}
+                    aria-pressed={values.title === reward.id}
+                    aria-disabled={!reward.unlocked}
+                    aria-describedby={`title-requirement-${reward.id}`}
+                    onClick={() => {
+                      if (reward.unlocked) set('title', reward.id)
+                    }}
+                  >
+                    <span className="reward-copy">
+                      <strong>{reward.name}</strong>
+                      {reward.newlyUnlocked && (
+                        <span className="reward-new">Novo</span>
+                      )}
+                      <span id={`title-requirement-${reward.id}`}>
+                        {reward.requirement}
+                      </span>
+                      <span className="reward-status">
+                        {reward.unlocked ? (
+                          <Check size={14} aria-hidden="true" />
+                        ) : (
+                          <LockKeyhole size={14} aria-hidden="true" />
+                        )}
+                        {values.title === reward.id
+                          ? 'Selecionado'
+                          : reward.unlocked
+                            ? 'Disponível'
+                            : 'Bloqueado'}
+                      </span>
+                    </span>
+                  </button>
+                ))}
+              </div>
+              {DATA_MODE === 'demo' && (
+                <p className="small muted">
+                  Os títulos por nível e conquista estão disponíveis no ambiente
+                  integrado.
+                </p>
+              )}
+              <Link className="text-link" to="/aluno/conquistas">
+                Ver progresso das conquistas
+              </Link>
             </>
           )}
           {section === 'Molduras' && (
@@ -593,7 +685,7 @@ function ProfileEditor({
           <h2>Pré-visualização ao vivo</h2>
           <ProfileShowcase
             profile={profile}
-            settings={{ ...initial, ...values, visuals }}
+            settings={{ ...initial, ...values, titleName, visuals }}
             preview
           />
         </aside>

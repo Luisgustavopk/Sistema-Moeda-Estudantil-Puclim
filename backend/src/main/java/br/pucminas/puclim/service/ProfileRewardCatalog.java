@@ -1,5 +1,6 @@
 package br.pucminas.puclim.service;
 
+import java.time.Instant;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -39,7 +40,8 @@ public class ProfileRewardCatalog {
     }
 
     public record Unlock(String id, Kind kind, String name, String requirement,
-            Integer requiredLevel, String badgeId, boolean unlocked, Visual visual) {
+            Integer requiredLevel, String badgeId, boolean unlocked, Visual visual, Instant unlockedAt,
+            boolean newlyUnlocked) {
     }
 
     public static boolean eligible(ProfileReward item, int level, Set<String> awards) {
@@ -68,7 +70,19 @@ public class ProfileRewardCatalog {
     public List<Unlock> unlocks(int level, Set<String> awards) {
         return repository.findAllByOrderBySortOrderAscIdAsc().stream().map(i -> new Unlock(i.code, i.kind, i.name,
                 requirement(i), i.requiredLevel, i.badge == null ? null : i.badge.id, eligible(i, level, awards),
-                visual(i))).toList();
+                visual(i), null, false)).toList();
+    }
+
+    public List<ProfileReward> items() { return repository.findAllByOrderBySortOrderAscIdAsc(); }
+
+    public String titleName(String code) {
+        if (code == null) return null;
+        return titleNames().get(code);
+    }
+
+    public Map<String, String> titleNames() {
+        return items().stream().filter(i -> i.kind == Kind.TITLE)
+            .collect(Collectors.toMap(i -> i.code, i -> i.name));
     }
 
     public void require(Kind kind, String code, int level, Set<String> awards) {

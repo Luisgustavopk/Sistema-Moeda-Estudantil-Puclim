@@ -18,7 +18,10 @@ export function SoundPreference() {
         <Volume2 size={22} aria-hidden="true" />
         <div>
           <h2>Sons da interface</h2>
-          <p>Um toque de confirmação para seus resgates e quizzes.</p>
+          <p>
+            Um toque de confirmação para resgates, quizzes e novas
+            personalizações.
+          </p>
         </div>
       </div>
       <label className="editor-check">

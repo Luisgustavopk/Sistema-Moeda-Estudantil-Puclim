@@ -23,6 +23,7 @@ export interface Rank {
   firstCoin: string | null
   avatar?: string
   avatarVisual?: import('./profile-rewards').RewardVisual | null
+  titleName?: string | null
 }
 export interface Ranking {
   content: Rank[]

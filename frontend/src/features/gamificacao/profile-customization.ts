@@ -14,6 +14,7 @@ export const customizationSchema = z.object({
   avatar: z.string().max(3000000),
   frame: z.string().min(1).max(40),
   banner: z.string().min(1).max(40),
+  title: z.string().min(1).max(40).nullable().optional(),
   featuredBadgeIds: z.array(z.string()).max(3),
   favoriteBadgeId: z.string().nullable(),
   visibility: z.enum(['all', 'institution', 'private']),
@@ -21,6 +22,7 @@ export const customizationSchema = z.object({
   showActivity: z.boolean(),
 })
 export type ProfileCustomization = z.infer<typeof customizationSchema> & {
+  titleName?: string | null
   visuals?: ProfileVisuals
   uploadPolicy?: {
     gifRequiredLevel: number
@@ -46,6 +48,7 @@ export function defaultCustomization(name: string): ProfileCustomization {
     avatar: 'portrait',
     frame: 'classic',
     banner: 'petroleum',
+    title: null,
     featuredBadgeIds: [],
     favoriteBadgeId: null,
     visibility: 'all',
@@ -58,6 +61,8 @@ function withDemoVisuals(settings: ProfileCustomization): ProfileCustomization {
   const options = basicDemoRewards({ badges: [] })
   return {
     ...settings,
+    title: null,
+    titleName: null,
     visuals: {
       avatar:
         options.find((r) => r.kind === 'AVATAR' && r.id === settings.avatar)

@@ -1,0 +1,198 @@
+/* Earned rewards arrive once and remain readable until acknowledged. */
+.reward-unlock-panel {
+  position: fixed;
+  z-index: 42;
+  inset: auto 24px 24px auto;
+  width: min(360px, calc(100vw - 32px));
+  max-height: calc(100dvh - 48px);
+  overflow-y: auto;
+  padding: 24px;
+  border: 1px solid var(--control-border);
+  border-radius: 16px;
+  background: var(--surface);
+  color: var(--ink);
+}
+.reward-unlock-panel[data-celebrating='true'] {
+  animation: reward-unlock-arrive 260ms cubic-bezier(0.23, 1, 0.32, 1);
+}
+.reward-unlock-heading {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+.reward-unlock-heading h2 {
+  margin: 0;
+  font-size: 1rem;
+  line-height: 1.4;
+}
+.reward-unlock-heading p {
+  margin: 4px 0 0;
+}
+.reward-unlock-celebration {
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: 48px;
+  height: 48px;
+  flex: 0 0 48px;
+  border-radius: 50%;
+  background: var(--gold-soft);
+  color: var(--merit-gold);
+}
+.reward-unlock-celebration > svg:last-child {
+  position: absolute;
+  inset: -4px -3px auto auto;
+}
+[data-celebrating='true'] .reward-unlock-celebration::before {
+  content: '';
+  position: absolute;
+  inset: -5px;
+  border: 2px solid currentColor;
+  border-radius: 50%;
+  animation: reward-unlock-ring 600ms cubic-bezier(0.23, 1, 0.32, 1) both;
+}
+.reward-unlock-panel h3 {
+  margin: 0 0 12px;
+  font-size: 1.25rem;
+  line-height: 1.4;
+  overflow-wrap: anywhere;
+}
+.reward-unlock-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 16px;
+}
+.reward-unlock-actions > .button:first-child {
+  flex: 1;
+}
+.reward-preview-trigger {
+  width: 100%;
+  margin-top: 12px;
+}
+.reward-unlock-thumbnail {
+  pointer-events: none;
+}
+.reward-preview-profile {
+  min-width: 0;
+  overflow: hidden;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: var(--surface);
+}
+.reward-preview-profile > .profile-cover {
+  height: 120px;
+}
+.reward-preview-identity {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  padding: 0 24px 24px;
+}
+.reward-preview-identity > .profile-framed-avatar {
+  width: 96px;
+  height: 96px;
+  flex: 0 0 96px;
+  margin-top: -24px;
+}
+.reward-preview-identity > div {
+  min-width: 0;
+  padding-top: 12px;
+}
+.reward-preview-identity strong {
+  font-size: 1.25rem;
+  line-height: 1.4;
+  overflow-wrap: anywhere;
+}
+.reward-preview-identity .profile-title {
+  margin-top: 4px;
+}
+.reward-unlock-thumbnail .profile-cover {
+  height: 56px;
+}
+.reward-unlock-thumbnail .reward-preview-identity {
+  gap: 12px;
+  padding: 0 12px 16px;
+}
+.reward-unlock-thumbnail .profile-framed-avatar {
+  width: 56px;
+  height: 56px;
+  flex-basis: 56px;
+  margin-top: -12px;
+  border-radius: 16px;
+}
+.reward-unlock-thumbnail .reward-preview-identity strong,
+.reward-unlock-thumbnail .profile-title {
+  font-size: 0.875rem;
+}
+.reward-unlock-preview {
+  display: grid;
+  gap: 16px;
+}
+.reward-unlock-preview > h3,
+.reward-unlock-preview > p {
+  margin: 0;
+}
+.reward-unlock-preview > h3 {
+  font-size: 1.375rem;
+}
+.reward-unlock-preview > .button {
+  justify-self: start;
+}
+.reward-unlock-preview .reward-unlock-actions {
+  margin-top: 0;
+}
+@keyframes reward-unlock-arrive {
+  from {
+    opacity: 0.65;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+@keyframes reward-unlock-ring {
+  from {
+    opacity: 0.7;
+    transform: scale(0.94);
+  }
+  to {
+    opacity: 0;
+    transform: scale(1.3);
+  }
+}
+@media (max-width: 767px) {
+  .reward-unlock-panel {
+    inset: auto 16px calc(88px + env(safe-area-inset-bottom)) 16px;
+    width: auto;
+    max-height: calc(100dvh - 128px - env(safe-area-inset-bottom));
+    padding: 20px;
+  }
+  .reward-preview-identity {
+    gap: 16px;
+    padding-inline: 16px;
+  }
+  .reward-preview-identity > .profile-framed-avatar {
+    width: 72px;
+    height: 72px;
+    flex-basis: 72px;
+  }
+  .reward-unlock-thumbnail .profile-framed-avatar {
+    width: 56px;
+    height: 56px;
+    flex-basis: 56px;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .reward-unlock-panel[data-celebrating],
+  .reward-unlock-celebration::before {
+    animation: none;
+  }
+}
+[data-motion-paused] .reward-unlock-panel,
+[data-motion-paused] .reward-unlock-celebration::before {
+  animation-play-state: paused;
+}

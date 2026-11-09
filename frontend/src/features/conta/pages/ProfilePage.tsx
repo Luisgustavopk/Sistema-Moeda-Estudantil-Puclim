@@ -28,6 +28,7 @@ import type { ProfileUpdate } from '@/shared/types/domain'
 import { SoundPreference } from '@/shared/components/ui/ConfirmationFeedback'
 import { UnsavedPrompt } from '@/features/gamificacao/components/UnsavedPrompt'
 import { ProfileIdentity } from '@/features/gamificacao/components/ProfileIdentity'
+import { ProfileTitle } from '@/features/gamificacao/components/ProfileTitle'
 import { useProfileCustomization } from '@/features/gamificacao/use-profile-customization'
 
 export function ProfilePage() {
@@ -104,6 +105,9 @@ export function ProfilePage() {
               )}
             </span>
             <h2>{user.name}</h2>
+            {user.role === 'ALUNO' && (
+              <ProfileTitle name={customization?.titleName} />
+            )}
             <p>{roleLabel}</p>
           </div>
           <div className="account-course">

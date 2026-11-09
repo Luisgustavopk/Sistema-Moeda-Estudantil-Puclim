@@ -23,8 +23,10 @@ public class ProfileCustomizationService {
     private final AccountService identity;
     private final GamificationPolicy policy;
     private final ProfileRewardCatalog catalog;
-    public ProfileCustomizationService(GamificationRepository db, AccountService identity, GamificationPolicy policy, ProfileRewardCatalog catalog) {
-        this.db = db; this.identity = identity; this.policy = policy; this.catalog = catalog;
+    private final ProfileRewardUnlockService rewardUnlocks;
+    public ProfileCustomizationService(GamificationRepository db, AccountService identity, GamificationPolicy policy, ProfileRewardCatalog catalog,
+            ProfileRewardUnlockService rewardUnlocks) {
+        this.db = db; this.identity = identity; this.policy = policy; this.catalog = catalog; this.rewardUnlocks = rewardUnlocks;
     }
     public ProfileCustomization settings(String id, String name) {
         var found = db.optional(ProfileCustomization.class, id);
@@ -36,7 +38,8 @@ public class ProfileCustomizationService {
     }
     public record Appearance(String displayName, String bio, boolean showRealName, String avatar,
         String frame, String banner, List<String> featuredBadgeIds, String favoriteBadgeId,
-        String visibility, boolean showStats, boolean showActivity, ProfileRewardCatalog.Visuals visuals, UploadPolicy uploadPolicy) {}
+        String visibility, boolean showStats, boolean showActivity, ProfileRewardCatalog.Visuals visuals, UploadPolicy uploadPolicy,
+        String title, String titleName) {}
     public record UploadPolicy(int gifRequiredLevel, boolean gifUnlocked, int maxBytes, int gifMaxDimension, int gifMaxFrames) {}
     public Appearance view(ProfileCustomization p) {
         return view(p, null);
@@ -44,7 +47,8 @@ public class ProfileCustomizationService {
     private Appearance view(ProfileCustomization p, UploadPolicy uploadPolicy) {
         return new Appearance(p.displayName, p.bio, p.showRealName, p.avatar, p.frame, p.banner,
             p.featuredBadgeIds.isBlank() ? List.of() : List.of(p.featuredBadgeIds.split(",")),
-            p.favoriteBadgeId, p.visibility, p.showStats, p.showActivity, catalog.visuals(p.avatar, p.frame, p.banner), uploadPolicy);
+            p.favoriteBadgeId, p.visibility, p.showStats, p.showActivity, catalog.visuals(p.avatar, p.frame, p.banner), uploadPolicy,
+            p.title, catalog.titleName(p.title));
     }
     public Appearance own() {
         var owner = identity.require("ALUNO");
@@ -67,22 +71,27 @@ public class ProfileCustomizationService {
     private ProfileAvatar findAvatar(String id) {
         return db.get(ProfileAvatar.class, id.endsWith(".gif") ? id.substring(0, id.length() - 4) : id);
     }
-    public List<ProfileRewardCatalog.Unlock> unlocks(Profile profile) {
-        var awards = new HashSet<String>();
-        profile.badges().stream().filter(b -> b.unlockedAt() != null).forEach(b -> awards.add(b.id()));
-        return catalog.unlocks(profile.level(), awards);
+    public List<ProfileRewardCatalog.Unlock> unlocks() {
+        var owner = identity.require("ALUNO");
+        var awards = db.list(BadgeAward.class, "select a from BadgeAward a join fetch a.badge where a.student.id=:s", "s", owner.id)
+            .stream().map(a -> a.badge.id).collect(java.util.stream.Collectors.toSet());
+        return rewardUnlocks.withState(owner.id, catalog.unlocks(level(owner.id), awards));
     }
     public Map<String, ProfileRewardCatalog.Visual> avatarVisuals() { return catalog.avatarVisuals(); }
-    public String rankingAvatar(ProfileCustomization p, Student student) {
-        if (p.visibility.equals("all")) return p.avatar;
+    public Map<String, String> titleNames() { return catalog.titleNames(); }
+    public boolean rankingAppearanceVisible(ProfileCustomization p, Student student) {
+        if (p.visibility.equals("all")) return true;
         var viewer = identity.current();
-        if (viewer.id.equals(student.id)) return p.avatar;
+        if (viewer.id.equals(student.id)) return true;
         if (p.visibility.equals("institution")) {
             String institution = viewer.role.equals("ALUNO") ? db.get(Student.class, viewer.id).institution.id
                 : db.get(Teacher.class, viewer.id).institution.id;
-            if (institution.equals(student.institution.id)) return p.avatar;
+            return institution.equals(student.institution.id);
         }
-        return "initials";
+        return false;
+    }
+    public String rankingAvatar(ProfileCustomization p, Student student) {
+        return rankingAppearanceVisible(p, student) ? p.avatar : "initials";
     }
     public Appearance save(ProfileAppearanceRequest input) {
         var owner = identity.require("ALUNO");
@@ -98,6 +107,7 @@ public class ProfileCustomizationService {
         var selections = new EnumMap<Kind, String>(Kind.class);
         selections.put(Kind.FRAME, input.frame());
         selections.put(Kind.BANNER, input.banner());
+        if (input.titleProvided() && input.titleValue() != null) selections.put(Kind.TITLE, input.titleValue());
         String avatar = input.avatar();
         if (avatar.startsWith(AVATARS)) {
             var asset = findAvatar(avatar.substring(AVATARS.length()));
@@ -112,8 +122,31 @@ public class ProfileCustomizationService {
         if (p.displayName.length() < 2) throw ApiException.bad("Use pelo menos 2 caracteres no nome de exibição.");
         p.showRealName = input.showRealName(); p.avatar = avatar;
         p.frame = input.frame(); p.banner = input.banner();
+        if (input.titleProvided()) p.title = input.titleValue();
         p.featuredBadgeIds = String.join(",", input.featuredBadgeIds()); p.favoriteBadgeId = input.favoriteBadgeId();
         p.visibility = input.visibility(); p.showStats = input.showStats(); p.showActivity = input.showActivity();
+        if (fresh) db.save(p);
+        return view(p, uploadPolicy(level));
+    }
+    /** Applies only one earned cosmetic, preserving text, privacy and every other selection. */
+    public Appearance equip(Kind kind, String code) {
+        var owner = identity.require("ALUNO");
+        identity.locked(owner.id);
+        if (code == null && kind != Kind.TITLE) throw ApiException.bad("Escolha uma personalização válida.");
+        int level = level(owner.id);
+        if (code != null) {
+            var awards = db.list(BadgeAward.class, "select a from BadgeAward a where a.student.id=:s", "s", owner.id)
+                .stream().map(a -> a.badge.id).collect(java.util.stream.Collectors.toSet());
+            catalog.require(kind, code, level, awards);
+        }
+        boolean fresh = db.optional(ProfileCustomization.class, owner.id) == null;
+        var p = settings(owner.id, owner.name);
+        switch (kind) {
+            case AVATAR -> p.avatar = code;
+            case FRAME -> p.frame = code;
+            case BANNER -> p.banner = code;
+            case TITLE -> p.title = code;
+        }
         if (fresh) db.save(p);
         return view(p, uploadPolicy(level));
     }
@@ -137,7 +170,7 @@ public class ProfileCustomizationService {
     public record Activity(String id, String title, Instant date, Integer level, String badgeId) {}
     public record PublicAppearance(String displayName, String bio, boolean showRealName, String avatar,
         String frame, String banner, List<String> featuredBadgeIds, String favoriteBadgeId,
-        boolean showStats, boolean showActivity, ProfileRewardCatalog.Visuals visuals) {}
+        boolean showStats, boolean showActivity, ProfileRewardCatalog.Visuals visuals, String title, String titleName) {}
     public record PublicProfile(String id, String name, String realName, String course, String institution,
         int level, int progressPercent, boolean maximumLevel, PublicAppearance appearance, Stats stats,
         List<Badge> badges, List<Activity> activity) {}
@@ -157,7 +190,7 @@ public class ProfileCustomizationService {
         return new PublicProfile(profile.id(), p.displayName, p.showRealName ? profile.name() : null,
             profile.course(), profile.institution(), profile.level(), profile.progressPercent(), profile.nextLevelAt() == null,
             new PublicAppearance(p.displayName, p.bio, p.showRealName, p.avatar, p.frame, p.banner,
-                appearance.featuredBadgeIds(), p.favoriteBadgeId, p.showStats, p.showActivity, appearance.visuals()), stats, profile.badges(), activity);
+                appearance.featuredBadgeIds(), p.favoriteBadgeId, p.showStats, p.showActivity, appearance.visuals(), p.title, appearance.titleName()), stats, profile.badges(), activity);
     }
     public record AvatarAsset(String assetId, String url, int width, int height) {}
     public AvatarAsset upload(MultipartFile file) throws IOException {

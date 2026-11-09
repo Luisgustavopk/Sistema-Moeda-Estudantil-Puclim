@@ -1,0 +1,45 @@
+/* Earned titles remain text, with the same hierarchy in every identity. */
+.profile-title {
+  display: block;
+  min-width: 0;
+  max-width: 100%;
+  color: var(--ink);
+  font-size: 0.875rem;
+  font-weight: 600;
+  line-height: 1.5;
+  overflow-wrap: anywhere;
+}
+.public-identity > .profile-title {
+  margin-block: -2px 4px;
+}
+.profile-title-option {
+  grid-template-columns: minmax(0, 1fr);
+}
+.profile-title-option[aria-disabled='true'] strong {
+  color: var(--muted);
+}
+.reward-copy .reward-new {
+  width: fit-content;
+  padding: 2px 8px;
+  border-radius: 4px;
+  background: var(--gold-soft);
+  color: var(--ink);
+  font-size: 0.75rem;
+  font-weight: 700;
+}
+.sidebar-user-info .sidebar-profile-title {
+  margin-block: 2px;
+  font-size: 0.75rem;
+  line-height: 1.4;
+}
+.rank-identity > .profile-title,
+.podium-member > .profile-title {
+  font-size: 0.8125rem;
+}
+@media (max-width: 600px) {
+  .account-identity > .profile-title {
+    grid-column: 2;
+    justify-self: start;
+    text-align: left;
+  }
+}

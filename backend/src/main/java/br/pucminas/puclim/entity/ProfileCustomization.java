@@ -12,6 +12,7 @@ public class ProfileCustomization {
     @Column(nullable = false, length = 300) public String avatar = "portrait";
     @Column(nullable = false, length = 40) public String frame = "classic";
     @Column(nullable = false, length = 40) public String banner = "petroleum";
+    @Column(length = 40) public String title;
     @Column(nullable = false, length = 500) public String featuredBadgeIds = "";
     @Column(length = 255) public String favoriteBadgeId;
     @Column(nullable = false, length = 20) public String visibility = "all";

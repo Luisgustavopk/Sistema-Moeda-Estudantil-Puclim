@@ -9,6 +9,7 @@ let context: AudioContext | undefined
 let buffers: Promise<AudioBuffer[]> | undefined
 let previous = -1
 let source: AudioBufferSourceNode | undefined
+const unlockTones = new Set<OscillatorNode>()
 let playbackGeneration = 0
 const preferenceEvent = 'puclim:sound-preference'
 export function soundEnabled() {
@@ -59,12 +60,71 @@ export function primeConfirmation() {
 }
 export function stopConfirmation() {
   playbackGeneration++
+  for (const tone of unlockTones) {
+    try {
+      tone.stop()
+    } catch {
+      /* Already ended. */
+    }
+  }
+  unlockTones.clear()
   try {
     source?.stop()
   } catch {
     /* Already ended. */
   }
   source = undefined
+}
+
+/** Prime in a user gesture; browsers that block autoplay keep visual feedback. */
+export function primeUnlockSound() {
+  if (!soundEnabled() || !window.AudioContext) return
+  try {
+    context ??= new AudioContext()
+    if (context.state === 'suspended')
+      void context.resume().catch(() => undefined)
+  } catch {
+    /* Sound is supplementary. */
+  }
+}
+
+/** A short earned-reward melody shares the interface's sound preference. */
+export function playUnlockSound(): boolean {
+  if (
+    !soundEnabled() ||
+    !context ||
+    context.state !== 'running' ||
+    document.hidden
+  )
+    return false
+  try {
+    stopConfirmation()
+    const audio = context
+    for (const [index, frequency] of [523.25, 659.25, 783.99].entries()) {
+      const tone = audio.createOscillator()
+      const gain = audio.createGain()
+      const start = audio.currentTime + index * 0.09
+      tone.type = 'sine'
+      tone.frequency.value = frequency
+      gain.gain.setValueAtTime(0, start)
+      gain.gain.linearRampToValueAtTime(0.045, start + 0.012)
+      gain.gain.exponentialRampToValueAtTime(0.001, start + 0.22)
+      tone.connect(gain)
+      gain.connect(audio.destination)
+      unlockTones.add(tone)
+      tone.onended = () => {
+        unlockTones.delete(tone)
+        tone.disconnect()
+        gain.disconnect()
+      }
+      tone.start(start)
+      tone.stop(start + 0.24)
+    }
+    return true
+  } catch {
+    stopConfirmation()
+    return false
+  }
 }
 export async function playConfirmation(): Promise<number | null> {
   if (!soundEnabled() || !context || !buffers || document.hidden) return null

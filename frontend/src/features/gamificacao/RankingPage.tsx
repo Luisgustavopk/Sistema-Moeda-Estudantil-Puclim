@@ -7,6 +7,7 @@ import { useAuth } from '@/features/auth/hooks/auth-context'
 import { PageHeading } from '@/shared/components/ui/PageHeading'
 import { QueryState, EmptyState } from '@/shared/components/ui/Feedback'
 import { ProfileIdentity } from './components/ProfileShowcase'
+import { ProfileTitle } from './components/ProfileTitle'
 import { Button } from '@/shared/components/ui/Button'
 import { number } from '@/shared/utils/format'
 import { api } from '@/shared/lib/api'
@@ -249,6 +250,7 @@ export function RankingPage() {
                       />
                     </span>
                     <strong>{row.name}</strong>
+                    <ProfileTitle name={row.titleName} />
                     <span className="small muted">Nível {row.level}</span>
                     <strong>{number(value(row))}</strong>
                     <span className="small muted">{unit}</span>
@@ -288,6 +290,7 @@ export function RankingPage() {
                       {row.name}
                       {row.studentId === user?.id ? ' · Você' : ''}
                     </strong>
+                    <ProfileTitle name={row.titleName} />
                     <span className="small muted">{row.course}</span>
                     <span className="small muted">
                       Nível {row.level}

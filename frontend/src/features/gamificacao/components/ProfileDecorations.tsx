@@ -149,7 +149,7 @@ export function RewardOptions({
   avatarVisual,
   onSelect,
 }: {
-  kind: ProfileReward['kind']
+  kind: Exclude<ProfileReward['kind'], 'TITLE'>
   rewards: ProfileReward[]
   value: string
   name: string
@@ -214,6 +214,9 @@ export function RewardOptions({
               </span>
               <span className="reward-copy">
                 <strong>{reward.name}</strong>
+                {reward.newlyUnlocked && (
+                  <span className="reward-new">Novo</span>
+                )}
                 <span id={hintId}>{reward.requirement}</span>
                 {reward.visual.motion && reward.visual.motion !== 'NONE' && (
                   <span className="reward-effect-label">

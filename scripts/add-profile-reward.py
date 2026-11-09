@@ -8,7 +8,7 @@ import re
 import struct
 import zlib
 
-KINDS = ('AVATAR', 'FRAME', 'BANNER')
+KINDS = ('AVATAR', 'FRAME', 'BANNER', 'TITLE')
 PALETTES = ('PETROLEUM', 'CREAM', 'GOLD', 'BRONZE', 'SILVER', 'FOREST', 'COSMOS', 'COPPER', 'TEAL')
 ICONS = ('Award', 'BookOpen', 'Compass', 'Crown', 'Flame', 'GraduationCap', 'Heart', 'Orbit', 'Rocket', 'Sparkles', 'Sprout', 'Ticket', 'Trophy', 'Waves', 'Initials', 'Portrait')
 ROOT = Path(__file__).resolve().parents[1]
@@ -19,7 +19,7 @@ def parser():
     p.add_argument('--kind', required=True, type=str.upper, choices=KINDS)
     p.add_argument('--code', required=True, help='Stable lowercase code, up to 40 characters')
     p.add_argument('--name', required=True)
-    artwork = p.add_mutually_exclusive_group(required=True)
+    artwork = p.add_mutually_exclusive_group()
     artwork.add_argument('--asset', type=Path, help='PNG artwork; frames require transparency')
     artwork.add_argument('--icon', choices=ICONS)
     rule = p.add_mutually_exclusive_group(required=True)
@@ -85,6 +85,10 @@ def sql(value):
 
 
 def create_reward(args, root=ROOT):
+    if args.kind != 'TITLE' and not args.asset and not args.icon:
+        raise ValueError('Escolha --asset ou --icon para a recompensa visual.')
+    if args.kind == 'TITLE' and args.asset:
+        raise ValueError('Títulos usam texto e um ícone opcional, sem imagem.')
     if not re.fullmatch('[a-z][a-z0-9_-]{0,39}', args.code):
         raise ValueError('O código deve ter até 40 letras minúsculas, números, _ ou hífen, começando com letra.')
     if not 1 <= len(args.name.strip()) <= 100:

@@ -21,6 +21,16 @@ def png(alpha=True):
 
 
 class AuthoringTest(unittest.TestCase):
+    def test_title_can_be_added_without_artwork_but_cannot_use_visual_effects(self):
+        with tempfile.TemporaryDirectory() as folder:
+            args = module.parser().parse_args(['--kind', 'TITLE', '--code', 'solidario', '--name', 'Guardião solidário', '--badge', 'DONATIONS_GOLD'])
+            result = module.create_reward(args, Path(folder))
+            self.assertIn("'TITLE','Guardião solidário','BADGE'", result['sql'])
+            self.assertIsNone(result['asset'])
+            args.code = 'outro'; args.motion = 'ORBIT'
+            with self.assertRaises(ValueError):
+                module.create_reward(args, Path(folder))
+
     def test_animated_banner_is_data_driven_and_uses_a_slow_cycle(self):
         with tempfile.TemporaryDirectory() as folder:
             args = module.parser().parse_args(['--kind', 'BANNER', '--code', 'mar', '--name', 'Mar', '--icon', 'Waves', '--level', '3', '--banner-motion', 'WAVES'])

@@ -326,9 +326,12 @@ export function AchievementsPage() {
                   {selectedRewards.map((r) => (
                     <li key={`${r.kind}-${r.id}`}>
                       {
-                        { AVATAR: 'Avatar', FRAME: 'Moldura', BANNER: 'Fundo' }[
-                          r.kind
-                        ]
+                        {
+                          AVATAR: 'Avatar',
+                          FRAME: 'Moldura',
+                          BANNER: 'Fundo',
+                          TITLE: 'Título',
+                        }[r.kind]
                       }
                       : {r.name}
                     </li>

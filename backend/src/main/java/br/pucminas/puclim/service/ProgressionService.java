@@ -43,15 +43,17 @@ public class ProgressionService {
     private final Clock clock;
     private final ApplicationEventPublisher events;
     private final ProfileCustomizationService appearances;
+    private final ProfileRewardUnlockService rewardUnlocks;
 
     public ProgressionService(GamificationRepository db, AccountService identity, GamificationPolicy policy,
-            Clock clock, ApplicationEventPublisher events, ProfileCustomizationService appearances) {
+            Clock clock, ApplicationEventPublisher events, ProfileCustomizationService appearances, ProfileRewardUnlockService rewardUnlocks) {
         this.db = db;
         this.identity = identity;
         this.policy = policy;
         this.clock = clock;
         this.events = events;
         this.appearances = appearances;
+        this.rewardUnlocks = rewardUnlocks;
     }
 
     public LocalDate today() {
@@ -120,6 +122,7 @@ public class ProgressionService {
                 events.publishEvent(new GamificationEvents.BadgeUnlocked(studentId, badge.id));
             }
         }
+        rewardUnlocks.synchronize(studentId, p.level);
     }
 
     private long badgeProgress(StudentProgress p, String criterion, long total) {
@@ -136,6 +139,13 @@ public class ProgressionService {
                         .orElse(0L);
             default -> 0L;
         };
+    }
+
+    /** Refresh eligibility without constructing public stats or institutional rankings. */
+    public void refreshOwn() {
+        var owner = identity.require("ALUNO");
+        identity.locked(owner.id);
+        recalculate(owner.id);
     }
 
     public Profile profile(String requested) {
@@ -212,6 +222,7 @@ public class ProgressionService {
                 .forEach(row -> streaks.put((String) row[0], ((Number) row[1]).intValue()));
         List<Rank> result = new ArrayList<>();
         var avatarVisuals = appearances.avatarVisuals();
+        var titleNames = appearances.titleNames();
         for (Student s : db.list(Student.class,
                 "select s from Student s join fetch s.account where s.institution.id=:i and s.account.active=true", "i",
                 institution)) {
@@ -221,7 +232,7 @@ public class ProgressionService {
             String avatar = appearances.rankingAvatar(appearance, s);
             result.add(new Rank(0, s.id, appearance.displayName, s.course, s.institution.account.name, received,
                     streaks.getOrDefault(s.id, 0), policy.level(total(s.id)), row == null ? null : (Instant) row[2],
-                    avatar, avatarVisuals.get(avatar)));
+                    avatar, avatarVisuals.get(avatar), appearances.rankingAppearanceVisible(appearance, s) ? titleNames.get(appearance.title) : null));
         }
         Comparator<Rank> comparator = type.equals("STREAK") ? Comparator.comparingInt((Rank rank) -> rank.streak()).reversed()
                 : Comparator.comparingLong((Rank rank) -> rank.received()).reversed()
@@ -232,7 +243,7 @@ public class ProgressionService {
         int pos = 1;
         for (Rank r : result)
             positioned.add(new Rank(pos++, r.studentId(), r.name(), r.course(), r.institution(), r.received(),
-                    r.streak(), r.level(), r.firstCoin(), r.avatar(), r.avatarVisual()));
+                    r.streak(), r.level(), r.firstCoin(), r.avatar(), r.avatarVisual(), r.titleName()));
         return positioned;
     }
 
