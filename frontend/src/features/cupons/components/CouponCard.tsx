@@ -1,12 +1,15 @@
-import { Check, Copy, Ticket } from 'lucide-react'
+import { Check, Copy, QrCode, Ticket } from 'lucide-react'
 import { useState } from 'react'
+import { QRCodeSVG } from 'qrcode.react'
 import type { Coupon } from '@/shared/types/domain'
 import { dateTime } from '@/shared/utils/format'
 import { Button } from '@/shared/components/ui/Button'
 import { useToast } from '@/shared/hooks/toast-context'
 import { DonateCoupon } from '@/features/gamificacao/DonateCoupon'
+import { Modal } from '@/shared/components/ui/Modal'
 export function CouponCard({ coupon }: { coupon: Coupon }) {
   const [copied, setCopied] = useState(false)
+  const [showQr, setShowQr] = useState(false)
   const toast = useToast()
   return (
     <article className="card coupon-card">
@@ -29,7 +32,7 @@ export function CouponCard({ coupon }: { coupon: Coupon }) {
       <p className="coupon-code">{coupon.code}</p>
       <p className="small muted">
         {coupon.status === 'VALIDO'
-          ? 'Apresente este código no atendimento presencial.'
+          ? 'Apresente o QR Code ou este código no atendimento presencial.'
           : coupon.status === 'DOADO'
             ? 'Doado definitivamente a uma instituição beneficiária.'
             : `Utilizado em ${dateTime(coupon.usedAt || coupon.date)}.`}
@@ -55,7 +58,48 @@ export function CouponCard({ coupon }: { coupon: Coupon }) {
           {copied ? 'Copiado' : 'Copiar'}
         </Button>
       </div>
-      {coupon.status === 'VALIDO' && <DonateCoupon code={coupon.code} />}
+      {coupon.status === 'VALIDO' && (
+        <>
+          <Button
+            className="coupon-show-qr"
+            variant="secondary"
+            onClick={() => setShowQr(true)}
+          >
+            <QrCode size={18} aria-hidden="true" /> Mostrar QR Code
+          </Button>
+          <DonateCoupon code={coupon.code} />
+        </>
+      )}
+      {showQr && coupon.status === 'VALIDO' && (
+        <Modal title="Apresentar cupom" onClose={() => setShowQr(false)}>
+          <div className="coupon-qr-presentation">
+            <h3>{coupon.advantageName}</h3>
+            <p className="muted">{coupon.companyName}</p>
+            <div className="coupon-qr-art">
+              <QRCodeSVG
+                value={coupon.code}
+                size={256}
+                level="M"
+                marginSize={4}
+                bgColor="#FFFFFF"
+                fgColor="#000000"
+                title="QR Code do cupom"
+              />
+            </div>
+            <p className="small muted">
+              O atendente pode escanear o QR Code ou digitar o código abaixo.
+            </p>
+            <p className="coupon-code">{coupon.code}</p>
+            <p className="small muted">
+              A leitura não utiliza o cupom automaticamente. A empresa confirma
+              o atendimento.
+            </p>
+          </div>
+          <div className="form-actions">
+            <Button onClick={() => setShowQr(false)}>Concluir</Button>
+          </div>
+        </Modal>
+      )}
     </article>
   )
 }

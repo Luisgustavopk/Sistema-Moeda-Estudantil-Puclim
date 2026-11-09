@@ -75,6 +75,16 @@ const LoginPage = lazy(() =>
     default: module.LoginPage,
   })),
 )
+const PasswordRecoveryPage = lazy(() =>
+  import('@/features/auth/pages/PasswordRecoveryPage').then((module) => ({
+    default: module.PasswordRecoveryPage,
+  })),
+)
+const PasswordResetPage = lazy(() =>
+  import('@/features/auth/pages/PasswordResetPage').then((module) => ({
+    default: module.PasswordResetPage,
+  })),
+)
 const LandingPage = lazy(() =>
   import('@/features/landing/pages/LandingPage').then((module) => ({
     default: module.LandingPage,
@@ -170,6 +180,8 @@ export default function App() {
   return (
     <Suspense fallback={<Loading label="Preparando seu espaço..." />}>
       <Routes>
+        <Route path="/recuperar-senha" element={<PasswordRecoveryPage />} />
+        <Route path="/redefinir-senha" element={<PasswordResetPage />} />
         <Route path="/" element={<HomeRedirect />}>
           <Route index element={<LandingPage />} />
         </Route>

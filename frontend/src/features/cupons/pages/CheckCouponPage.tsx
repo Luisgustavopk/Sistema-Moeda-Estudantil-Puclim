@@ -1,6 +1,12 @@
-import { CheckCircle2, ScanLine, Search, ShieldCheck } from 'lucide-react'
-import { useState } from 'react'
-import { useMutation, useQuery } from '@tanstack/react-query'
+import {
+  CheckCircle2,
+  ImageUp,
+  ScanLine,
+  Search,
+  ShieldCheck,
+} from 'lucide-react'
+import { useEffect, useRef, useState } from 'react'
+import { useQuery } from '@tanstack/react-query'
 import type { Coupon } from '@/shared/types/domain'
 import { useAuth } from '@/features/auth/hooks/auth-context'
 import { cuponsApi } from '../api/cupons.api'
@@ -12,17 +18,87 @@ import { ErrorNotice, QueryState } from '@/shared/components/ui/Feedback'
 import { useAction } from '@/shared/hooks/use-action'
 import { useToast } from '@/shared/hooks/toast-context'
 import { dateTime } from '@/shared/utils/format'
+import { CouponQrScanner } from '../components/CouponQrScanner'
+import { couponCodeFromImage } from '../qr'
 export function CheckCouponPage() {
   const { user } = useAuth()
   const toast = useToast()
   const [code, setCode] = useState('')
   const [result, setResult] = useState<Coupon | null>(null)
   const [confirm, setConfirm] = useState(false)
-  const check = useMutation({
-    mutationFn: cuponsApi.check,
-    onSuccess: setResult,
-  })
+  const [checking, setChecking] = useState(false)
+  const [checkError, setCheckError] = useState<unknown>(null)
+  const [scanner, setScanner] = useState(false)
+  const [readingImage, setReadingImage] = useState(false)
+  const [imageError, setImageError] = useState<unknown>(null)
+  const [scanMessage, setScanMessage] = useState('')
+  const imageInput = useRef<HTMLInputElement>(null)
+  const request = useRef(0)
+  const imageRequest = useRef(0)
+  const mounted = useRef(true)
+  const currentCode = useRef('')
   const action = useAction(cuponsApi.use)
+  useEffect(() => {
+    mounted.current = true
+    return () => {
+      mounted.current = false
+      request.current += 1
+      imageRequest.current += 1
+    }
+  }, [])
+  function replaceCode(value: string) {
+    request.current += 1
+    imageRequest.current += 1
+    currentCode.current = value.trim().toUpperCase()
+    setCode(value.toUpperCase())
+    setResult(null)
+    setConfirm(false)
+    setChecking(false)
+    setReadingImage(false)
+    setCheckError(null)
+    setImageError(null)
+    setScanMessage('')
+    action.reset()
+  }
+  async function checkCode(value: string) {
+    const normalized = value.trim().toUpperCase()
+    if (!normalized) return
+    replaceCode(normalized)
+    const version = ++request.current
+    setChecking(true)
+    try {
+      const coupon = await cuponsApi.check(normalized)
+      if (
+        mounted.current &&
+        version === request.current &&
+        currentCode.current === normalized
+      )
+        setResult(coupon)
+    } catch (error) {
+      if (mounted.current && version === request.current) setCheckError(error)
+    } finally {
+      if (mounted.current && version === request.current) setChecking(false)
+    }
+  }
+  async function readImage(file: File) {
+    replaceCode(code)
+    const version = ++imageRequest.current
+    setReadingImage(true)
+    try {
+      const decoded = await couponCodeFromImage(file)
+      if (!mounted.current || version !== imageRequest.current) return
+      void checkCode(decoded)
+      setScanMessage(
+        'QR Code lido. Confira os dados antes de confirmar a utilização.',
+      )
+    } catch (error) {
+      if (mounted.current && version === imageRequest.current)
+        setImageError(error)
+    } finally {
+      if (mounted.current && version === imageRequest.current)
+        setReadingImage(false)
+    }
+  }
   const coupons = useQuery({
     queryKey: ['coupons', user?.id],
     queryFn: cuponsApi.list,
@@ -41,15 +117,42 @@ export function CheckCouponPage() {
               <ScanLine size={35} />
             </span>
             <h2>Uma conquista pronta para usar.</h2>
-            <p>Digite o código apresentado pelo aluno.</p>
+            <p>Escaneie o QR Code ou digite o código apresentado pelo aluno.</p>
           </div>
+          <div className="coupon-reading-options">
+            <Button variant="secondary" onClick={() => setScanner(true)}>
+              <ScanLine size={18} aria-hidden="true" /> Escanear QR Code
+            </Button>
+            <Button
+              variant="ghost"
+              loading={readingImage}
+              onClick={() => imageInput.current?.click()}
+            >
+              <ImageUp size={18} aria-hidden="true" /> Ler imagem do QR
+            </Button>
+            <input
+              ref={imageInput}
+              type="file"
+              accept="image/*"
+              aria-label="Imagem do QR Code"
+              className="coupon-image-input"
+              tabIndex={-1}
+              onChange={(event) => {
+                const file = event.currentTarget.files?.[0]
+                event.currentTarget.value = ''
+                if (file) void readImage(file)
+              }}
+            />
+          </div>
+          <ErrorNotice error={imageError} />
+          <p className="small muted coupon-read-status" role="status">
+            {scanMessage}
+          </p>
           <form
             className="form-stack"
             onSubmit={(event) => {
               event.preventDefault()
-              setResult(null)
-              action.reset()
-              check.mutate(code.trim())
+              void checkCode(code)
             }}
           >
             <Field id="coupon-code" label="Código do cupom">
@@ -57,28 +160,24 @@ export function CheckCouponPage() {
                 id="coupon-code"
                 placeholder="PCL-XXXXXXXX"
                 value={code}
-                onChange={(event) => {
-                  setCode(event.target.value.toUpperCase())
-                  setResult(null)
-                  check.reset()
-                }}
+                onChange={(event) => replaceCode(event.target.value)}
                 maxLength={40}
                 required
                 autoComplete="off"
-                style={{ fontFamily: 'monospace', letterSpacing: 2 }}
+                className="coupon-code-input"
               />
             </Field>
-            <Button
-              type="submit"
-              loading={check.isPending}
-              disabled={!code.trim()}
-            >
+            <Button type="submit" loading={checking} disabled={!code.trim()}>
               <Search size={18} /> Conferir código
             </Button>
-            <ErrorNotice error={check.error} />
+            <ErrorNotice error={checkError} />
           </form>
           {result && (
             <div className="summary-box">
+              <div className="summary-line">
+                <span>Código conferido</span>
+                <strong className="coupon-checked-code">{result.code}</strong>
+              </div>
               <div className="summary-line">
                 <span>Vantagem</span>
                 <strong>{result.advantageName}</strong>
@@ -104,7 +203,14 @@ export function CheckCouponPage() {
                 </span>
               </div>
               {result.status === 'VALIDO' ? (
-                <Button onClick={() => setConfirm(true)}>
+                <Button
+                  onClick={() => {
+                    if (
+                      currentCode.current === result.code.trim().toUpperCase()
+                    )
+                      setConfirm(true)
+                  }}
+                >
                   <CheckCircle2 size={17} /> Confirmar utilização
                 </Button>
               ) : result.status === 'DOADO' ? (
@@ -155,10 +261,14 @@ export function CheckCouponPage() {
               <Button
                 variant="ghost"
                 onClick={() => {
-                  setCode(coupon.code)
-                  setResult(null)
-                  check.mutate(coupon.code)
-                  window.scrollTo({ top: 0, behavior: 'smooth' })
+                  void checkCode(coupon.code)
+                  window.scrollTo({
+                    top: 0,
+                    behavior: matchMedia('(prefers-reduced-motion: reduce)')
+                      .matches
+                      ? 'instant'
+                      : 'smooth',
+                  })
                 }}
               >
                 Conferir
@@ -167,6 +277,18 @@ export function CheckCouponPage() {
           ))}
         </section>
       </div>
+      {scanner && (
+        <CouponQrScanner
+          onClose={() => setScanner(false)}
+          onDetected={(decoded) => {
+            setScanner(false)
+            void checkCode(decoded)
+            setScanMessage(
+              'QR Code lido. Confira os dados antes de confirmar a utilização.',
+            )
+          }}
+        />
+      )}
       {confirm && result && (
         <Modal
           title="Confirmar utilização do cupom?"
@@ -194,8 +316,13 @@ export function CheckCouponPage() {
             <Button
               loading={action.isPending}
               onClick={async () => {
+                const checkedCode = result.code
+                if (currentCode.current !== checkedCode.trim().toUpperCase())
+                  return
+                const version = request.current
                 try {
-                  const updated = await action.mutateAsync(result.code)
+                  const updated = await action.mutateAsync(checkedCode)
+                  if (!mounted.current || version !== request.current) return
                   setResult(updated)
                   setConfirm(false)
                   toast('Cupom utilizado. Bom atendimento!')

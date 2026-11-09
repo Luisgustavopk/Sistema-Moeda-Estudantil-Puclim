@@ -20,13 +20,19 @@ export default defineConfig({
   projects: [
     {
       name: 'demo',
-      testMatch: ['sprint3.spec.ts', 'profile-customization.spec.ts'],
+      testMatch: [
+        'sprint3.spec.ts',
+        'profile-customization.spec.ts',
+        'password-recovery.spec.ts',
+      ],
       use: { baseURL: `http://127.0.0.1:${demoPort}` },
     },
     {
       name: 'api',
       testMatch: [
         'api.spec.ts',
+        'password-recovery.spec.ts',
+        'coupon-qr.spec.ts',
         'login-motion.spec.ts',
         'registration.spec.ts',
         'landing.spec.ts',

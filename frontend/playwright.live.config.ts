@@ -7,6 +7,7 @@ export default defineConfig({
     'live.spec.ts',
     'gamification.live.spec.ts',
     'peer-transfers.live.spec.ts',
+    'password-coupon.live.spec.ts',
   ],
   timeout: 90000,
   expect: { timeout: 15000 },
