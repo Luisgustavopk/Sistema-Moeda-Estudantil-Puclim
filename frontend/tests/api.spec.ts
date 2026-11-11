@@ -1,3 +1,4 @@
+import { historyJson } from './history-fixture'
 import { expect, test } from '@playwright/test'
 
 const student = {
@@ -47,7 +48,7 @@ test('uma resposta de sessão atrasada não restaura a conta após logout', asyn
         }
         return route.fulfill({ json: snapshot })
       }
-      return route.fulfill({ json: [] })
+      return route.fulfill({ json: historyJson(route, []) })
     },
   )
   await page.goto('/login')
@@ -93,15 +94,17 @@ test('modo API exibe erro e permite repetir a consulta sem recorrer à demonstra
         return route.fulfill({ json: student })
       }
       if (path === '/api/auth/session')
-        return route.fulfill({ json: authenticated ? student : null })
+        return route.fulfill({
+          json: historyJson(route, authenticated ? student : null),
+        })
       if (path === '/api/conta/extrato')
         return fail
           ? route.fulfill({
               status: 503,
               json: { message: 'O extrato está temporariamente indisponível.' },
             })
-          : route.fulfill({ json: [] })
-      return route.fulfill({ json: [] })
+          : route.fulfill({ json: historyJson(route, []) })
+      return route.fulfill({ json: historyJson(route, []) })
     },
   )
   await page.goto('/login')

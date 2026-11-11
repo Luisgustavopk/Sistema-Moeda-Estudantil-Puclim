@@ -6,6 +6,7 @@ import type {
 } from '@/shared/types/domain'
 import { digits } from '@/shared/utils/format'
 import { ApiError } from '../errors'
+import { couponPage, statementCsv, transactionPage } from './history'
 import {
   addNotification,
   clearDemoSession,
@@ -285,12 +286,21 @@ export const demoApi: PuclimApi = {
       }
       return result
     }),
-  transactions: () =>
+  transactions: (query) =>
     withStore((store) =>
-      (
+      transactionPage(
         store.transactions[currentAccount(store, ['ALUNO', 'PROFESSOR']).id] ||
-        []
-      ).toSorted((a, b) => b.date.localeCompare(a.date)),
+          [],
+        query,
+      ),
+    ),
+  exportTransactions: (query) =>
+    withStore((store) =>
+      statementCsv(
+        store.transactions[currentAccount(store, ['ALUNO', 'PROFESSOR']).id] ||
+          [],
+        query,
+      ),
     ),
   transfer: (studentId, amount, reason) =>
     withStore((store) => {
@@ -451,13 +461,18 @@ export const demoApi: PuclimApi = {
       )
       return coupon
     }),
-  coupons: () =>
+  coupons: (query) =>
     withStore((store) => {
       const account = currentAccount(store, ['ALUNO', 'EMPRESA'])
-      return store.coupons.filter((value) =>
-        account.role === 'ALUNO'
-          ? value.studentId === account.id
-          : value.companyId === account.id,
+      if (account.role !== 'ALUNO') company(store)
+      return couponPage(
+        store.coupons.filter((value) =>
+          account.role === 'ALUNO'
+            ? value.studentId === account.id
+            : value.companyId === account.id,
+        ),
+        query,
+        account.role === 'ALUNO',
       )
     }),
   checkCoupon: (code) =>

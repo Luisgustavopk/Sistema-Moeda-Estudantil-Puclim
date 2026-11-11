@@ -20,6 +20,9 @@ import { useToast } from '@/shared/hooks/toast-context'
 import { dateTime } from '@/shared/utils/format'
 import { CouponQrScanner } from '../components/CouponQrScanner'
 import { couponCodeFromImage } from '../qr'
+import { Pagination } from '@/shared/components/ui/Pagination'
+import { Select } from '@/shared/components/ui/Select'
+import { useDebouncedValue } from '@/shared/hooks/use-debounced-value'
 export function CheckCouponPage() {
   const { user } = useAuth()
   const toast = useToast()
@@ -33,6 +36,8 @@ export function CheckCouponPage() {
   const [imageError, setImageError] = useState<unknown>(null)
   const [scanMessage, setScanMessage] = useState('')
   const imageInput = useRef<HTMLInputElement>(null)
+  const codeInput = useRef<HTMLInputElement>(null)
+  const focusAfterUse = useRef(false)
   const request = useRef(0)
   const imageRequest = useRef(0)
   const mounted = useRef(true)
@@ -46,6 +51,12 @@ export function CheckCouponPage() {
       imageRequest.current += 1
     }
   }, [])
+  useEffect(() => {
+    if (!confirm && focusAfterUse.current) {
+      focusAfterUse.current = false
+      codeInput.current?.focus({ preventScroll: true })
+    }
+  }, [confirm])
   function replaceCode(value: string) {
     request.current += 1
     imageRequest.current += 1
@@ -99,10 +110,33 @@ export function CheckCouponPage() {
         setReadingImage(false)
     }
   }
+  const [historyPage, setHistoryPage] = useState(1)
+  const [historySearch, setHistorySearch] = useState('')
+  const [historyStatus, setHistoryStatus] = useState<Coupon['status'] | 'all'>(
+    'all',
+  )
+  const settledSearch = useDebouncedValue(historySearch)
+  const searchingHistory = settledSearch !== historySearch
+  const filters = {
+    page: historyPage - 1,
+    size: 12,
+    q: settledSearch,
+    status: historyStatus === 'all' ? undefined : historyStatus,
+  }
   const coupons = useQuery({
-    queryKey: ['coupons', user?.id],
-    queryFn: cuponsApi.list,
+    queryKey: ['coupons', user?.id, 'history', filters],
+    queryFn: () => cuponsApi.list(filters),
+    enabled: !searchingHistory,
+    placeholderData: (previous, query) =>
+      query?.queryKey[1] === user?.id ? previous : undefined,
   })
+  if (
+    coupons.data &&
+    !coupons.isPlaceholderData &&
+    historyPage > Math.max(1, coupons.data.pages)
+  ) {
+    setHistoryPage(Math.max(1, coupons.data.pages))
+  }
   return (
     <>
       <PageHeading
@@ -158,6 +192,7 @@ export function CheckCouponPage() {
             <Field id="coupon-code" label="Código do cupom">
               <input
                 id="coupon-code"
+                ref={codeInput}
                 placeholder="PCL-XXXXXXXX"
                 value={code}
                 onChange={(event) => replaceCode(event.target.value)}
@@ -240,17 +275,68 @@ export function CheckCouponPage() {
             conferidos.
           </p>
         </section>
-        <section className="card" style={{ marginTop: 25 }}>
+        <section
+          className="card"
+          style={{ marginTop: 25 }}
+          aria-busy={coupons.isFetching || searchingHistory}
+        >
           <h2 style={{ marginBottom: 18 }}>Resgates da sua empresa</h2>
+          <div className="toolbar">
+            <div className="search-field">
+              <Search size={19} aria-hidden="true" />
+              <input
+                aria-label="Buscar resgate"
+                placeholder="Código, vantagem ou aluno"
+                maxLength={200}
+                value={historySearch}
+                onChange={(event) => {
+                  setHistorySearch(event.target.value)
+                  setHistoryPage(1)
+                }}
+              />
+            </div>
+            <Select
+              aria-label="Status dos resgates"
+              value={historyStatus}
+              onValueChange={(value) => {
+                setHistoryStatus(value as Coupon['status'] | 'all')
+                setHistoryPage(1)
+              }}
+            >
+              <option value="all">Todos os status</option>
+              <option value="VALIDO">Disponíveis</option>
+              <option value="UTILIZADO">Utilizados</option>
+              <option value="DOADO">Doados</option>
+            </Select>
+            {(historySearch || historyStatus !== 'all') && (
+              <Button
+                variant="ghost"
+                onClick={() => {
+                  setHistorySearch('')
+                  setHistoryStatus('all')
+                  setHistoryPage(1)
+                }}
+              >
+                Limpar filtros
+              </Button>
+            )}
+          </div>
           <QueryState
             loading={coupons.isLoading}
             error={coupons.error}
             retry={coupons.refetch}
           />
-          {coupons.data?.length === 0 && (
-            <p className="small muted">Ainda não há cupons emitidos.</p>
+          <p className="small muted" role="status">
+            {searchingHistory || (coupons.isFetching && !coupons.isPending)
+              ? 'Atualizando resgates…'
+              : ''}
+          </p>
+          {coupons.data?.total === 0 && (
+            <p className="small muted">
+              Nenhum cupom encontrado. Experimente ajustar os filtros.
+            </p>
           )}
-          {coupons.data?.map((coupon) => (
+          {coupons.data?.items.map((coupon) => (
             <div className="row" key={coupon.id}>
               <div className="row-text">
                 <strong>{coupon.advantageName}</strong>
@@ -275,6 +361,16 @@ export function CheckCouponPage() {
               </Button>
             </div>
           ))}
+          {coupons.data && (
+            <Pagination
+              page={coupons.data.page + 1}
+              size={12}
+              total={coupons.data.total}
+              disabled={coupons.isFetching || searchingHistory}
+              onChange={setHistoryPage}
+              label="Páginas dos resgates"
+            />
+          )}
         </section>
       </div>
       {scanner && (
@@ -324,6 +420,7 @@ export function CheckCouponPage() {
                   const updated = await action.mutateAsync(checkedCode)
                   if (!mounted.current || version !== request.current) return
                   setResult(updated)
+                  focusAfterUse.current = true
                   setConfirm(false)
                   toast('Cupom utilizado. Bom atendimento!')
                 } catch {

@@ -32,7 +32,7 @@ class CouponIntegrationTest extends AbstractDatabaseTest {
                 () -> second.call("POST", path, Map.of(), UUID.randomUUID().toString()));
         assertEquals(List.of(200, 409), responses.stream().map(response -> response.statusCode()).sorted().toList());
         assertEquals(100, accounts.findById(fixture.student().id()).orElseThrow().balance);
-        assertEquals(1, fixture.student().client().ok("GET", "/cupons", null).size());
+        assertEquals(1, fixture.student().client().ok("GET", "/cupons", null).path("items").size());
     }
 
     @Test
@@ -67,7 +67,7 @@ class CouponIntegrationTest extends AbstractDatabaseTest {
                 () -> second.call("POST", "/cupons/" + code + "/utilizar", Map.of(), null).statusCode());
         assertEquals(List.of(200, 409), responses.stream().sorted().toList());
         assertEquals("UTILIZADO", company.client().ok("GET", "/cupons/" + code, null).path("status").asString());
-        assertEquals("UTILIZADO", fixture.student().client().ok("GET", "/cupons", null).get(0).path("status").asString());
+        assertEquals("UTILIZADO", fixture.student().client().ok("GET", "/cupons", null).path("items").get(0).path("status").asString());
     }
 
 }

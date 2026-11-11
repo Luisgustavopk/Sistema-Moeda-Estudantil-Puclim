@@ -194,23 +194,6 @@ public class FinancialService {
     }
 
     @Transactional(readOnly = true)
-    public List<TransactionResponse> transactions() {
-        Account a = identity.current();
-        if (a.role.equals("EMPRESA"))
-            throw ApiException.forbidden();
-        return ledger.findByAccountIdOrderByDateDesc(a.id).stream().map(DomainMapper::transaction).toList();
-    }
-
-    @Transactional(readOnly = true)
-    public List<CouponResponse> coupons() {
-        Account a = identity.current();
-        if (a.role.equals("ALUNO"))
-            return coupons.findByStudentIdOrderByDateDesc(a.id).stream().map(DomainMapper::coupon).toList();
-        Partner p = identity.requirePartner("EMPRESA");
-        return coupons.findByCompanyIdOrderByDateDesc(p.id).stream().map(DomainMapper::coupon).toList();
-    }
-
-    @Transactional(readOnly = true)
     public CouponResponse checkCoupon(String code) {
         Partner p = identity.requirePartner("EMPRESA");
         Coupon c = coupons.findByCode(code.toUpperCase(Locale.ROOT)).orElseThrow(ApiException::missing);

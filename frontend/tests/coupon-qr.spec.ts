@@ -1,3 +1,4 @@
+import { historyJson } from './history-fixture'
 import { expect, test, type Page } from '@playwright/test'
 import { createElement } from 'react'
 import { renderToStaticMarkup } from 'react-dom/server'
@@ -27,13 +28,18 @@ async function setup(page: Page, role = 'EMPRESA', items: Coupon[] = []) {
   await mockGame(page, role)
   await page.route('**/api/auth/session', (route) =>
     route.fulfill({
-      json:
+      json: historyJson(
+        route,
         role === 'EMPRESA'
           ? { ...student, id: 'company', role, partnerKind: 'EMPRESA' }
           : student,
+      ),
     }),
   )
-  await page.route('**/api/cupons', (route) => route.fulfill({ json: items }))
+  await page.route(
+    (url) => url.pathname === '/api/cupons',
+    (route) => route.fulfill({ json: historyJson(route, items) }),
+  )
   await page.route('**/api/cupons/**', (route) => {
     const path = new URL(route.request().url()).pathname
     const value = decodeURIComponent(path.split('/')[3])
@@ -135,7 +141,9 @@ for (const width of [390, 820, 1440]) {
     await expect(
       page.getByRole('button', { name: 'Mostrar QR Code' }),
     ).toHaveCount(1)
-    await expect(page.locator('.coupon-card').first()).toContainText(code)
+    await expect(
+      page.locator('.coupon-card').filter({ hasText: code }),
+    ).toContainText(code)
     await page.getByRole('button', { name: 'Mostrar QR Code' }).click()
     const modal = page.getByRole('dialog', { name: 'Apresentar cupom' })
     await expect(modal).toContainText(code)
@@ -180,11 +188,9 @@ for (const width of [390, 820, 1440]) {
         localStorage.setItem('puclim.theme', theme)
         window.dispatchEvent(new Event('puclim:theme'))
       }, theme)
-      await partner
-        .locator('.check-page')
-        .screenshot({
-          path: testInfo.outputPath(`coupon-check-${width}-${theme}.png`),
-        })
+      await partner.locator('.check-page').screenshot({
+        path: testInfo.outputPath(`coupon-check-${width}-${theme}.png`),
+      })
       expect(
         await partner.evaluate(
           () => document.documentElement.scrollWidth <= innerWidth,

@@ -396,7 +396,7 @@ test('demonstração serializa resgates concorrentes e conserva saldo e históri
       fulfilled: outcomes.filter((value) => value.status === 'fulfilled')
         .length,
       balance: account?.balance,
-      sum: transactions.reduce(
+      sum: transactions.items.reduce(
         (total: number, item: { amount: number }) => total + item.amount,
         0,
       ),

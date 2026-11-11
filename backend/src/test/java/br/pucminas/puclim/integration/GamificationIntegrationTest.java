@@ -328,7 +328,7 @@ class GamificationIntegrationTest extends AbstractDatabaseTest {
         f.student().client().expect("POST", "/gamificacao/cupons/" + code + "/doar",
                 Map.of("beneficiaryId", data.partner("BENEFICIARIA").id()), 409);
         assertEquals(1, beneficiary.client().ok("GET", "/gamificacao/doacoes", null).size());
-        assertEquals("DOADO", f.student().client().ok("GET", "/cupons", null).get(0).path("status").asString());
+        assertEquals("DOADO", f.student().client().ok("GET", "/cupons", null).path("items").get(0).path("status").asString());
         assertTrue(data.partner("BENEFICIARIA").client().ok("GET", "/gamificacao/doacoes", null).isEmpty());
     }
 

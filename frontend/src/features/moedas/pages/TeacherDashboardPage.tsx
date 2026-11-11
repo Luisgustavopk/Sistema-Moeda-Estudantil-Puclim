@@ -12,13 +12,12 @@ import { number } from '@/shared/utils/format'
 export function TeacherDashboardPage() {
   const { user } = useAuth()
   const transactions = useQuery({
-    queryKey: ['transactions', user?.id],
-    queryFn: moedasApi.transactions,
+    queryKey: ['transactions', user?.id, 'dashboard'],
+    queryFn: () => moedasApi.transactions({ kind: 'ENVIO', size: 5 }),
   })
-  const sent =
-    transactions.data?.filter((value) => value.kind === 'ENVIO') || []
-  const total = sent.reduce((sum, value) => sum - value.amount, 0)
-  const recipients = new Set(sent.map((value) => value.counterpart)).size
+  const sent = transactions.data?.items || []
+  const total = transactions.data?.summary.outgoing
+  const recipients = transactions.data?.summary.recognizedStudents
   return (
     <>
       <PageHeading
@@ -69,9 +68,7 @@ export function TeacherDashboardPage() {
             error={transactions.error}
             retry={transactions.refetch}
           />
-          {transactions.data && (
-            <TransactionList transactions={sent.slice(0, 5)} compact />
-          )}
+          {transactions.data && <TransactionList transactions={sent} compact />}
         </section>
         <div className="dashboard-column">
           <section className="card welcome-card">
@@ -95,7 +92,7 @@ export function TeacherDashboardPage() {
             </p>
             <p className="muted" style={{ marginTop: 12 }}>
               {transactions.data
-                ? `${sent.length} reconhecimentos registrados no seu extrato.`
+                ? `${transactions.data.total} reconhecimentos registrados no seu extrato.`
                 : 'A quantidade de reconhecimentos depende da consulta ao extrato.'}
             </p>
           </section>

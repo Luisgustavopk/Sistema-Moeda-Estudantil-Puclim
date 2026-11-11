@@ -1,10 +1,16 @@
 import type { PuclimApi } from '@/shared/types/domain'
-import { http } from './http'
+import { http, httpBlob } from './http'
 import { ApiError } from './errors'
 const body = (data: unknown, method = 'POST') => ({
   method,
   body: JSON.stringify(data),
 })
+const historyQuery = (values: object = {}) => {
+  const params = new URLSearchParams()
+  for (const [name, value] of Object.entries(values))
+    if (value !== undefined && value !== '') params.set(name, String(value))
+  return params.toString()
+}
 export const remoteApi: PuclimApi = {
   session: async () => {
     try {
@@ -27,7 +33,10 @@ export const remoteApi: PuclimApi = {
   teachers: () => http('/instituicao/professores'),
   importTeachers: (rows) =>
     http('/instituicao/professores/importar', body({ rows })),
-  transactions: () => http('/conta/extrato'),
+  transactions: (query = {}) =>
+    http(`/conta/extrato?${historyQuery({ page: 0, size: 12, ...query })}`),
+  exportTransactions: ({ page: _page, size: _size, ...filters } = {}) =>
+    httpBlob(`/conta/extrato/exportar?${historyQuery(filters)}`),
   transfer: (studentId, amount, reason, requestKey = crypto.randomUUID()) =>
     http('/transferencias', {
       ...body({ studentId, amount, reason }),
@@ -55,7 +64,8 @@ export const remoteApi: PuclimApi = {
       ...body({}),
       headers: { 'Idempotency-Key': requestKey },
     }),
-  coupons: () => http('/cupons'),
+  coupons: (query = {}) =>
+    http(`/cupons?${historyQuery({ page: 0, size: 12, ...query })}`),
   checkCoupon: (code) => http(`/cupons/${encodeURIComponent(code)}`),
   useCoupon: (code) =>
     http(`/cupons/${encodeURIComponent(code)}/utilizar`, body({})),

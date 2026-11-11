@@ -9,6 +9,7 @@ import br.pucminas.puclim.dto.response.InstitutionResponse;
 import br.pucminas.puclim.dto.response.NotificationResponse;
 import br.pucminas.puclim.dto.response.StudentSummaryResponse;
 import br.pucminas.puclim.dto.response.TransactionResponse;
+import br.pucminas.puclim.dto.response.HistoryPageResponse;
 
 import java.util.List;
 
@@ -18,12 +19,13 @@ import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
 import br.pucminas.puclim.service.AccountService;
 import br.pucminas.puclim.service.AuthService;
-import br.pucminas.puclim.service.FinancialService;
+import br.pucminas.puclim.service.HistoryService;
 import br.pucminas.puclim.service.OutboxService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -34,13 +36,13 @@ import jakarta.validation.Valid;
 public class AccountController {
     private final AccountService accounts;
     private final AuthService auth;
-    private final FinancialService finance;
+    private final HistoryService history;
     private final OutboxService outbox;
 
-    public AccountController(AccountService a, AuthService b, FinancialService f, OutboxService n) {
+    public AccountController(AccountService a, AuthService b, HistoryService h, OutboxService n) {
         accounts = a;
         auth = b;
-        finance = f;
+        history = h;
         outbox = n;
     }
 
@@ -89,8 +91,23 @@ public class AccountController {
     }
 
     @GetMapping("/conta/extrato")
-    List<TransactionResponse> transactions() {
-        return finance.transactions();
+    HistoryPageResponse<TransactionResponse, HistoryService.StatementSummary> transactions(
+            @RequestParam(defaultValue = "0") int page, @RequestParam(defaultValue = "12") int size,
+            @RequestParam(defaultValue = "") String q, @RequestParam(defaultValue = "") String kind,
+            @RequestParam(defaultValue = "") String from, @RequestParam(defaultValue = "") String to,
+            @RequestParam(defaultValue = "") String zone) {
+        return history.transactions(page, size, q, kind, from, to, zone);
+    }
+
+    @GetMapping("/conta/extrato/exportar")
+    void exportTransactions(@RequestParam(defaultValue = "") String q, @RequestParam(defaultValue = "") String kind,
+            @RequestParam(defaultValue = "") String from, @RequestParam(defaultValue = "") String to,
+            @RequestParam(defaultValue = "") String zone, HttpServletResponse response) throws java.io.IOException {
+        var filter = history.statementFilter(q, kind, from, to, zone);
+        response.setContentType("text/csv;charset=UTF-8");
+        response.setHeader("Content-Disposition", "attachment; filename=\"extrato-puclim.csv\"");
+        response.setHeader("Cache-Control", "no-store");
+        history.exportStatement(filter, response.getWriter());
     }
 
     @GetMapping("/conta/notificacoes")

@@ -335,12 +335,18 @@ class Demo:
             account = client.call("GET", "/auth/session")
             if account["role"] != "EMPRESA":
                 entries = client.call("GET", "/conta/extrato")
-                if sum(row["amount"] for row in entries) != account["balance"]:
+                if entries["summary"]["incoming"] - entries["summary"]["outgoing"] != account["balance"]:
                     raise RuntimeError(f"{login}: saldo não conciliado com o extrato.")
             self.summary["accounts"].append({key: account.get(key) for key in
                                             ["id", "name", "login", "role", "partnerKind", "balance"]})
             if account["role"] == "ALUNO":
-                self.summary["coupons"].extend(client.call("GET", "/cupons"))
+                page = 0
+                while True:
+                    coupons = client.call("GET", f"/cupons?page={page}&size=100")
+                    self.summary["coupons"].extend(coupons["items"])
+                    page += 1
+                    if page >= coupons["pages"]:
+                        break
         self.summary["fund"] = institution.call("GET", f"/gamificacao/fundo/{semester}")
         cache = ROOT / ".cache"
         cache.mkdir(exist_ok=True)

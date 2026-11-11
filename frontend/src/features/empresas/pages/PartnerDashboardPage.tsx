@@ -28,8 +28,8 @@ export function PartnerDashboardPage() {
     enabled: isCompany,
   })
   const coupons = useQuery({
-    queryKey: ['coupons', user?.id],
-    queryFn: cuponsApi.list,
+    queryKey: ['coupons', user?.id, 'dashboard'],
+    queryFn: () => cuponsApi.list({ size: 5 }),
     enabled: isCompany,
   })
   const teachers = useQuery({
@@ -80,7 +80,7 @@ export function PartnerDashboardPage() {
                 <Ticket size={21} />
               </span>
               <div>
-                <QueryValue value={coupons.data?.length} query={coupons} />
+                <QueryValue value={coupons.data?.total} query={coupons} />
                 <p>Resgates realizados</p>
               </div>
             </div>
@@ -90,10 +90,7 @@ export function PartnerDashboardPage() {
               </span>
               <div>
                 <QueryValue
-                  value={
-                    coupons.data?.filter((item) => item.status === 'UTILIZADO')
-                      .length
-                  }
+                  value={coupons.data?.summary.used}
                   query={coupons}
                 />
                 <p>Cupons utilizados</p>
@@ -113,12 +110,12 @@ export function PartnerDashboardPage() {
                 error={coupons.error}
                 retry={coupons.refetch}
               />
-              {coupons.data?.length === 0 && (
+              {coupons.data?.total === 0 && (
                 <p className="muted small">
                   Os resgates dos alunos aparecerão aqui.
                 </p>
               )}
-              {coupons.data?.slice(0, 5).map((item) => (
+              {coupons.data?.items.map((item) => (
                 <div key={item.id} className="row">
                   <Ticket size={20} className="muted" />
                   <div className="row-text">

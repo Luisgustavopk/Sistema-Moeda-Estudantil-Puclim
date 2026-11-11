@@ -2,12 +2,14 @@ import { ApiError } from './errors'
 export const DATA_MODE =
   import.meta.env.VITE_DATA_MODE === 'demo' ? 'demo' : 'api'
 const baseUrl = (import.meta.env.VITE_API_URL || '/api').replace(/\/$/, '')
-export async function http<T>(
+async function request<T>(
   path: string,
-  options: RequestInit = {},
+  options: RequestInit,
+  read: (response: Response) => Promise<T>,
+  timeoutMs = 15000,
 ): Promise<T> {
   const controller = new AbortController()
-  const timeout = setTimeout(() => controller.abort(), 15000)
+  const timeout = setTimeout(() => controller.abort(), timeoutMs)
   try {
     const headers = new Headers(options.headers)
     if (!(options.body instanceof FormData))
@@ -48,9 +50,7 @@ export async function http<T>(
         response.status,
       )
     }
-    return response.status === 204
-      ? (undefined as T)
-      : ((await response.json()) as T)
+    return await read(response)
   } catch (error) {
     if (error instanceof ApiError) throw error
     throw new ApiError(
@@ -60,4 +60,14 @@ export async function http<T>(
   } finally {
     clearTimeout(timeout)
   }
+}
+
+export function http<T>(path: string, options: RequestInit = {}): Promise<T> {
+  return request(path, options, async (response) =>
+    response.status === 204 ? (undefined as T) : ((await response.json()) as T),
+  )
+}
+
+export function httpBlob(path: string): Promise<Blob> {
+  return request(path, {}, (response) => response.blob(), 60000)
 }

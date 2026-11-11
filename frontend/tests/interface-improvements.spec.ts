@@ -1,3 +1,4 @@
+import { historyJson, fulfillHistory } from './history-fixture'
 import { test, expect, type Page } from '@playwright/test'
 import { mockDesignReview } from './design-round1-fixture'
 import { student } from './gamification-fixture'
@@ -41,7 +42,7 @@ async function setup(page: Page, role = 'ALUNO', balance = 180) {
     (url) => url.pathname === '/api/vantagens',
     (route) =>
       route.fulfill({
-        json: [
+        json: historyJson(route, [
           {
             id: 'coffee',
             companyId: 'company',
@@ -62,14 +63,14 @@ async function setup(page: Page, role = 'ALUNO', balance = 180) {
             photo: '/images/books.jpg',
             active: true,
           },
-        ],
+        ]),
       }),
   )
   await page.route(
     (url) => url.pathname === '/api/conta/extrato',
     (route) =>
       route.fulfill({
-        json: [
+        json: historyJson(route, [
           {
             id: 'one',
             kind: 'RECEBIMENTO',
@@ -96,7 +97,7 @@ async function setup(page: Page, role = 'ALUNO', balance = 180) {
             amount: -70,
             date: '2026-11-01T12:00:00Z',
           },
-        ],
+        ]),
       }),
   )
 }
@@ -511,10 +512,11 @@ test('F10 e F13 extrato com 120 registros, filtros, totais e CSV completo', asyn
 }) => {
   await setup(page)
   await page.route(
-    (url) => url.pathname === '/api/conta/extrato',
+    (url) => url.pathname.startsWith('/api/conta/extrato'),
     (route) =>
-      route.fulfill({
-        json: Array.from({ length: 120 }, (_, i) => ({
+      fulfillHistory(
+        route,
+        Array.from({ length: 120 }, (_, i) => ({
           id: String(i),
           kind: 'RECEBIMENTO',
           amount: 10,
@@ -522,7 +524,7 @@ test('F10 e F13 extrato com 120 registros, filtros, totais e CSV completo', asyn
           description: `Reconhecimento ${i + 1}`,
           counterpart: 'Helena Prado',
         })),
-      }),
+      ),
   )
   await page.goto('/aluno/extrato')
   await expect(page.locator('main .row')).toHaveCount(12)
@@ -576,14 +578,17 @@ test('F14 cupons do parceiro distinguem Disponível, Utilizado e Doado', async (
     (url) => url.pathname === '/api/cupons',
     (route) =>
       route.fulfill({
-        json: ['VALIDO', 'UTILIZADO', 'DOADO'].map((status, i) => ({
-          id: String(i),
-          code: `TESTE-${i}`,
-          status,
-          advantageName: `Vantagem ${i}`,
-          studentName: student.name,
-          date: '2026-11-03T12:00:00Z',
-        })),
+        json: historyJson(
+          route,
+          ['VALIDO', 'UTILIZADO', 'DOADO'].map((status, i) => ({
+            id: String(i),
+            code: `TESTE-${i}`,
+            status,
+            advantageName: `Vantagem ${i}`,
+            studentName: student.name,
+            date: '2026-11-03T12:00:00Z',
+          })),
+        ),
       }),
   )
   await page.goto('/empresa')
@@ -617,7 +622,7 @@ test('F05 carregamento, atualização com cache e recuperação independente', a
       await route.fulfill(
         fail
           ? { status: 503, json: { message: 'Falha de teste' } }
-          : { json: [{ id: 'coupon', status: 'VALIDO' }] },
+          : { json: historyJson(route, [{ id: 'coupon', status: 'VALIDO' }]) },
       )
     },
   )

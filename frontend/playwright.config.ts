@@ -33,6 +33,7 @@ export default defineConfig({
         'api.spec.ts',
         'password-recovery.spec.ts',
         'coupon-qr.spec.ts',
+        'history-pagination.spec.ts',
         'login-motion.spec.ts',
         'registration.spec.ts',
         'landing.spec.ts',

@@ -59,7 +59,7 @@ class CouponPersistenceTest extends AbstractDatabaseTest {
         assertEquals("VALIDO", coupons.findByCode(code).orElseThrow().status);
         company.client().expect("DELETE", "/conta", null, 204);
         assertTrue(coupons.findByCode(code).isPresent());
-        assertEquals(code, fixture.student().client().ok("GET", "/cupons", null).get(0).path("code").asString());
+        assertEquals(code, fixture.student().client().ok("GET", "/cupons", null).path("items").get(0).path("code").asString());
     }
 
 }

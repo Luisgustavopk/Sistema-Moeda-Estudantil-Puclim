@@ -1,3 +1,4 @@
+import { historyJson } from './history-fixture'
 import type { Page } from '@playwright/test'
 import type { Profile, Quiz, Rank } from '../src/features/gamificacao/types'
 import type { ProfileCustomization } from '../src/features/gamificacao/profile-customization'
@@ -247,7 +248,7 @@ export async function mockGame(
         }
         data = completed
       }
-      return route.fulfill({ json: data })
+      return route.fulfill({ json: historyJson(route, data) })
     },
   )
 }

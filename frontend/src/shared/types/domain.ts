@@ -120,6 +120,44 @@ export interface Coupon {
   status: 'VALIDO' | 'UTILIZADO' | 'DOADO'
   usedAt?: string
 }
+export interface HistoryQuery {
+  page?: number
+  size?: number
+  q?: string
+}
+export interface StatementQuery extends HistoryQuery {
+  kind?: Transaction['kind'] | 'in' | 'out'
+  from?: string
+  to?: string
+  zone?: string
+}
+export interface CouponQuery extends HistoryQuery {
+  status?: Coupon['status']
+}
+export interface HistoryPage<T, S> {
+  items: T[]
+  page: number
+  size: number
+  total: number
+  pages: number
+  summary: S
+}
+export type StatementPage = HistoryPage<
+  Transaction,
+  {
+    incoming: number
+    outgoing: number
+    recognizedStudents: number
+  }
+>
+export type CouponPage = HistoryPage<
+  Coupon,
+  {
+    available: number
+    used: number
+    donated: number
+  }
+>
 export interface ImportRow {
   line: number
   name: string
@@ -157,7 +195,8 @@ export interface PuclimApi {
   students(): Promise<StudentSummary[]>
   teachers(): Promise<TeacherSummary[]>
   importTeachers(rows: ImportRow[]): Promise<ImportResult>
-  transactions(): Promise<Transaction[]>
+  transactions(query?: StatementQuery): Promise<StatementPage>
+  exportTransactions(query?: StatementQuery): Promise<Blob>
   transfer(
     studentId: string,
     amount: number,
@@ -169,7 +208,7 @@ export interface PuclimApi {
   saveAdvantage(input: AdvantageInput, id?: string): Promise<Advantage>
   deleteAdvantage(id: string): Promise<void>
   redeem(id: string, requestKey?: string): Promise<Coupon>
-  coupons(): Promise<Coupon[]>
+  coupons(query?: CouponQuery): Promise<CouponPage>
   checkCoupon(code: string): Promise<Coupon>
   useCoupon(code: string): Promise<Coupon>
   notifications(): Promise<Notification[]>

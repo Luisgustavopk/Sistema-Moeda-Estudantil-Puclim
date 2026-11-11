@@ -52,7 +52,10 @@ export function downloadText(
   content: string,
   type = 'text/csv;charset=utf-8',
 ) {
-  const url = URL.createObjectURL(new Blob(['\uFEFF', content], { type }))
+  downloadBlob(filename, new Blob(['\uFEFF', content], { type }))
+}
+export function downloadBlob(filename: string, content: Blob) {
+  const url = URL.createObjectURL(content)
   const anchor = document.createElement('a')
   anchor.href = url
   anchor.download = filename

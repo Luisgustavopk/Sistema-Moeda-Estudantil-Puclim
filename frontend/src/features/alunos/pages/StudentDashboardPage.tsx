@@ -21,23 +21,19 @@ export function StudentDashboardPage() {
   const { user } = useAuth()
   const [selected, setSelected] = useState<Advantage | null>(null)
   const transactions = useQuery({
-    queryKey: ['transactions', user?.id],
-    queryFn: moedasApi.transactions,
+    queryKey: ['transactions', user?.id, 'dashboard'],
+    queryFn: () => moedasApi.transactions({ size: 4 }),
   })
   const offers = useQuery({
     queryKey: ['advantages'],
     queryFn: () => vantagensApi.list(),
   })
   const coupons = useQuery({
-    queryKey: ['coupons', user?.id],
-    queryFn: cuponsApi.list,
+    queryKey: ['coupons', user?.id, 'dashboard'],
+    queryFn: () => cuponsApi.list({ status: 'VALIDO', size: 1 }),
   })
-  const received = transactions.data
-    ?.filter((value) => value.amount > 0)
-    .reduce((total, value) => total + value.amount, 0)
-  const activeCoupons = coupons.data?.filter(
-    (value) => value.status === 'VALIDO',
-  ).length
+  const received = transactions.data?.summary.incoming
+  const activeCoupons = coupons.data?.total
   return (
     <>
       <PageHeading
@@ -100,10 +96,7 @@ export function StudentDashboardPage() {
               retry={transactions.refetch}
             />
             {transactions.data && (
-              <TransactionList
-                transactions={transactions.data.slice(0, 4)}
-                compact
-              />
+              <TransactionList transactions={transactions.data.items} compact />
             )}
           </section>
         </div>

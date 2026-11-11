@@ -1,3 +1,4 @@
+import { historyJson } from './history-fixture'
 import { test, expect, type Page } from '@playwright/test'
 import { mkdir, writeFile } from 'node:fs/promises'
 import { mockDesignReview } from './design-round1-fixture'
@@ -197,7 +198,7 @@ async function setup(page: Page, persona: string) {
           },
         ]
       else return route.fallback()
-      return route.fulfill({ json: data })
+      return route.fulfill({ json: historyJson(route, data) })
     },
   )
 }

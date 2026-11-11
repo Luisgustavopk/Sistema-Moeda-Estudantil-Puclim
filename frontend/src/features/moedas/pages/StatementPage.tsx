@@ -2,7 +2,7 @@ import { Select } from '@/shared/components/ui/Select'
 import { Download, Search, Wallet } from 'lucide-react'
 import { useState } from 'react'
 import { DateInput } from '@/shared/components/ui/DateInput'
-import { useQuery } from '@tanstack/react-query'
+import { useMutation, useQuery } from '@tanstack/react-query'
 import { useAuth } from '@/features/auth/hooks/auth-context'
 import { moedasApi } from '../api/moedas.api'
 import { TransactionList } from '../components/TransactionList'
@@ -12,68 +12,55 @@ import {
   QueryState,
   QueryValue,
   EmptyState,
+  ErrorNotice,
 } from '@/shared/components/ui/Feedback'
 import { Pagination } from '@/shared/components/ui/Pagination'
-import { usePagination } from '@/shared/hooks/use-pagination'
-import { number, downloadText, dateTime } from '@/shared/utils/format'
-const csv = (value: string) =>
-  `"${(/^[=+\-@]/.test(value) ? `'${value}` : value).replace(/"/g, '""')}"`
+import { useDebouncedValue } from '@/shared/hooks/use-debounced-value'
+import { number, downloadBlob } from '@/shared/utils/format'
+import type { StatementQuery } from '@/shared/types/domain'
 export function StatementPage() {
   const { user } = useAuth()
   const teacher = user?.role === 'PROFESSOR'
-  const transactions = useQuery({
-    queryKey: ['transactions', user?.id],
-    queryFn: moedasApi.transactions,
-  })
   const [search, setSearch] = useState('')
   const [kind, setKind] = useState('all')
   const [from, setFrom] = useState('')
   const [to, setTo] = useState('')
+  const [page, setPage] = useState(1)
+  const settledSearch = useDebouncedValue(search)
+  const searching = settledSearch !== search
   const invalidPeriod = !!from && !!to && from > to
-  const filtered = (transactions.data || []).filter((item) => {
-    const text =
-      `${item.description} ${item.counterpart || ''} ${item.reason || ''}`.toLocaleLowerCase(
-        'pt-BR',
-      )
-    const date = new Date(item.date)
-    const localDate = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`
-    return (
-      !invalidPeriod &&
-      text.includes(search.toLocaleLowerCase('pt-BR')) &&
-      (kind === 'all' ||
-        (kind === 'in'
-          ? item.amount > 0
-          : kind === 'out'
-            ? item.amount < 0
-            : item.kind === kind)) &&
-      (!from || localDate >= from) &&
-      (!to || localDate <= to)
-    )
+  const filters: StatementQuery = {
+    q: settledSearch,
+    kind: kind === 'all' ? undefined : (kind as StatementQuery['kind']),
+    from,
+    to,
+    zone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+  }
+  const transactions = useQuery({
+    queryKey: ['transactions', user?.id, 'history', { ...filters, page }],
+    queryFn: () =>
+      moedasApi.transactions({ ...filters, page: page - 1, size: 12 }),
+    enabled: !invalidPeriod && !searching,
+    placeholderData: (previous, query) =>
+      query?.queryKey[1] === user?.id ? previous : undefined,
   })
-  const incoming = filtered
-    .filter((item) => item.amount > 0)
-    .reduce((sum, item) => sum + item.amount, 0)
-  const outgoing = filtered
-    .filter((item) => item.amount < 0)
-    .reduce((sum, item) => sum - item.amount, 0)
-  const pagination = usePagination(filtered, 12)
-  const exportCsv = () =>
-    downloadText(
-      'extrato-puclim.csv',
-      [
-        'Data;Tipo;Descrição;Pessoa ou empresa;Motivo;Pucoins',
-        ...filtered.map((item) =>
-          [
-            csv(dateTime(item.date)),
-            csv(item.kind),
-            csv(item.description),
-            csv(item.counterpart || ''),
-            csv(item.reason || ''),
-            item.amount,
-          ].join(';'),
-        ),
-      ].join('\r\n'),
-    )
+  if (
+    transactions.data &&
+    !transactions.isPlaceholderData &&
+    page > Math.max(1, transactions.data.pages)
+  ) {
+    setPage(Math.max(1, transactions.data.pages))
+  }
+  const incoming = invalidPeriod
+    ? undefined
+    : transactions.data?.summary.incoming
+  const outgoing = invalidPeriod
+    ? undefined
+    : transactions.data?.summary.outgoing
+  const exportCsv = useMutation({
+    mutationFn: (query: StatementQuery) => moedasApi.exportTransactions(query),
+    onSuccess: (blob) => downloadBlob('extrato-puclim.csv', blob),
+  })
   return (
     <>
       <PageHeading
@@ -87,8 +74,14 @@ export function StatementPage() {
         action={
           <Button
             variant="secondary"
-            disabled={!filtered.length}
-            onClick={exportCsv}
+            disabled={
+              invalidPeriod ||
+              searching ||
+              transactions.isFetching ||
+              !transactions.data?.total
+            }
+            loading={exportCsv.isPending}
+            onClick={() => exportCsv.mutate(filters)}
           >
             <Download size={17} /> Baixar extrato
           </Button>
@@ -107,8 +100,8 @@ export function StatementPage() {
         <section className="card stat-card">
           <div>
             <QueryValue
-              value={transactions.data ? incoming : undefined}
-              prefix={incoming > 0 ? '+' : ''}
+              value={incoming}
+              prefix={incoming && incoming > 0 ? '+' : ''}
               query={transactions}
             />
             <p>Entradas no período filtrado</p>
@@ -117,15 +110,18 @@ export function StatementPage() {
         <section className="card stat-card">
           <div>
             <QueryValue
-              value={transactions.data ? outgoing : undefined}
-              prefix={outgoing > 0 ? '−' : ''}
+              value={outgoing}
+              prefix={outgoing && outgoing > 0 ? '−' : ''}
               query={transactions}
             />
             <p>Saídas no período filtrado</p>
           </div>
         </section>
       </div>
-      <section className="card">
+      <section
+        className="card"
+        aria-busy={transactions.isFetching || searching}
+      >
         <div className="toolbar">
           <div className="search-field">
             <Search size={19} />
@@ -137,9 +133,10 @@ export function StatementPage() {
                 teacher ? 'Buscar aluno ou motivo' : 'Buscar uma movimentação'
               }
               value={search}
+              maxLength={200}
               onChange={(event) => {
                 setSearch(event.target.value)
-                pagination.setPage(1)
+                setPage(1)
               }}
             />
           </div>
@@ -148,7 +145,7 @@ export function StatementPage() {
             value={kind}
             onValueChange={(value) => {
               setKind(value)
-              pagination.setPage(1)
+              setPage(1)
             }}
             style={{ width: 'auto' }}
           >
@@ -190,7 +187,7 @@ export function StatementPage() {
               value={from}
               onChange={(event) => {
                 setFrom(event.target.value)
-                pagination.setPage(1)
+                setPage(1)
               }}
             />
           </div>
@@ -204,7 +201,7 @@ export function StatementPage() {
               min={from || undefined}
               onChange={(event) => {
                 setTo(event.target.value)
-                pagination.setPage(1)
+                setPage(1)
               }}
             />
           </div>
@@ -215,26 +212,34 @@ export function StatementPage() {
           </p>
         )}
         <QueryState
-          loading={transactions.isLoading}
+          loading={!invalidPeriod && transactions.isPending}
           error={transactions.error}
           retry={transactions.refetch}
         />
+        <ErrorNotice error={exportCsv.error} />
+        <p className="small muted" role="status">
+          {!invalidPeriod &&
+          (searching || (transactions.isFetching && !transactions.isPending))
+            ? 'Atualizando resultados…'
+            : ''}
+        </p>
         {transactions.data &&
           !invalidPeriod &&
-          (filtered.length ? (
+          (transactions.data.total ? (
             <>
               <p className="small muted">
-                {filtered.length}{' '}
-                {filtered.length === 1
+                {transactions.data.total}{' '}
+                {transactions.data.total === 1
                   ? 'movimentação encontrada'
                   : 'movimentações encontradas'}
               </p>
-              <TransactionList transactions={pagination.items} />
+              <TransactionList transactions={transactions.data.items} />
               <Pagination
-                page={pagination.page}
-                total={filtered.length}
+                page={transactions.data.page + 1}
+                total={transactions.data.total}
                 size={12}
-                onChange={pagination.setPage}
+                onChange={setPage}
+                disabled={transactions.isFetching || searching}
                 label="Páginas do extrato"
               />
             </>
@@ -250,6 +255,7 @@ export function StatementPage() {
                     setKind('all')
                     setFrom('')
                     setTo('')
+                    setPage(1)
                   }}
                 >
                   Limpar filtros
