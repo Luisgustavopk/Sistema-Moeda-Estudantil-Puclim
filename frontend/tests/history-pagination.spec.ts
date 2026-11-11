@@ -50,6 +50,74 @@ async function noOverflow(page: Page) {
   ).toBe(true)
 }
 
+for (const invalid of ['lista antiga', 'sem summary', 'summary incompleto']) {
+  test(`painel trata histórico ${invalid} sem quebrar e permite recuperar a consulta`, async ({
+    page,
+  }) => {
+    await setup(page)
+    let failing = true
+    const statement = {
+      items: transactions.slice(0, 4),
+      page: 0,
+      size: 4,
+      total: 125,
+      pages: 32,
+      summary: { incoming: 1250, outgoing: 0, recognizedStudents: 0 },
+    }
+    const coupon = {
+      items: coupons.slice(0, 1),
+      page: 0,
+      size: 1,
+      total: 13,
+      pages: 13,
+      summary: { available: 13, used: 0, donated: 0 },
+    }
+    await page.route(
+      (url) => ['/api/conta/extrato', '/api/cupons'].includes(url.pathname),
+      (route) => {
+        const valid = new URL(route.request().url()).pathname.endsWith(
+          'extrato',
+        )
+          ? statement
+          : coupon
+        return route.fulfill({
+          json: !failing
+            ? valid
+            : invalid === 'lista antiga'
+              ? valid.items
+              : {
+                  ...valid,
+                  summary: invalid === 'sem summary' ? undefined : {},
+                },
+        })
+      },
+    )
+    await page.goto('/aluno')
+    await expect(
+      page.getByRole('heading', { name: 'Olá, Mariana!' }),
+    ).toBeVisible()
+    await expect(page.getByRole('alert')).toContainText(
+      'histórico incompatível',
+    )
+    const received = page
+      .locator('.stat-card')
+      .filter({ hasText: 'Pucoins recebidos' })
+    const available = page
+      .locator('.stat-card')
+      .filter({ hasText: 'Cupons disponíveis' })
+    await expect(received).toContainText('Indisponível')
+    await expect(available).toContainText('Indisponível')
+    await expect(page.locator('main .row')).toHaveCount(0)
+    failing = false
+    await page.getByRole('button', { name: 'Tentar novamente' }).click()
+    await available.getByRole('button', { name: 'Atualizar indicador' }).click()
+    await expect(received).toContainText('1.250')
+    await expect(available.locator('.stat-value')).toHaveText('13')
+    await expect(page.locator('main .row')).toHaveCount(4)
+    await expect(page.getByRole('alert')).toHaveCount(0)
+  })
+}
+
 for (const width of [390, 820, 1440]) {
   test(`extrato pagina e filtra na API, mantém totais globais e exporta todos os resultados em ${width}px`, async ({
     page,
