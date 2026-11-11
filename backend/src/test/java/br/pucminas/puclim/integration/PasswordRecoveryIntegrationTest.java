@@ -47,6 +47,7 @@ import jakarta.mail.internet.MimeMessage;
 
 @EnabledIfEnvironmentVariable(named = "TEST_DB_URL", matches = "jdbc:(mysql|mariadb):.*")
 @TestPropertySource(properties = { "puclim.public-app-url=https://app.puclim.example",
+        "puclim.password-reset.email-cooldown=120s",
         "puclim.password-reset.ip-limit=1000", "puclim.password-reset.delivery-delay-ms=3600000" })
 class PasswordRecoveryIntegrationTest extends AbstractDatabaseTest {
     @Autowired
@@ -72,6 +73,7 @@ class PasswordRecoveryIntegrationTest extends AbstractDatabaseTest {
     void genericRequestProtectsUnknownInactiveAndRateLimitedAccountsAndRequiresCsrf() throws Exception {
         var known = data.partner("EMPRESA");
         var inactive = data.partner("EMPRESA");
+        var ipBlocked = data.partner("EMPRESA");
         inactive.client().expect("DELETE", "/conta", null, 204);
         var client = data.anonymous();
         var noCsrf = client.send(HttpRequest.newBuilder(client.uri("/auth/recuperar-senha"))
@@ -80,10 +82,23 @@ class PasswordRecoveryIntegrationTest extends AbstractDatabaseTest {
         assertEquals(403, noCsrf.statusCode());
         var expected = client.expect("POST", "/auth/recuperar-senha", Map.of("email", known.email()), 202);
         assertEquals(PasswordResetService.ACCEPTED, expected.path("message").asString());
+        assertEquals(120L, expected.path("resendAfterSeconds").asLong());
+        assertEquals(2, expected.size());
         assertEquals(expected, client.expect("POST", "/auth/recuperar-senha", Map.of("email", known.email()), 202));
         assertEquals(expected, client.expect("POST", "/auth/recuperar-senha", Map.of("email", inactive.email()), 202));
         assertEquals(expected, client.expect("POST", "/auth/recuperar-senha",
                 Map.of("email", UUID.randomUUID() + "@example.com"), 202));
+        String ipBucket = PasswordResetRateLimiter.hash("ip:" + client.uri("").getHost());
+        int ipAttempts = jdbc.queryForObject("SELECT attempts FROM password_reset_rate_limits WHERE bucket_key=?",
+                Integer.class, ipBucket);
+        try {
+            jdbc.update("UPDATE password_reset_rate_limits SET attempts=1000 WHERE bucket_key=?", ipBucket);
+            assertEquals(expected, client.expect("POST", "/auth/recuperar-senha",
+                    Map.of("email", ipBlocked.email()), 202));
+            assertEquals(0L, count(ipBlocked.id()));
+        } finally {
+            jdbc.update("UPDATE password_reset_rate_limits SET attempts=? WHERE bucket_key=?", ipAttempts, ipBucket);
+        }
         assertEquals(1L, count(known.id()));
         assertEquals(0L, count(inactive.id()));
         var queued = latest(known.id());

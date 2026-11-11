@@ -45,7 +45,7 @@ test.describe('recuperação conectada', () => {
       await page.route('**/api/auth/recuperar-senha', (route) =>
         route.fulfill({
           status: 202,
-          json: { message: 'Solicitação recebida.' },
+          json: { message: 'Solicitação recebida.', resendAfterSeconds: 60 },
         }),
       )
       let resetBody: unknown
@@ -78,6 +78,14 @@ test.describe('recuperação conectada', () => {
       await expect(
         page.getByText(/Se houver uma conta ativa com esse e-mail/),
       ).toBeVisible()
+      await expect(
+        page.getByText('Você pode solicitar outro link em 60s.'),
+      ).toBeVisible()
+      await assertNoOverflow(page)
+      await page.screenshot({
+        path: info.outputPath('reenvio-escuro.png'),
+        fullPage: true,
+      })
       await page.goto(resetPath)
       await expect(page).toHaveURL(/\/redefinir-senha$/)
       await expect(page.getByLabel('Nova senha', { exact: true })).toBeVisible()
@@ -117,43 +125,67 @@ test.describe('recuperação conectada', () => {
     })
   }
 
-  test('valida e-mail, mantém resposta genérica e oferece reenvio após 60 segundos', async ({
-    page,
-  }) => {
-    const emails: string[] = []
-    await page.route('**/api/auth/recuperar-senha', (route) => {
-      emails.push(route.request().postDataJSON().email)
-      return route.fulfill({ status: 202, json: { message: 'Recebido.' } })
+  for (const cooldown of [5, 120]) {
+    test(`valida e-mail e respeita o intervalo de ${cooldown}s informado pela API a cada reenvio`, async ({
+      page,
+    }) => {
+      const emails: string[] = []
+      await page.route('**/api/auth/recuperar-senha', (route) => {
+        emails.push(route.request().postDataJSON().email)
+        return route.fulfill({
+          status: 202,
+          json: {
+            message: 'Recebido.',
+            resendAfterSeconds: emails.length === 1 ? cooldown : 7,
+          },
+        })
+      })
+      await page.goto('/recuperar-senha')
+      await page
+        .getByRole('button', { name: 'Enviar link de recuperação' })
+        .click()
+      await expect(page.getByLabel('E-mail do cadastro')).toBeFocused()
+      await expect(page.getByRole('alert')).toContainText('Informe o e-mail')
+      await page.getByLabel('E-mail do cadastro').fill('email-invalido')
+      await page.keyboard.press('Enter')
+      await expect(page.getByRole('alert')).toContainText(
+        'Informe um e-mail válido',
+      )
+      expect(emails).toHaveLength(0)
+      await page.clock.install()
+      await page
+        .getByLabel('E-mail do cadastro')
+        .fill('  inexistente@example.test  ')
+      await page.keyboard.press('Enter')
+      await expect(page.getByText(/Se houver uma conta ativa/)).toBeVisible()
+      const resend = page.getByRole('button', { name: 'Reenviar link' })
+      await expect(resend).toBeDisabled()
+      await expect(
+        page.getByText(`Você pode solicitar outro link em ${cooldown}s.`),
+      ).toBeVisible()
+      await page.keyboard.press('Enter')
+      expect(emails).toHaveLength(1)
+      await page.clock.fastForward((cooldown - 1) * 1000)
+      await expect(resend).toBeDisabled()
+      await expect(
+        page.getByText('Você pode solicitar outro link em 1s.'),
+      ).toBeVisible()
+      await page.clock.fastForward(1000)
+      await expect(resend).toBeEnabled()
+      await expect(page.locator('#resend-hint')).toHaveCount(0)
+      await resend.click()
+      await expect(resend).toBeDisabled()
+      await expect(
+        page.getByText('Você pode solicitar outro link em 7s.'),
+      ).toBeVisible()
+      expect(emails).toEqual([
+        'inexistente@example.test',
+        'inexistente@example.test',
+      ])
+      await page.clock.fastForward(7000)
+      await expect(resend).toBeEnabled()
     })
-    await page.goto('/recuperar-senha')
-    await page
-      .getByRole('button', { name: 'Enviar link de recuperação' })
-      .click()
-    await expect(page.getByLabel('E-mail do cadastro')).toBeFocused()
-    await expect(page.getByRole('alert')).toContainText('Informe o e-mail')
-    await page.getByLabel('E-mail do cadastro').fill('email-invalido')
-    await page.keyboard.press('Enter')
-    await expect(page.getByRole('alert')).toContainText(
-      'Informe um e-mail válido',
-    )
-    expect(emails).toHaveLength(0)
-    await page.clock.install()
-    await page
-      .getByLabel('E-mail do cadastro')
-      .fill('  inexistente@example.test  ')
-    await page.keyboard.press('Enter')
-    await expect(page.getByText(/Se houver uma conta ativa/)).toBeVisible()
-    const resend = page.getByRole('button', { name: 'Reenviar link' })
-    await expect(resend).toBeDisabled()
-    await page.clock.fastForward(61000)
-    await expect(resend).toBeEnabled()
-    await resend.click()
-    await expect(resend).toBeDisabled()
-    expect(emails).toEqual([
-      'inexistente@example.test',
-      'inexistente@example.test',
-    ])
-  })
+  }
 
   test('falha ao solicitar preserva o e-mail e permite tentar novamente', async ({
     page,
@@ -167,7 +199,10 @@ test.describe('recuperação conectada', () => {
               message: 'Não foi possível solicitar agora. Tente novamente.',
             },
           })
-        : route.fulfill({ status: 202, json: { message: 'Recebido.' } }),
+        : route.fulfill({
+            status: 202,
+            json: { message: 'Recebido.', resendAfterSeconds: 60 },
+          }),
     )
     await page.goto('/recuperar-senha')
     await page.getByLabel('E-mail do cadastro').fill('mariana@example.test')

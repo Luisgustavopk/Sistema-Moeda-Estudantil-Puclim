@@ -17,7 +17,6 @@ import { ErrorNotice } from '@/shared/components/ui/Feedback'
 import { DATA_MODE } from '@/shared/lib/http'
 
 type Values = z.infer<typeof passwordRecoverySchema>
-const RESEND_SECONDS = 60
 
 export function PasswordRecoveryPage() {
   const form = useForm<Values>({
@@ -30,10 +29,10 @@ export function PasswordRecoveryPage() {
   const status = useRef<HTMLDivElement>(null)
   const request = useMutation({
     mutationFn: ({ email }: Values) => authApi.requestPasswordReset(email),
-    onSuccess: () => {
+    onSuccess: ({ resendAfterSeconds }) => {
       setSent(true)
-      setRemaining(RESEND_SECONDS)
-      setResendAt(Date.now() + RESEND_SECONDS * 1000)
+      setRemaining(resendAfterSeconds)
+      setResendAt(Date.now() + resendAfterSeconds * 1000)
     },
   })
 

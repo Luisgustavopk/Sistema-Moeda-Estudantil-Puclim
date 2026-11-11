@@ -31,4 +31,17 @@ class PasswordResetPolicyTest {
         assertEquals("PasswordResetInput[dados protegidos]",
                 new PasswordResetInput("secret-token", "secret-password").toString());
     }
+
+    @Test
+    void resendWaitUsesConfiguredCooldownRoundedUpToWholeSeconds() {
+        assertEquals(60L, policy("https://app.example").resendAfterSeconds());
+        assertEquals(120L, policy(Duration.ofSeconds(120)).resendAfterSeconds());
+        assertEquals(121L, policy(Duration.ofMillis(120001)).resendAfterSeconds());
+        assertEquals(1L, policy(Duration.ofNanos(1)).resendAfterSeconds());
+    }
+
+    private PasswordResetPolicy policy(Duration cooldown) {
+        return new PasswordResetPolicy(Duration.ofMinutes(30), cooldown, Duration.ofMinutes(15), 20,
+                "https://app.example");
+    }
 }

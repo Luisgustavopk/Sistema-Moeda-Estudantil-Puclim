@@ -16,10 +16,13 @@ export const authApi = {
   changePassword: api.changePassword,
   requestPasswordReset: (email: string) => {
     requirePasswordRecoveryApi()
-    return http<{ message: string }>('/auth/recuperar-senha', {
-      method: 'POST',
-      body: JSON.stringify({ email }),
-    })
+    return http<{ message: string; resendAfterSeconds: number }>(
+      '/auth/recuperar-senha',
+      {
+        method: 'POST',
+        body: JSON.stringify({ email }),
+      },
+    )
   },
   resetPassword: (token: string, password: string) => {
     requirePasswordRecoveryApi()

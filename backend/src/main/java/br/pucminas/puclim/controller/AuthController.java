@@ -4,6 +4,7 @@ import br.pucminas.puclim.dto.request.LoginRequest;
 import br.pucminas.puclim.dto.request.PasswordRecoveryRequest;
 import br.pucminas.puclim.dto.request.PasswordResetInput;
 import br.pucminas.puclim.dto.response.AccountResponse;
+import br.pucminas.puclim.dto.response.PasswordRecoveryResponse;
 
 import java.util.Map;
 
@@ -18,6 +19,7 @@ import org.springframework.web.bind.annotation.RestController;
 import br.pucminas.puclim.service.AccountService;
 import br.pucminas.puclim.service.AuthService;
 import br.pucminas.puclim.service.PasswordResetService;
+import br.pucminas.puclim.config.PasswordResetPolicy;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
@@ -28,11 +30,14 @@ public class AuthController {
     private final AuthService auth;
     private final AccountService accounts;
     private final PasswordResetService recovery;
+    private final PasswordResetPolicy recoveryPolicy;
 
-    public AuthController(AuthService a, AccountService s, PasswordResetService recovery) {
+    public AuthController(AuthService a, AccountService s, PasswordResetService recovery,
+            PasswordResetPolicy recoveryPolicy) {
         auth = a;
         accounts = s;
         this.recovery = recovery;
+        this.recoveryPolicy = recoveryPolicy;
     }
 
     @GetMapping("/csrf")
@@ -58,10 +63,10 @@ public class AuthController {
 
     @PostMapping("/recuperar-senha")
     @ResponseStatus(org.springframework.http.HttpStatus.ACCEPTED)
-    Map<String, String> recover(@Valid @RequestBody PasswordRecoveryRequest input, HttpServletRequest request) {
+    PasswordRecoveryResponse recover(@Valid @RequestBody PasswordRecoveryRequest input, HttpServletRequest request) {
         // Remote address comes from the server connector; never trust arbitrary Forwarded headers.
         recovery.request(input.email(), request.getRemoteAddr());
-        return Map.of("message", PasswordResetService.ACCEPTED);
+        return new PasswordRecoveryResponse(PasswordResetService.ACCEPTED, recoveryPolicy.resendAfterSeconds());
     }
 
     @PostMapping("/redefinir-senha")

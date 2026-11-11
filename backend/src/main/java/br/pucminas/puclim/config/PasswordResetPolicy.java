@@ -33,4 +33,9 @@ public record PasswordResetPolicy(Duration tokenTtl, Duration emailCooldown, Dur
     public String link(String token) {
         return publicAppUrl + "/redefinir-senha#token=" + token;
     }
+
+    /** Public policy duration, never an account's remaining rate-limit window. */
+    public long resendAfterSeconds() {
+        return Math.max(1, Math.addExact(emailCooldown.toSeconds(), emailCooldown.getNano() == 0 ? 0 : 1));
+    }
 }
