@@ -37,7 +37,7 @@ public class ProfileReward {
     }
 
     public enum Motion {
-        NONE, ORBIT, CROWN, SHIMMER
+        NONE, ORBIT, CROWN, SHIMMER, LIGHTNING, BLACK_HOLE
     }
     public enum BannerMotion {
         NONE, AURORA, METEORS, WAVES

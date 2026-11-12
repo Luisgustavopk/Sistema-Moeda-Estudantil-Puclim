@@ -10,7 +10,7 @@ import zlib
 
 KINDS = ('AVATAR', 'FRAME', 'BANNER', 'TITLE')
 PALETTES = ('PETROLEUM', 'CREAM', 'GOLD', 'BRONZE', 'SILVER', 'FOREST', 'COSMOS', 'COPPER', 'TEAL')
-ICONS = ('Award', 'BookOpen', 'Compass', 'Crown', 'Flame', 'GraduationCap', 'Heart', 'Orbit', 'Rocket', 'Sparkles', 'Sprout', 'Ticket', 'Trophy', 'Waves', 'Initials', 'Portrait')
+ICONS = ('Award', 'BookOpen', 'Compass', 'Crown', 'Flame', 'GraduationCap', 'Heart', 'Orbit', 'Rocket', 'Sparkles', 'Sprout', 'Ticket', 'Trophy', 'Waves', 'Zap', 'Initials', 'Portrait')
 ROOT = Path(__file__).resolve().parents[1]
 
 
@@ -31,7 +31,7 @@ def parser():
     p.add_argument('--variant', type=str.upper, choices=('PLAIN', 'DOUBLE'), default='PLAIN')
     p.add_argument('--shape', type=str.upper, choices=('ROUNDED', 'CIRCLE', 'SQUARE'), default='ROUNDED')
     p.add_argument('--inset', type=int, default=12, help='Avatar inset inside a frame, 0–35 percent')
-    p.add_argument('--motion', type=str.upper, choices=('NONE', 'ORBIT', 'CROWN', 'SHIMMER'), default='NONE')
+    p.add_argument('--motion', type=str.upper, choices=('NONE', 'ORBIT', 'CROWN', 'SHIMMER', 'LIGHTNING', 'BLACK_HOLE'), default='NONE')
     p.add_argument('--banner-motion', type=str.upper, choices=('NONE', 'AURORA', 'METEORS', 'WAVES'), default='NONE')
     p.add_argument('--cycle-ms', type=int, help='Frame: 1.200–20.000 ms; animated banner: 8.000–20.000 ms')
     p.add_argument('--order', type=int, default=1000)

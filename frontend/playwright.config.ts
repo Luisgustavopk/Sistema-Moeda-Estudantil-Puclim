@@ -39,6 +39,7 @@ export default defineConfig({
         'landing.spec.ts',
         'gamification.spec.ts',
         'profile-rewards.spec.ts',
+        'elemental-frames.spec.ts',
         'animated-avatar.spec.ts',
         'animated-banners.spec.ts',
         'reward-unlocks.spec.ts',

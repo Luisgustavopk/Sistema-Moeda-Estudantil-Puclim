@@ -1,10 +1,11 @@
-import { Check, Crown, LockKeyhole } from 'lucide-react'
+import { Check, LockKeyhole } from 'lucide-react'
 import type { CSSProperties, ReactNode } from 'react'
 import type { ProfileReward, RewardVisual } from '../profile-rewards'
 import { ProfileIdentity } from './ProfileIdentity'
 import { rewardIcons } from './reward-icons'
 import { useProfileMotion } from '../use-profile-motion'
 import { ProfileCoverEffects } from './ProfileCoverEffects'
+import { ProfileFrameEffects } from './ProfileFrameEffects'
 export function ProfileFrame({
   frame,
   children,
@@ -54,37 +55,14 @@ export function ProfileFrame({
           aria-hidden="true"
         />
       )}
-      {motion === 'ORBIT' && (
-        <span className="frame-orbit" aria-hidden="true">
-          <svg viewBox="0 0 100 100" fill="none">
-            <circle
-              cx="50"
-              cy="50"
-              r="47"
-              stroke="currentColor"
-              strokeWidth="1.2"
-              strokeDasharray="42 32"
-            />
-            <circle cx="50" cy="3" r="3" fill="currentColor" />
-            <circle cx="50" cy="97" r="2" fill="currentColor" />
-          </svg>
-        </span>
-      )}
-      {motion === 'CROWN' && (
-        <span className="frame-crown" aria-hidden="true">
-          <Crown size={32} strokeWidth={1.6} />
-        </span>
-      )}
-      {motion === 'SHIMMER' && (
-        <span className="frame-shimmer" aria-hidden="true">
-          <span />
-        </span>
-      )}
-      {!visual?.assetUrl && Icon && motion !== 'CROWN' && (
-        <span className="frame-emblem" aria-hidden="true">
-          <Icon size={16} strokeWidth={2} />
-        </span>
-      )}
+      <ProfileFrameEffects motion={motion} />
+      {!visual?.assetUrl &&
+        Icon &&
+        !['CROWN', 'LIGHTNING', 'BLACK_HOLE'].includes(motion) && (
+          <span className="frame-emblem" aria-hidden="true">
+            <Icon size={16} strokeWidth={2} />
+          </span>
+        )}
     </span>
   )
 }
@@ -225,6 +203,8 @@ export function RewardOptions({
                         ORBIT: 'Órbita em movimento',
                         CROWN: 'Coroa dinâmica',
                         SHIMMER: 'Brilho em movimento',
+                        LIGHTNING: 'Raios de plasma',
+                        BLACK_HOLE: 'Disco de acreção em movimento',
                       }[reward.visual.motion]
                     }
                   </span>

@@ -21,6 +21,15 @@ def png(alpha=True):
 
 
 class AuthoringTest(unittest.TestCase):
+    def test_elemental_effects_can_be_reused_by_new_reward_codes(self):
+        with tempfile.TemporaryDirectory() as folder:
+            for motion in ('LIGHTNING', 'BLACK_HOLE'):
+                args = module.parser().parse_args(['--kind', 'FRAME', '--code', 'another-' + motion.lower().replace('_', '-'),
+                    '--name', 'Outra moldura', '--icon', 'Zap', '--level', '5', '--shape', 'CIRCLE', '--motion', motion, '--dry-run'])
+                result = module.create_reward(args, Path(folder))
+                self.assertIn("'" + motion + "'", result['sql'])
+                self.assertFalse(Path(result['migration']).exists())
+
     def test_title_can_be_added_without_artwork_but_cannot_use_visual_effects(self):
         with tempfile.TemporaryDirectory() as folder:
             args = module.parser().parse_args(['--kind', 'TITLE', '--code', 'solidario', '--name', 'Guardião solidário', '--badge', 'DONATIONS_GOLD'])

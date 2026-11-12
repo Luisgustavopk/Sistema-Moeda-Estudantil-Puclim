@@ -4,6 +4,8 @@
 **/target/
 .cache/
 *.log
+__pycache__/
+*.py[cod]
 
 # Arquivos locais de revisao e referencias para seus assets
 /.local/

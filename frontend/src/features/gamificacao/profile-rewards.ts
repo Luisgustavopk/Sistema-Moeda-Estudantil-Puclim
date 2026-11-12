@@ -16,7 +16,7 @@ export interface RewardVisual {
   assetUrl?: string | null
   avatarInset?: number
   avatarShape?: 'ROUNDED' | 'CIRCLE' | 'SQUARE'
-  motion?: 'NONE' | 'ORBIT' | 'CROWN' | 'SHIMMER'
+  motion?: 'NONE' | 'ORBIT' | 'CROWN' | 'SHIMMER' | 'LIGHTNING' | 'BLACK_HOLE'
   bannerMotion?: 'NONE' | 'AURORA' | 'METEORS' | 'WAVES'
   cycleMs?: number
 }
